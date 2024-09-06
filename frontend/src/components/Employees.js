@@ -241,7 +241,7 @@ function Employees() {
                             value={searchQuery}
                             onChange={handleSearchInputChange}
                         />
-                        <span className="material-symbols-outlined info-icon" title="Only Employee No., Name, and Job Title are searchable.">info</span>
+                        <span className="material-symbols-outlined info-icon" data-tooltip="Only Employee No., Name, and Job Title are searchable.">info</span>
                     </div>
                     <div className="employees-actions">
                         <button className="add-employee-button" onClick={toggleModal}>+ Add New Employee</button>
@@ -255,7 +255,7 @@ function Employees() {
                                 <th>EMPLOYEE NO.</th>
                                 <th>NAME</th>
                                 <th>CONTACT NO.</th>
-                                <th>EMAIL ADDRESS</th>
+                                <th>EMAIL</th>
                                 <th>JOB TITLE</th>
                                 <th>SALARY</th>
                                 <th>ACTION</th>

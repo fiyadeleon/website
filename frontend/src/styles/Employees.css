@@ -17,7 +17,7 @@
 
 .employees-header h1 {
     font-size: 35px;
-    color: #282828;
+    color: #333;
     font-weight: bold;
 }
 
@@ -28,7 +28,7 @@
     width: 100%; /* Ensure full width */
     position: relative; /* Needed for absolute positioning */
     padding-bottom: 10px; /* Space for the border */
-    border-bottom: 1px solid #282828; /* Creates the line under the buttons */
+    border-bottom: 1px solid #333; /* Creates the line under the buttons */
 }
 
 .employees-status {
@@ -45,7 +45,7 @@
     padding: 10px 15px;
     border-radius: 4px 4px 0 0; /* Rounded corners at the top, square at the bottom */
     background-color: #FFFFFF;
-    color: #282828;
+    color: #333;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -59,7 +59,7 @@
 .status-button:hover, 
 .status-button:active,
 .status-button.active {
-    background-color: #282828;
+    background-color: #333;
     color: white;
 }
 
@@ -78,7 +78,7 @@
 
 .add-employee-button {
     background-color: #F8CE00; /* Yellow color */
-    color: #282828;
+    color: #333;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
@@ -136,7 +136,7 @@
     padding-left: 10px; /* Left padding */
     padding-right: 3px; /* Right padding */
     font-size: 14px;
-    color: #282828;
+    color: #333;
     cursor: pointer;
     font-weight: bold;
     font-family: 'Poppins', sans-serif;
@@ -149,7 +149,7 @@
 
 .sort-button .material-symbols-outlined {
     font-size: 25px; /* Icon size */
-    color: #282828; /* Black icon color */
+    color: #333; /* Black icon color */
     transition: transform 0.3s ease; /* Smooth icon rotation */
 }
 
@@ -209,6 +209,7 @@
 }
 
 .employees-table th, .employees-table td {
+    color: #333;
     padding: 10px;
     border: 1px solid #dddddd; /* Light grey border for individual cells */
     font-family: 'Poppins', sans-serif;
@@ -299,7 +300,7 @@
 
 .page-number.active {
     background-color: #F8CE00;
-    color: #282828;
+    color: #333;
     border-color: #F8CE00;
 }
 
@@ -344,7 +345,7 @@
 
 .notification-box {
     background-color: #f5f5f5;
-    color: #282828;
+    color: #333;
     font-weight: bold;
     padding: 15px;
     border-radius: 5px;
@@ -371,7 +372,7 @@
 
 .yes-button, .no-button {
     background-color: #F8CE00;
-    color: #282828;
+    color: #333;
     border: none;
     padding: 8px 15px;
     border-radius: 4px;
@@ -382,13 +383,13 @@
 }
 
 .yes-button:hover, .no-button:hover {
-    background-color: #282828;
+    background-color: #333;
     color: #F8CE00;
 }
 
 .clear-all-button {
     background-color: #F8CE00; /* Yellow color */
-    color: #282828;
+    color: #333;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
@@ -554,7 +555,7 @@ input[type="number"] {
 
 .modal-actions button[type="submit"] {
     background-color: #F8CE00;
-    color: #282828;
+    color: #333;
 }
 
 .modal-actions button[type="submit"]:hover {
@@ -563,7 +564,7 @@ input[type="number"] {
 
 .create-new-icon, .edit-icon {
     cursor: pointer;
-    color: #282828; /* Match the Add button color */
+    color: #333; /* Match the Add button color */
     font-size: 30px;
     transition: color 0.3s ease;
     margin-right: 10px;
@@ -571,7 +572,7 @@ input[type="number"] {
 
 .save-pdf-icon {
     cursor: pointer;
-    color: #282828; /* Match the Add button color */
+    color: #333; /* Match the Add button color */
     font-size: 30px;
     transition: color 0.3s ease;
 }
@@ -581,9 +582,33 @@ input[type="number"] {
 }
 
 .info-icon {
-    margin-left: 8px;
+    margin-left: 12px; 
     font-size: 20px;
     color: #666;
-    cursor: pointer;
     position: relative;
+    cursor: pointer;
+}
+
+.info-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    left: 120%; 
+    top: 50%;
+    transform: translateY(-50%); 
+    white-space: nowrap;
+    font-size: 14px; 
+    font-family: Arial, sans-serif; 
+    display: none; 
+    opacity: 0;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+}
+
+.info-icon:hover::after {
+    display: block;
+    opacity: 1;
 }

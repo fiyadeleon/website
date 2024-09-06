@@ -15,18 +15,19 @@ function Customers() {
         contact: '',
         email: '',
         address: '',
-        plateNo: ''
+        plateNo: '',
+        carModel: ''
     });
 
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
 
     const [customers, setCustomers] = useState([
-        { customerNo: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123' },
-        { customerNo: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456' },
-        { customerNo: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789' },
-        { customerNo: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234' },
-        { customerNo: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678' }
-    ]);
+        { customerNo: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
+        { customerNo: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
+        { customerNo: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
+        { customerNo: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234', carModel: 'Ford Mustang Mach 1' },
+        { customerNo: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678', carModel: 'Ford Mustang GT Convertible' }
+    ]);    
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -57,20 +58,6 @@ function Customers() {
                     const plateA = a.plateNo.toUpperCase();
                     const plateB = b.plateNo.toUpperCase();
                     return plateB.localeCompare(plateA, undefined, { numeric: true, sensitivity: 'base' });
-                });
-                break;
-            case 'Customer No: High to Low':
-                sortedCustomers.sort((a, b) => {
-                    const numA = parseInt(a.customerNo.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.customerNo.replace(/[^0-9]/g, ''), 10);
-                    return numB - numA;
-                });
-                break;
-            case 'Customer No: Low to High':
-                sortedCustomers.sort((a, b) => {
-                    const numA = parseInt(a.customerNo.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.customerNo.replace(/[^0-9]/g, ''), 10);
-                    return numA - numB;
                 });
                 break;
             default:
@@ -155,6 +142,7 @@ function Customers() {
             email: customerDetails.email,
             address: customerDetails.address,
             plateNo: customerDetails.plateNo,
+            carModel: customerDetails.carModel
         };
 
         if (isEditMode && editCustomerIndex !== null) {
@@ -215,8 +203,6 @@ function Customers() {
                         <div onClick={() => handleSortSelection('Name: Z to A')}>Name: Z to A</div>
                         <div onClick={() => handleSortSelection('Plate No: A to Z')}>Plate No: A to Z</div>
                         <div onClick={() => handleSortSelection('Plate No: Z to A')}>Plate No: Z to A</div>
-                        <div onClick={() => handleSortSelection('Customer No: High to Low')}>Customer No: High to Low</div>
-                        <div onClick={() => handleSortSelection('Customer No: Low to High')}>Customer No: Low to High</div>
                     </div>
                     <div className="search-container">
                         <span className="material-symbols-outlined search-icon">search</span>
@@ -227,7 +213,7 @@ function Customers() {
                             value={searchQuery}
                             onChange={handleSearchInputChange}
                         />
-                        <span className="material-symbols-outlined info-icon" title="Only Customer No., Name, and Plate No. are searchable.">info</span>
+                        <span className="material-symbols-outlined info-icon" data-tooltip="Only Name, and Plate No. are searchable.">info</span>
                     </div>
                     <div className="customers-actions">
                         <button className="add-customer-button" onClick={toggleModal}>+ Add New Customer</button>
@@ -238,12 +224,12 @@ function Customers() {
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>CUSTOMER NO.</th>
                                 <th>NAME</th>
+                                <th>CAR MODEL</th>
+                                <th>PLATE NO.</th>
                                 <th>CONTACT</th>
                                 <th>EMAIL</th>
                                 <th>ADDRESS</th>
-                                <th>PLATE NO.</th>
                                 <th>ACTION</th>
                             </tr>
                         </thead>
@@ -258,12 +244,12 @@ function Customers() {
                                             onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
                                         />
                                     </td>
-                                    <td>{customer.customerNo}</td>
                                     <td>{customer.name}</td>
+                                    <td>{customer.carModel}</td>
+                                    <td>{customer.plateNo}</td>
                                     <td>{customer.contact}</td>
                                     <td>{customer.email}</td>
                                     <td>{customer.address}</td>
-                                    <td>{customer.plateNo}</td>
                                     <td>
                                         <span
                                             className="material-symbols-outlined edit-icon"
@@ -316,6 +302,26 @@ function Customers() {
                                         />
                                     </div>
                                     <div className="form-group">
+                                        <label>Plate No.</label>
+                                        <input
+                                            type="text"
+                                            name="plateNo"
+                                            value={customerDetails.plateNo}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Car Model</label>
+                                        <input
+                                            type="text"
+                                            name="carModel"
+                                            value={customerDetails.carModel}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
                                         <label>Contact</label>
                                         <input
                                             type="text"
@@ -341,16 +347,6 @@ function Customers() {
                                             type="text"
                                             name="address"
                                             value={customerDetails.address}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Plate No.</label>
-                                        <input
-                                            type="text"
-                                            name="plateNo"
-                                            value={customerDetails.plateNo}
                                             onChange={handleInputChange}
                                             required
                                         />

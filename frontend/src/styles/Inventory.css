@@ -13,12 +13,14 @@
     top: 0;
     z-index: 100;
     position: relative;
+    z-index: 2;
 }
 
 .inventory-header h1 {
     font-size: 35px;
-    color: #282828;
+    color: #333;
     font-weight: bold;
+    z-index: 3;
 }
 
 .inventory-info {
@@ -28,7 +30,7 @@
     width: 100%; /* Ensure full width */
     position: relative; /* Needed for absolute positioning */
     padding-bottom: 10px; /* Space for the border */
-    border-bottom: 1px solid #282828; /* Creates the line under the buttons */
+    border-bottom: 1px solid #333; /* Creates the line under the buttons */
 }
 
 .inventory-status {
@@ -45,7 +47,7 @@
     padding: 10px 15px;
     border-radius: 4px 4px 0 0; /* Rounded corners at the top, square at the bottom */
     background-color: #FFFFFF;
-    color: #282828;
+    color: #333;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -59,7 +61,7 @@
 .status-button:hover, 
 .status-button:active,
 .status-button.active {
-    background-color: #282828;
+    background-color: #333;
     color: white;
 }
 
@@ -78,7 +80,7 @@
 
 .add-product-button {
     background-color: #F8CE00; /* Yellow color */
-    color: #282828;
+    color: #333;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
@@ -136,7 +138,7 @@
     padding-left: 10px; /* Left padding */
     padding-right: 3px; /* Right padding */
     font-size: 14px;
-    color: #282828;
+    color: #333;
     cursor: pointer;
     font-weight: bold;
     font-family: 'Poppins', sans-serif;
@@ -149,7 +151,7 @@
 
 .sort-button .material-symbols-outlined {
     font-size: 25px; /* Icon size */
-    color: #282828; /* Black icon color */
+    color: #333; /* Black icon color */
     transition: transform 0.3s ease; /* Smooth icon rotation */
 }
 
@@ -209,6 +211,7 @@
 }
 
 .inventory-table th, .inventory-table td {
+    color: #333;
     padding: 10px;
     border: 1px solid #dddddd; /* Light grey border for individual cells */
     font-family: 'Poppins', sans-serif;
@@ -277,7 +280,9 @@
     margin-top: 10px;
     position: relative;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between; /* Aligns Clear All to the left and Pagination to the right */
+    align-items: center; /* Vertically center both elements */
+    padding: 10px 0;
 }
 
 .page-number {
@@ -299,7 +304,7 @@
 
 .page-number.active {
     background-color: #F8CE00;
-    color: #282828;
+    color: #333;
     border-color: #F8CE00;
 }
 
@@ -344,7 +349,7 @@
 
 .notification-box {
     background-color: #f5f5f5;
-    color: #282828;
+    color: #333;
     font-weight: bold;
     padding: 15px;
     border-radius: 5px;
@@ -371,7 +376,7 @@
 
 .yes-button, .no-button {
     background-color: #F8CE00;
-    color: #282828;
+    color: #333;
     border: none;
     padding: 8px 15px;
     border-radius: 4px;
@@ -382,13 +387,13 @@
 }
 
 .yes-button:hover, .no-button:hover {
-    background-color: #282828;
+    background-color: #333;
     color: #F8CE00;
 }
 
 .clear-all-button {
     background-color: #F8CE00; /* Yellow color */
-    color: #282828;
+    color: #333;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
@@ -554,7 +559,7 @@ input[type="number"] {
 
 .modal-actions button[type="submit"] {
     background-color: #F8CE00;
-    color: #282828;
+    color: #333;
 }
 
 .modal-actions button[type="submit"]:hover {
@@ -576,7 +581,7 @@ input[type="number"] {
 /* Style for the edit icon */
 .edit-icon {
     cursor: pointer;
-    color: #282828; /* Match the Add button color */
+    color: #333; /* Match the Add button color */
     font-size: 30px;
     transition: color 0.3s ease;
 }
@@ -586,11 +591,35 @@ input[type="number"] {
 }
 
 .info-icon {
-    margin-left: 8px;
+    margin-left: 12px; 
     font-size: 20px;
     color: #666;
-    cursor: pointer;
     position: relative;
+    cursor: pointer;
+}
+
+.info-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    left: 120%; 
+    top: 50%;
+    transform: translateY(-50%); 
+    white-space: nowrap;
+    font-size: 14px; 
+    font-family: Arial, sans-serif; 
+    display: none; 
+    opacity: 0;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+}
+
+.info-icon:hover::after {
+    display: block;
+    opacity: 1;
 }
 
 .inventory-select {
@@ -601,7 +630,7 @@ input[type="number"] {
     font-family: 'Poppins', sans-serif; /* Consistent font */
     font-size: 14px; /* Adjust font size */
     background-color: #fff; /* White background */
-    color: #282828; /* Text color */
+    color: #333; /* Text color */
     cursor: pointer;
     appearance: none; /* Remove default browser styling */
     background-image: url('data:image/svg+xml;base64,...'); /* Custom dropdown icon */
@@ -623,11 +652,11 @@ input[type="number"] {
 /* Optional: Disable the arrow in Firefox */
 .inventory-select:-moz-focusring {
     color: transparent;
-    text-shadow: 0 0 0 #282828;
+    text-shadow: 0 0 0 #333;
 }
 
 /* Style for the dropdown options */
 .inventory-select option {
     font-family: 'Poppins', sans-serif;
-    color: #282828;
+    color: #333;
 }

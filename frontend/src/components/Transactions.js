@@ -227,7 +227,7 @@ function Transactions() {
                             value={searchQuery}
                             onChange={handleSearchInputChange}
                         />
-                        <span className="material-symbols-outlined info-icon" title="Only Transaction No., Customer Name, and Plate No. are searchable.">info</span>
+                        <span className="material-symbols-outlined info-icon" data-tooltip="Only Transaction No., Customer Name, and Plate No. are searchable.">info</span>
                     </div>
                     <div className="transactions-actions">
                         <button className="add-transaction-button" onClick={toggleModal}>+ Add New Transaction</button>

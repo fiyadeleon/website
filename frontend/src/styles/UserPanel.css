@@ -22,7 +22,7 @@
     left: 0;
     width: 70px;
     height: 100vh;
-    background-color: #282828;
+    background-color: #333;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,7 +47,7 @@
     width: 45px;
     height: 45px;
     border-radius: 50%;
-    background-color: #282828;
+    background-color: #333;
     margin: 10px 0;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -75,7 +75,7 @@
 
 .circle.active .material-symbols-outlined {
     font-size: 24px;
-    color: #282828;
+    color: #333;
     line-height: 1;
     z-index: 1; /* Ensure the icon stays above the overlay */
 }
@@ -131,7 +131,7 @@
     padding: 10px;
     border: none;
     cursor: pointer;
-    background-color: #282828;
+    background-color: #333;
     color: white;
     width: 45px;
     height: 45px;

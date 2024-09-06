@@ -8,7 +8,7 @@ body, html {
 .login-page {
   margin: 0;
   padding: 0;
-  background-color: #282828;
+  background-color: #333;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -75,7 +75,7 @@ body, html {
   width: 50%;
   padding: 15px;
   background-color: #F8CE00;
-  color: #282828;
+  color: #333;
   font-size: 16px;
   border: none;
   border-radius: 5px;

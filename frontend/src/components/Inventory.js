@@ -20,32 +20,48 @@ function Inventory() {
     const [productDetails, setProductDetails] = useState({ id: '', product_name: '', category: '', stock: '', price: '', unit: '' });
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('onHand');
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([
+        {"id": "PROD-CA1234-20240101", "product_name": "Engine Oil", "category": "Lubricants", "stock": 120, "unit": "liter", "price": 450.00},
+        {"id": "PROD-BR5678-20240101", "product_name": "Brake Pads", "category": "Brakes", "stock": 75, "unit": "set", "price": 1500.50},
+        {"id": "PROD-TY9101-20240101", "product_name": "All-Season Tires", "category": "Tires", "stock": 40, "unit": "piece", "price": 5500.00},
+        {"id": "PROD-BT2345-20240101", "product_name": "Car Battery", "category": "Batteries", "stock": 65, "unit": "piece", "price": 3200.00},
+        {"id": "PROD-FL6789-20240101", "product_name": "Fuel Filter", "category": "Filters", "stock": 200, "unit": "piece", "price": 300.00},
+        {"id": "PROD-WP2345-20240102", "product_name": "Windshield Wiper", "category": "Accessories", "stock": 150, "unit": "pair", "price": 600.00},
+        {"id": "PROD-OF5678-20240102", "product_name": "Oil Filter", "category": "Filters", "stock": 95, "unit": "piece", "price": 350.00},
+        {"id": "PROD-RB6789-20240103", "product_name": "Radiator Belt", "category": "Belts", "stock": 50, "unit": "piece", "price": 1200.00},
+        {"id": "PROD-EX7890-20240103", "product_name": "Exhaust Pipe", "category": "Exhaust", "stock": 30, "unit": "piece", "price": 8000.00},
+        {"id": "PROD-BR2345-20240104", "product_name": "Brake Fluid", "category": "Fluids", "stock": 250, "unit": "liter", "price": 400.00},
+        {"id": "PROD-LB1234-20240105", "product_name": "LED Headlights", "category": "Lighting", "stock": 80, "unit": "pair", "price": 7000.00},
+        {"id": "PROD-AC5678-20240105", "product_name": "Air Conditioning Filter", "category": "Filters", "stock": 100, "unit": "piece", "price": 1200.00},
+        {"id": "PROD-TR6789-20240106", "product_name": "Transmission Fluid", "category": "Fluids", "stock": 60, "unit": "liter", "price": 1600.00},
+        {"id": "PROD-SP8901-20240106", "product_name": "Spark Plug", "category": "Engine Parts", "stock": 220, "unit": "piece", "price": 300.00},
+        {"id": "PROD-TB9012-20240107", "product_name": "Timing Belt", "category": "Belts", "stock": 35, "unit": "piece", "price": 2500.00}
+      ]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5;
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch('https://out3aiyu9d.execute-api.ap-southeast-1.amazonaws.com/v1/inventory', {
-                    headers: {
-                        'x-api-key': '7JdX88oUgP23Yurbs9ABF75S9R4JxcqS9FqZbt1B'
-                    }
-                });
-                if (!response.ok) {
-                    console.log(response)
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                setProducts(data);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchProducts = async () => {
+    //         try {
+    //             const response = await fetch('https://out3aiyu9d.execute-api.ap-southeast-1.amazonaws.com/v1/inventory', {
+    //                 headers: {
+    //                     'x-api-key': '7JdX88oUgP23Yurbs9ABF75S9R4JxcqS9FqZbt1B'
+    //                 }
+    //             });
+    //             if (!response.ok) {
+    //                 console.log(response)
+    //                 throw new Error('Network response was not ok');
+    //             }
+    //             const data = await response.json();
+    //             setProducts(data);
+    //         } catch (error) {
+    //             console.error('Error fetching products:', error);
+    //         }
+    //     };
 
-        fetchProducts();
-    }, []);
+    //     fetchProducts();
+    // }, []);
 
     useEffect(() => {
         const handleEsc = (event) => {
@@ -60,7 +76,7 @@ function Inventory() {
         return () => {
             window.removeEventListener('keydown', handleEsc);
         };
-    }, [isModalOpen]); // Only re-run when isModalOpen changes
+    }, [isModalOpen]);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -357,7 +373,7 @@ function Inventory() {
                         />
                         <span
                             className="material-symbols-outlined info-icon"
-                            title="Only Product Name and Category are searchable."
+                            data-tooltip="Only Product Name and Category are searchable."
                         >
                             info
                         </span>
@@ -418,6 +434,11 @@ function Inventory() {
                 </div>
                 
                 <div className="lower-table">
+                    <div className="clear-all-container">
+                        {selectedCheckboxes.length > 0 && (
+                            <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
+                        )}
+                    </div>
                     <div className="pagination">
                         {Array.from({ length: totalPages }, (_, i) => (
                             <span
