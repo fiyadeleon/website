@@ -1,0 +1,156 @@
+.admin-layout {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.admin-content-wrapper {
+    margin-left: 70px; /* This ensures the sidebar doesn’t overlap with the content */
+    padding: 20px;
+    flex-grow: 1;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto; /* Handle overflowing content */
+    flex-wrap: wrap; /* Ensure items wrap to the next line if there's not enough space */
+}
+
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 70px;
+    height: 100vh;
+    background-color: #A5A5A5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    justify-content: space-between; /* Distribute space between circles and buttons */
+    z-index: 10; /* Ensure the sidebar stays on top of the content */
+}
+
+.circles-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex-grow: 1; /* Allow the circles container to grow and take up space */
+    justify-content: flex-start; /* Align circles to the start of the container */
+    padding-top: 10px; /* Add padding to give space between the logo and circles */
+}
+
+.admin-circle {
+    position: relative;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: #A5A5A5;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+}
+
+.admin-circle:hover {
+    transform: scale(1.2); /* Scale up the circle */
+}
+
+.admin-circle.active {
+    background-color: #F8CE00;
+}
+
+.admin-circle .material-symbols-outlined {
+    font-size: 24px;
+    color: white;
+    line-height: 1;
+    z-index: 1; /* Ensure the icon stays above the overlay */
+}
+
+.admin-circle.active .material-symbols-outlined {
+    font-size: 24px;
+    color: #282828;
+    line-height: 1;
+    z-index: 1; /* Ensure the icon stays above the overlay */
+}
+
+.admin-circle .admin-tooltip {
+    visibility: hidden;
+    width: auto;
+    max-width: 150px;
+    background-color: white;
+    color: #333;
+    text-align: left;
+    border-radius: 5px;
+    padding: 10px;
+    position: absolute;
+    z-index: 2;
+    left: 110%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.admin-circle .admin-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -11px;
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent white transparent transparent;
+}
+
+.admin-circle:hover .admin-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.admin-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 30px; /* Add margin to separate from the bottom */
+}
+
+.admin-settings-btn, .admin-logout-btn {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    background-color: #A5A5A5;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-settings-btn:hover, .admin-logout-btn:hover {
+    transform: scale(1.2); /* Scale up the circle */
+}
+
+.material-symbols-outlined {
+    cursor: pointer;
+}
+
+.sidebar-logo {
+    width: 50px; /* Adjust the size as needed */
+    margin-top: 10px; /* Space between the top of the sidebar and the logo */
+    object-fit: contain; /* Ensure the logo fits within the specified dimensions */
+}

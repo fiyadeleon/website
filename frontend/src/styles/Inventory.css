@@ -1,0 +1,633 @@
+.inventory {
+    font-family: 'Poppins', sans-serif;
+    width: 100%; /* Full width */
+    padding: 20px;
+    box-sizing: border-box; /* Include padding in width */
+    margin-top: 0; /* Ensure it's at the top */
+}
+
+.inventory-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    top: 0;
+    z-index: 100;
+    position: relative;
+}
+
+.inventory-header h1 {
+    font-size: 35px;
+    color: #282828;
+    font-weight: bold;
+}
+
+.inventory-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Ensure full width */
+    position: relative; /* Needed for absolute positioning */
+    padding-bottom: 10px; /* Space for the border */
+    border-bottom: 1px solid #282828; /* Creates the line under the buttons */
+}
+
+.inventory-status {
+    display: flex;
+    align-items: center;
+    position: relative; /* Relative positioning for the overlap effect */
+    margin-bottom: -10px; /* Pull the status buttons down slightly */
+}
+
+.status-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border-radius: 4px 4px 0 0; /* Rounded corners at the top, square at the bottom */
+    background-color: #FFFFFF;
+    color: #282828;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-right: 20px;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    position: relative; /* Ensure overlap with border */
+    z-index: 2; /* Ensure the buttons are above the border */
+}
+
+.status-button:hover, 
+.status-button:active,
+.status-button.active {
+    background-color: #282828;
+    color: white;
+}
+
+.on-hand-count, .low-stock-count, .out-of-stock-count {
+    font-size: 16px;
+    font-weight: bold;
+    color: #F8CE00;
+    margin-left: 8px;
+}
+
+.inventory-actions {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Pushes the inventory-actions to the right */
+}
+
+.add-product-button {
+    background-color: #F8CE00; /* Yellow color */
+    color: #282828;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+}
+
+.add-product-button:hover {
+    background-color: #FFC107;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 5px; /* Optional: Adjust spacing between sort button and search bar */
+}
+
+.search-input {
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    padding: 8px 12px 8px 36px; /* Adjust padding to leave space for the icon */
+    width: 300px;
+    font-size: 14px;
+    color: #666666;
+    font-family: 'Poppins', sans-serif;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: #666666; /* Icon color */
+    font-size: 20px; /* Adjust the icon size if necessary */
+    pointer-events: none; /* Make sure the icon doesn't block input interaction */
+}
+
+.sort-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    width: auto;
+    position: relative; /* Ensure dropdown positioning works relative to this container */
+    z-index: 1; /* Base z-index */
+}
+
+.sort-button {
+    display: flex;
+    align-items: center;
+    background-color: #F8CE00;
+    border: none;
+    border-radius: 5px;
+    padding-left: 10px; /* Left padding */
+    padding-right: 3px; /* Right padding */
+    font-size: 14px;
+    color: #282828;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    height: 38.4px; /* Match the height of the search input */
+    box-sizing: border-box; /* Include padding in height calculation */
+    position: relative;
+    z-index: 2;
+    margin-left: 0;
+}
+
+.sort-button .material-symbols-outlined {
+    font-size: 25px; /* Icon size */
+    color: #282828; /* Black icon color */
+    transition: transform 0.3s ease; /* Smooth icon rotation */
+}
+
+.sort-button:hover {
+    background-color: #FFC107;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background-color: #fff;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1000; /* Ensure dropdown overlaps other elements like the table */
+    width: 19%;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.dropdown-menu.open {
+    max-height: 400px;
+    opacity: 1;
+}
+
+.dropdown-menu.closed {
+    max-height: 0;
+    opacity: 0;
+}
+
+.dropdown-menu div {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.dropdown-menu div:hover {
+    background-color: #f1f1f1; /* Light grey on hover */
+}
+
+.inventory-table {
+    margin-top: 10px; /* Space between the sort button and the table */
+    width: 100%;
+}
+
+.inventory-table table {
+    width: 100%;
+    border-collapse: separate; /* Separate borders to allow for border-radius */
+    border-spacing: 0; /* Remove spacing between cells */
+    border: 1px solid #dddddd; /* Outline border for the entire table */
+    border-radius: 10px; /* Rounded corners for the table */
+    overflow: hidden; /* Ensure the corners are clipped */
+}
+
+.inventory-table th, .inventory-table td {
+    padding: 10px;
+    border: 1px solid #dddddd; /* Light grey border for individual cells */
+    font-family: 'Poppins', sans-serif;
+    vertical-align: middle; /* Center content vertically */
+}
+
+.inventory-table th {
+    background-color: #f5f5f5; /* Slightly grey background for headers */
+    font-weight: bold; /* Make header text bold */
+    text-align: left; /* Align header text to the left */
+}
+
+/* Center the checkbox and delete icon */
+.inventory-table th:first-child,
+.inventory-table td:first-child,
+.inventory-table th:last-child,
+.inventory-table td:last-child {
+    text-align: center; /* Center content in first and last columns */
+}
+
+/* Left-align the other columns */
+.inventory-table th:nth-child(2),
+.inventory-table td:nth-child(2),
+.inventory-table th:nth-child(3),
+.inventory-table td:nth-child(3),
+.inventory-table th:nth-child(4),
+.inventory-table td:nth-child(4),
+.inventory-table th:nth-child(5),
+.inventory-table td:nth-child(5) {
+    text-align: left; /* Left-align content in other columns */
+}
+
+.inventory-table tr {
+    background-color: #fff; /* Ensure white background for table cells */
+    font-size: 16px;
+}
+
+/* Specific corners for the table */
+.inventory-table th:first-child,
+.inventory-table td:first-child {
+    border-left: none;
+}
+
+.inventory-table th:last-child,
+.inventory-table td:last-child {
+    border-right: none;
+}
+
+.inventory-table tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.inventory-table tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.inventory-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.inventory-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.lower-table {
+    margin-top: 10px;
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.page-number {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 5px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #999;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.page-number.active {
+    background-color: #F8CE00;
+    color: #282828;
+    border-color: #F8CE00;
+}
+
+.page-number:hover:not(.active) {
+    background-color: #f1f1f1;
+}
+
+.lower-table .material-symbols-outlined {
+    font-size: 24px;
+    color: #999;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-arrow {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 5px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #999;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.page-arrow:hover {
+    background-color: #f1f1f1;
+}
+
+.page-arrow.disabled {
+    cursor: not-allowed;
+    color: #ddd;
+    border-color: #ddd;
+}
+
+.notification-box {
+    background-color: #f5f5f5;
+    color: #282828;
+    font-weight: bold;
+    padding: 15px;
+    border-radius: 5px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.notification-box p {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.yes-button, .no-button {
+    background-color: #F8CE00;
+    color: #282828;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.yes-button:hover, .no-button:hover {
+    background-color: #282828;
+    color: #F8CE00;
+}
+
+.clear-all-button {
+    background-color: #F8CE00; /* Yellow color */
+    color: #282828;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    margin-right: auto;
+}
+
+.clear-all-button:hover {
+    background-color: #FFC107;
+}
+
+.modal {
+    position: fixed;
+    top: 100px; /* Adjust based on where you want the modal to appear vertically */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%; /* Adjust based on the size of the modal */
+    background-color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: -15px;
+    min-height: 40px; /* Ensure space for the error message */
+}
+
+.form-group label {
+    display: block;
+    margin-top: 0px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #dddddd; /* Maintain consistent border across all inputs */
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 999; /* Below the modal, but above other content */
+}
+
+.modal {
+    position: fixed;
+    top: 100px; /* Adjust based on where you want the modal to appear vertically */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%; /* Adjust based on the size of the modal (reduce width if necessary) */
+    background-color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1000; /* Above the overlay */
+    padding: 20px;
+    box-sizing: border-box; /* Ensure padding is included in the width calculation */
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%; /* Ensure the input field takes up full width of its container */
+    padding: 8px;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box; 
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Chrome, Safari, Edge, and Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Ensure input still looks good without the arrows */
+input[type="number"] {
+    appearance: textfield; /* Standardize the appearance */
+    width: 100%; /* Ensure the input takes up full width of its container */
+    padding: 8px; 
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box; /* Ensure padding is included in the width calculation */
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-left: auto;
+    margin-top: 2px;
+    margin-bottom: 0;
+    margin-right: 0;
+    text-align: right;
+    display: block;
+}
+
+.input-error {
+    border: 2px solid red;
+    box-sizing: border-box;
+    padding: 8px;
+    width: 100%; /* Ensure the input stays full-width */
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+}
+
+.modal-actions button[type="button"] {
+    background-color: #dddddd;
+}
+
+.modal-actions button[type="submit"] {
+    background-color: #F8CE00;
+    color: #282828;
+}
+
+.modal-actions button[type="submit"]:hover {
+    background-color: #FFC107;
+}
+
+.modal-actions button[type="submit"]:disabled:hover {
+    background-color: #888; 
+    cursor: not-allowed;
+    opacity: 0.6; 
+}
+
+.modal-actions button[type="submit"]:disabled {
+    background-color: #888; 
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+/* Style for the edit icon */
+.edit-icon {
+    cursor: pointer;
+    color: #282828; /* Match the Add button color */
+    font-size: 30px;
+    transition: color 0.3s ease;
+}
+
+.edit-icon:hover {
+    color: #FFC107; /* Slightly darker on hover */
+}
+
+.info-icon {
+    margin-left: 8px;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    position: relative;
+}
+
+.inventory-select {
+    width: 100%; /* Full width */
+    padding: 10px 15px; /* Adjust padding */
+    border-radius: 4px; /* Rounded corners */
+    border: 1px solid #dddddd; /* Light grey border */
+    font-family: 'Poppins', sans-serif; /* Consistent font */
+    font-size: 14px; /* Adjust font size */
+    background-color: #fff; /* White background */
+    color: #282828; /* Text color */
+    cursor: pointer;
+    appearance: none; /* Remove default browser styling */
+    background-image: url('data:image/svg+xml;base64,...'); /* Custom dropdown icon */
+    background-position: right 10px center; /* Position of the dropdown arrow */
+    background-repeat: no-repeat; /* Ensure no repeat */
+    background-size: 14px; /* Size of the arrow icon */
+    transition: border-color 0.3s ease; /* Smooth border change */
+}
+
+.inventory-select:focus {
+    border-color: #F8CE00; /* Highlight color on focus */
+    outline: none; /* Remove default outline */
+}
+
+.inventory-select:hover {
+    border-color: #FFC107; /* Border color on hover */
+}
+
+/* Optional: Disable the arrow in Firefox */
+.inventory-select:-moz-focusring {
+    color: transparent;
+    text-shadow: 0 0 0 #282828;
+}
+
+/* Style for the dropdown options */
+.inventory-select option {
+    font-family: 'Poppins', sans-serif;
+    color: #282828;
+}

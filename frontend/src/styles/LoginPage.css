@@ -1,0 +1,103 @@
+/* src/LoginPage.css */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.login-page {
+  margin: 0;
+  padding: 0;
+  background-color: #282828;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #fff;
+}
+
+.login-page .container {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.login-page .logo {
+  margin-bottom: 0px; /* Increased margin for spacing */
+}
+
+.login-page .logo img {
+  max-width: 100%;
+  height: auto;
+}
+
+.login-page .input-group {
+  margin-bottom: 20px;
+  position: relative;
+  width: 50%;
+  margin: 0 auto 10px; /* Center the input group */
+}
+
+.login-page .input-field {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: 1px solid #333;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 16px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-page .input-field::placeholder {
+  color: #888;
+}
+
+.login-page .input-field:focus {
+  outline: none;
+  border-color: #F8CE00;
+}
+
+.login-page .forgot-password {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: #fff;
+  text-decoration: underline;
+  font-family: 'Poppins', sans-serif;
+  width: 50%;
+  margin: 0 auto 10px;
+}
+
+.login-page .login-button {
+  width: 50%;
+  padding: 15px;
+  background-color: #F8CE00;
+  color: #282828;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  margin: 0 auto;
+  display: block;
+}
+
+.login-page .login-button:hover {
+  background-color: #e6b800;
+}
+
+.login-page .login-button:disabled {
+  background-color: #888; 
+  cursor: not-allowed; 
+  opacity: 0.6; 
+}
+
+.login-page .loading-indicator {
+  display: none;
+  text-align: center;
+  margin-top: 20px;
+}

@@ -1,0 +1,14 @@
+.admin-homepage {
+    text-align: center;
+    padding: 20px;
+    font-family: 'Poppins', sans-serif;
+    overflow: auto; /* Allow scrolling if content overflows */
+    max-height: 100vh; /* Adjust this value based on your layout */
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  }
+  
+  .admin-homepage h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+  }
