@@ -10,7 +10,7 @@ function Customers() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editCustomerIndex, setEditCustomerIndex] = useState(null);
     const [customerDetails, setCustomerDetails] = useState({
-        customerNo: '',
+        id: '',
         name: '',
         contact: '',
         email: '',
@@ -22,11 +22,11 @@ function Customers() {
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
 
     const [customers, setCustomers] = useState([
-        { customerNo: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
-        { customerNo: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
-        { customerNo: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
-        { customerNo: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234', carModel: 'Ford Mustang Mach 1' },
-        { customerNo: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678', carModel: 'Ford Mustang GT Convertible' }
+        { id: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
+        { id: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
+        { id: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
+        { id: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234', carModel: 'Ford Mustang Mach 1' },
+        { id: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678', carModel: 'Ford Mustang GT Convertible' }
     ]);    
 
     const toggleDropdown = () => {
@@ -97,14 +97,14 @@ function Customers() {
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditCustomerIndex(null);
-            setCustomerDetails({ customerNo: '', name: '', contact: '', email: '', address: '', plateNo: '' });
+            setCustomerDetails({ id: '', name: '', contact: '', email: '', address: '', plateNo: '' });
         }
     };
 
     const handleEdit = (index) => {
         const customer = customers[index];
         setCustomerDetails({
-            customerNo: customer.customerNo,
+            id: customer.id,
             name: customer.name,
             contact: customer.contact,
             email: customer.email,
@@ -136,7 +136,7 @@ function Customers() {
         e.preventDefault();
 
         const newCustomer = {
-            customerNo: customerDetails.customerNo,
+            id: customerDetails.id,
             name: customerDetails.name,
             contact: customerDetails.contact,
             email: customerDetails.email,
@@ -162,7 +162,7 @@ function Customers() {
 
     // Filtered customers based on search query
     const filteredCustomers = customers.filter((customer) =>
-        customer.customerNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         customer.plateNo.toLowerCase().includes(searchQuery.toLowerCase())
     );

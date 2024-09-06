@@ -1,11 +1,11 @@
-.sow-scope-of-work {
+.jo-job-order {
   padding: 20px;
   font-family: 'Poppins', sans-serif;
   width: 100%; /* Full width */
   box-sizing: border-box;
 }
 
-.sow-header {
+.jo-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,7 +13,7 @@
   gap: 10px;
 }
 
-.sow-header h1 {
+.jo-header h1 {
   font-size: 35px;
   color: #333;
   font-weight: bold;
@@ -21,14 +21,14 @@
   margin: 0;
 }
 
-.sow-header-section {
+.jo-header-section {
   color: #333;
   margin-top: -20px;
   display: flex;
   align-items: center;
 }
 
-.sow-clear-button {
+.jo-clear-button {
   background-color: #F8CE00; /* Yellow */
   border: none;
   padding: 10px 20px;
@@ -42,18 +42,18 @@
   margin-top: 20px;
 }
 
-.sow-clear-button:hover {
+.jo-clear-button:hover {
   background-color: #FFC107;
 }
 
-.sow-user-info {
+.jo-user-info {
   display: flex;
   justify-content: space-between;
   align-items: flex-start; 
   gap: 20px; 
 }
 
-.sow-customer-section, .sow-employee-section {
+.jo-customer-section, .jo-employee-section {
   width: 48%;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -63,14 +63,14 @@
   transition: all 0.3s ease-in-out;
 }
 
-.sow-search-bar {
+.jo-search-bar {
   position: relative;
   display: flex;
   align-items: center;
   margin-left: 5px; 
 }
 
-.sow-search-icon {
+.jo-search-icon {
   position: absolute;
   left: 12px; /* Adjusted for better alignment */
   top: 50%; /* Vertically center the icon */
@@ -80,7 +80,7 @@
   pointer-events: none; /* Make sure the icon doesn't block input interaction */
 }
 
-.sow-search-input {
+.jo-search-input {
   border: 1px solid #dddddd;
   border-radius: 4px;
   padding: 8px 12px 8px 36px; /* Adjust padding to leave space for the icon */
@@ -90,15 +90,15 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-search-input::placeholder {
+.jo-search-input::placeholder {
   color: gray;
   font-size: 14px;
 }
 
-.sow-placeholder {
+.jo-placeholder {
   width: 100%;
   padding: 10px;
-  margin-top: -35px;
+  margin: 5px 0;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
@@ -106,17 +106,17 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-placeholder:focus {
+.jo-placeholder:focus {
   outline: none;
   border-color: #888;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
-.sow-placeholder::placeholder {
+.jo-placeholder::placeholder {
   color: #aaa;
 }
 
-.sow-parts-section, .sow-services-section, .sow-remarks-section {
+.jo-parts-section, .jo-services-section, .jo-remarks-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -124,7 +124,7 @@
   margin-top: 20px;
 }
 
-.sow-services-textarea, .sow-remarks-textarea {
+.jo-services-textarea, .jo-remarks-textarea {
   width: 100%;
   height: 100px;
   padding: 10px;
@@ -137,13 +137,13 @@
   box-sizing: border-box;
 }
 
-.sow-parts-search-bar {
+.jo-parts-search-bar {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.sow-parts-search-bar input {
+.jo-parts-search-bar input {
   width: 100%;
   padding: 10px;
   border: 1px solid #dddddd;
@@ -151,7 +151,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-add-customer-btn {
+.jo-add-customer-btn {
   background-color: #F8CE00; 
   color: #333;
   border: none;
@@ -166,7 +166,7 @@
   right: 20px;  
 }
 
-.sow-add-customer-btn, .sow-add-employee-btn {
+.jo-add-customer-btn, .jo-add-employee-btn {
   background-color: #F8CE00;
   color: #333;
   border: none;
@@ -182,22 +182,22 @@
   transition: background-color 0.3s ease-in-out;
 }
 
-.sow-add-customer-btn.cancel, .sow-add-employee-btn.cancel {
+.jo-add-customer-btn.cancel, .jo-add-employee-btn.cancel {
   background-color: #cccccc; 
   color: #333; 
 }
 
-.sow-add-customer-btn.cancel:hover,
-.sow-add-employee-btn.cancel:hover {
+.jo-add-customer-btn.cancel:hover,
+.jo-add-employee-btn.cancel:hover {
   background-color: #b3b3b3;
 }
 
-.sow-add-employee-btn:hover,
-.sow-add-customer-btn:hover {
+.jo-add-employee-btn:hover,
+.jo-add-customer-btn:hover {
   background-color: #FFC107;
 }
 
-.sow-save-button {
+.jo-save-button {
   background-color: #F8CE00;
   border: none;
   padding: 12px 20px;
@@ -212,11 +212,11 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-save-button:hover {
+.jo-save-button:hover {
   background-color: #FFC107;
 }
 
-.sow-info-icon {
+.jo-info-icon {
   margin-left: 12px; 
   font-size: 20px;
   color: #666;
@@ -224,7 +224,7 @@
   cursor: pointer;
 }
 
-.sow-info-icon::after {
+.jo-info-icon::after {
   content: attr(data-tooltip);
   position: absolute;
   background-color: #333;
@@ -243,92 +243,15 @@
   transition: opacity 0.3s ease;
 }
 
-.sow-info-icon:hover::after {
+.jo-info-icon:hover::after {
   display: block;
   opacity: 1;
 }
 
-.sow-parts-section {
+.jo-parts-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
-}
-
-.sow-dropdown {
-  position: relative;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 100%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 5px;
-  z-index: 1000;
-  overflow-y: auto;
-  max-height: 200px;
-}
-
-.sow-dropdown-option {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  align-items: center; /* Ensure vertical alignment */
-}
-
-.sow-dropdown-option:hover {
-  background-color: #f0f0f0;
-}
-
-.sow-dropdown-text {
-  font-size: 14px;
-  color: #333;
-}
-
-.sow-dropdown-actions {
-  font-size: 14px;
-  color: #999;
-  text-align: right;
-}
-
-.sow-customer-details,
-.sow-employee-details,
-.sow-inventory-details {
-  margin-left: 20px;
-  color: #666;
-  font-family: 'Poppins', sans-serif;
-}
-
-.sow-selected-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  margin-left: 10px;
-}
-
-.sow-selected-item {
-  border: 1px solid #dddddd;
-  border-radius: 10px;
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #666666;
-}
-
-.remove-item-btn {
-  background: none;
-  border: none;
-  color: red;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0;
-}
-
-.remove-item-btn:hover {
-  color: darkred;
 }

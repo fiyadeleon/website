@@ -10,7 +10,7 @@ function Employees() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editEmployeeIndex, setEditEmployeeIndex] = useState(null);
     const [employeeDetails, setEmployeeDetails] = useState({
-        employeeNo: '',
+        id: '',
         name: '',
         contact: '',
         email: '',
@@ -21,47 +21,13 @@ function Employees() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const [employees, setEmployees] = useState([
-        { 
-            employeeNo: 'EMP001', 
-            name: 'John Doe', 
-            contact: '1234567890', 
-            email: 'john@example.com', 
-            jobTitle: 'Senior Mechanic',
-            salary: 55000
-        },
-        { 
-            employeeNo: 'EMP002', 
-            name: 'Jane Smith', 
-            contact: '0987654321', 
-            email: 'jane@example.com', 
-            jobTitle: 'Engine Specialist',
-            salary: 60000
-        },
-        { 
-            employeeNo: 'EMP003', 
-            name: 'Michael Brown', 
-            contact: '5555555555', 
-            email: 'michael@example.com', 
-            jobTitle: 'Transmission Technician',
-            salary: 58000
-        },
-        { 
-            employeeNo: 'EMP004', 
-            name: 'Alice Johnson', 
-            contact: '1112223333', 
-            email: 'alice@example.com', 
-            jobTitle: 'Brake and Suspension Specialist',
-            salary: 57000
-        },
-        { 
-            employeeNo: 'EMP005', 
-            name: 'Bob Williams', 
-            contact: '4445556666', 
-            email: 'bob@example.com', 
-            jobTitle: 'Diagnostic Technician',
-            salary: 62000
-        }
-    ]);
+        { id: 'EMP001', jobTitle: 'Senior Mechanic', name: 'John Doe', contact: '1234567890', email: 'john@example.com', salary: 55000 },
+        { id: 'EMP002', jobTitle: 'Engine Specialist', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', salary: 60000 },
+        { id: 'EMP003', jobTitle: 'Transmission Technician', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', salary: 58000 },
+        { id: 'EMP004', jobTitle: 'Brake and Suspension Specialist', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', salary: 57000 },
+        { id: 'EMP005', jobTitle: 'Diagnostic Technician', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', salary: 62000 }
+      ]);
+      
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -82,15 +48,15 @@ function Employees() {
                 break;
             case 'Employee No: High to Low':
                 sortedEmployees.sort((a, b) => {
-                    const numA = parseInt(a.employeeNo.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.employeeNo.replace(/[^0-9]/g, ''), 10);
+                    const numA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
+                    const numB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
                     return numB - numA;
                 });
                 break;
             case 'Employee No: Low to High':
                 sortedEmployees.sort((a, b) => {
-                    const numA = parseInt(a.employeeNo.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.employeeNo.replace(/[^0-9]/g, ''), 10);
+                    const numA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
+                    const numB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
                     return numA - numB;
                 });
                 break;
@@ -131,14 +97,14 @@ function Employees() {
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditEmployeeIndex(null);
-            setEmployeeDetails({ employeeNo: '', name: '', contact: '', email: '', jobTitle: '', salary: '' });
+            setEmployeeDetails({ id: '', name: '', contact: '', email: '', jobTitle: '', salary: '' });
         }
     };
 
     const handleEdit = (index) => {
         const employee = employees[index];
         setEmployeeDetails({
-            employeeNo: employee.employeeNo,
+            id: employee.id,
             name: employee.name,
             contact: employee.contact,
             email: employee.email,
@@ -166,7 +132,7 @@ function Employees() {
         e.preventDefault();
 
         const newEmployee = {
-            employeeNo: employeeDetails.employeeNo,
+            id: employeeDetails.id,
             name: employeeDetails.name,
             contact: employeeDetails.contact,
             email: employeeDetails.email,
@@ -190,7 +156,7 @@ function Employees() {
     };
 
     const filteredEmployees = employees.filter((employee) =>
-        employee.employeeNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         employee.jobTitle.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -272,7 +238,7 @@ function Employees() {
                                             onClick={(e) => e.stopPropagation()}
                                         />
                                     </td>
-                                    <td>{employee.employeeNo}</td>
+                                    <td>{employee.id}</td>
                                     <td>{employee.name}</td>
                                     <td>{employee.contact}</td>
                                     <td>{employee.email}</td>

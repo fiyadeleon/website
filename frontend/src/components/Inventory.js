@@ -36,7 +36,7 @@ function Inventory() {
         {"id": "PROD-TR6789-20240106", "product_name": "Transmission Fluid", "category": "Fluids", "stock": 60, "unit": "liter", "price": 1600.00},
         {"id": "PROD-SP8901-20240106", "product_name": "Spark Plug", "category": "Engine Parts", "stock": 220, "unit": "piece", "price": 300.00},
         {"id": "PROD-TB9012-20240107", "product_name": "Timing Belt", "category": "Belts", "stock": 35, "unit": "piece", "price": 2500.00}
-      ]);
+    ]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5;
     const [isLoading, setIsLoading] = useState(false);
