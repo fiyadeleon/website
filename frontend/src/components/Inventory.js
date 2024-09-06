@@ -133,10 +133,10 @@ function Inventory() {
                     return { id: product.id };
                 });
     
-                const response = await fetch('https://out3aiyu9d.execute-api.ap-southeast-1.amazonaws.com/v1/inventory', {
+                const response = await fetch('https://api.com', {
                     method: 'DELETE',
                     headers: {
-                        'x-api-key': '7JdX88oUgP23Yurbs9ABF75S9R4JxcqS9FqZbt1B'
+                        'x-api-key': 'test'
                     },
                     body: JSON.stringify(selectedProducts)
                 });
@@ -239,18 +239,18 @@ function Inventory() {
                 let response;
 
                 if (isEditMode && editProductIndex !== null) {
-                    response = await fetch(`https://out3aiyu9d.execute-api.ap-southeast-1.amazonaws.com/v1/inventory`, {
+                    const response = await fetch('https://api.com', {
                         method: 'PUT',
                         headers: {
-                            'x-api-key': '7JdX88oUgP23Yurbs9ABF75S9R4JxcqS9FqZbt1B'
+                            'x-api-key': 'test'
                         },
                         body: JSON.stringify(newProduct)
                     });
                 } else {
-                    response = await fetch('https://out3aiyu9d.execute-api.ap-southeast-1.amazonaws.com/v1/inventory', {
-                        method: 'POST', 
+                    const response = await fetch('https://api.com', {
+                        method: '{POST}',
                         headers: {
-                            'x-api-key': '7JdX88oUgP23Yurbs9ABF75S9R4JxcqS9FqZbt1B'
+                            'x-api-key': 'test'
                         },
                         body: JSON.stringify(newProduct)
                     });
