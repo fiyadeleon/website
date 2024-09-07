@@ -22,7 +22,7 @@ def lambda_handler(event, context):
         logger.error('Username and password are required')
         return generate_response(400, {'error': 'Username and password are required'})
 
-    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    # hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     try:
         response = table.get_item(Key={'username': username})
@@ -32,7 +32,7 @@ def lambda_handler(event, context):
 
     if 'Item' in response:
         user = response['Item']
-        if user['password'] == hashed_password:
+        if user['password'] == password:
             try:
                 token_response = sts.get_session_token()
                 session_token = token_response['Credentials']['SessionToken']
