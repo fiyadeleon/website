@@ -24,9 +24,9 @@ module "dynamodb" {
 }
 
 module "lambda_users" {
-  source                     = "git::https://github.com/fiyadeleon/website.git//aws/lambda/users?ref=main"
-  prefix_name                = var.prefix_name
-  stanghero_users_table_name = module.dynamodb.stanghero_users_table_name
+  source                    = "git::https://github.com/fiyadeleon/website.git//aws/lambda/users?ref=main"
+  prefix_name               = var.prefix_name
+  stanghero_user_table_name = module.dynamodb.stanghero_user_table_name
 }
 
 module "lambda_inventory" {

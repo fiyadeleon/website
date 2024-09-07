@@ -57,7 +57,7 @@ resource "aws_lambda_function" "get_users" {
 
   environment {
     variables = {
-      TABLE_NAME = var.stanghero_users_table_name
+      TABLE_NAME = var.stanghero_user_table_name
     }
   }
 
