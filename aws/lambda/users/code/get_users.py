@@ -3,12 +3,13 @@ import boto3
 import hashlib
 import os
 import logging
+import uuid
+import base64
 
 logger = logging.getLogger()
 logger.setLevel("INFO")
 
 dynamodb = boto3.resource('dynamodb')
-sts = boto3.client('sts')
 
 table_name = os.environ['TABLE_NAME']
 table = dynamodb.Table(table_name)
@@ -33,12 +34,7 @@ def lambda_handler(event, context):
     if 'Item' in response:
         user = response['Item']
         if user['password'] == password:
-            try:
-                token_response = sts.get_session_token()
-                session_token = token_response['Credentials']['SessionToken']
-            except Exception as e:
-                logger.error(f'Error generating session token: {str(e)}')
-                return generate_response(500, {'error': 'Error generating session token', 'message': str(e)})
+            session_token = generate_session_token()
 
             return generate_response(200, {
                 'message': 'Authentication successful',
@@ -51,6 +47,13 @@ def lambda_handler(event, context):
     else:
         logger.error('User not found')
         return generate_response(404, {'error': 'User not found'})
+    
+def generate_session_token():
+    unique_id = uuid.uuid4()
+
+    token = base64.urlsafe_b64encode(unique_id.bytes).rstrip(b'=').decode('utf-8')
+    
+    return token
 
 def generate_response(status_code, body):
     return {

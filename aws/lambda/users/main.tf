@@ -42,11 +42,6 @@ resource "aws_iam_role_policy" "stanghero_lambda_users_policy" {
         Resource = [
           "arn:aws:logs:ap-southeast-1:654654411031:log-group:/aws/lambda/get_users:*"
         ]
-      },
-      {
-        "Effect": "Allow",
-        "Action": "sts:GetSessionToken",
-        "Resource": "*"
       }
     ]
   })
