@@ -1,27 +1,31 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-const isAuthenticated = () => {
-  const token = localStorage.getItem('token');
-  return token ? true : false;
-};
+const ProtectedRoute = ({ element, adminElement, allowedRoles }) => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
 
-const getUserRole = () => {
-  return localStorage.getItem('role');
-};
+    if (!token) {
+        return <Navigate to="/login" />;
+    }
 
-const ProtectedRoute = ({ element, adminElement }) => {
-  if (!isAuthenticated()) {
+    if (allowedRoles.includes(role)) {
+        if (role === 'admin' && adminElement) {
+        return adminElement;
+        }
+
+        return element;
+    }
+
+    if (role === 'admin') {
+        return <Navigate to="/reports" />;
+    }
+
+    if (role === 'user') {
+        return <Navigate to="/userHomepage" />;
+    }
+
     return <Navigate to="/login" />;
-  }
-
-  const role = getUserRole();
-
-  if (role === 'admin') {
-    return adminElement;
-  }
-
-  return element;
 };
 
 export default ProtectedRoute;

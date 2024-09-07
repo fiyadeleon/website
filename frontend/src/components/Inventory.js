@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import UserPanel from './UserPanel';
 import '../styles/Inventory.css';
 
 function generateProductId() {
@@ -317,222 +316,221 @@ function Inventory() {
     const paginatedProducts = productsToDisplay.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     return (
-        <UserPanel>
-            <div className="inventory">
-                <div className="inventory-header">
-                    <h1>INVENTORY</h1>
-                    {selectedCheckboxes.length > 0 && (
-                        <div className="notification-box">
-                            <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
-                            <div className="notification-actions">
-                                <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
-                                <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
-                            </div>
+        <div className="inventory">
+            <div className="inventory-header">
+                <h1>INVENTORY</h1>
+                {selectedCheckboxes.length > 0 && (
+                    <div className="notification-box">
+                        <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
+                        <div className="notification-actions">
+                            <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
+                            <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
                         </div>
-                    )}
-                </div>
-                <div className="inventory-info">
-                    <div className="inventory-status">
-                        <button
-                            className={`status-button on-hand ${activeTab === 'onHand' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('onHand')}
-                        >
-                            <span>On Hand</span>
-                            <span className="on-hand-count">{products.filter(p => p.stock > 0).length}</span>
-                        </button>
-                        <button
-                            className={`status-button out-of-stock ${activeTab === 'outOfStock' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('outOfStock')}
-                        >
-                            <span>Out of Stock</span>
-                            <span className="out-of-stock-count">{products.filter(p => p.stock === 0).length}</span>
-                        </button>
                     </div>
-                </div>
-                <div className="sort-container">
-                    <button className="sort-button" onClick={toggleDropdown}>
-                        {selectedSort}
-                        <span className="material-symbols-outlined">
-                            {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-                        </span>
-                    </button>
-                    <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
-                        <div onClick={() => handleSortSelection('Price: High to Low')}>Price: High to Low</div>
-                        <div onClick={() => handleSortSelection('Price: Low to High')}>Price: Low to High</div>
-                        <div onClick={() => handleSortSelection('Stock: High to Low')}>Stock: High to Low</div>
-                        <div onClick={() => handleSortSelection('Stock: Low to High')}>Stock: Low to High</div>
-                    </div>
-                    <div className="search-container">
-                        <span className="material-symbols-outlined search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search products"
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                        />
-                        <span
-                            className="material-symbols-outlined info-icon"
-                            data-tooltip="Only Product Name and Category are searchable."
-                        >
-                            info
-                        </span>
-                    </div>
-                    <div className="inventory-actions">
-                        <button className="add-product-button" onClick={toggleModal}>+ Add New Product</button>
-                    </div>
-                </div>
-                <div className="inventory-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>INVENTORY NO.</th>
-                                <th>PRODUCT NAME</th>
-                                <th>CATEGORY</th>
-                                <th>STOCK</th>
-                                <th>UNIT</th>
-                                <th>PRICE</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedProducts.map((product, index) => {
-                                // Calculate the correct absolute index in the products array
-                                const absoluteIndex = (currentPage - 1) * pageSize + index;
-
-                                return (
-                                    <tr key={absoluteIndex}>
-                                        <td onClick={() => handleCheckboxChange(absoluteIndex, product.product_name)} style={{ cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                onChange={() => handleCheckboxChange(absoluteIndex)}
-                                                checked={selectedCheckboxes.includes(absoluteIndex)}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                        </td>
-                                        <td>{product.id}</td>
-                                        <td>{product.product_name}</td>
-                                        <td>{product.category}</td>
-                                        <td>{product.stock}</td>
-                                        <td>{product.unit}</td>
-                                        <td>₱{parseFloat(product.price).toFixed(2)}</td>
-                                        <td>
-                                            <span
-                                                className="material-symbols-outlined edit-icon"
-                                                onClick={() => handleEdit(index)} // Use absoluteIndex here
-                                                title="Edit Product"
-                                            >
-                                                edit_note
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div className="lower-table">
-                    <div className="clear-all-container">
-                        {selectedCheckboxes.length > 0 && (
-                            <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
-                        )}
-                    </div>
-                    <div className="pagination">
-                        {Array.from({ length: totalPages }, (_, i) => (
-                            <span
-                                key={i}
-                                className={`page-number ${currentPage === i + 1 ? 'active' : ''}`}
-                                onClick={() => handlePageChange(i + 1)}
-                            >
-                                {i + 1}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-
-                {isModalOpen && (
-                    <>
-                        <div className="modal-overlay" onClick={toggleModal}></div>
-                        <div className="modal">
-                            <div className="modal-content">
-                                <h2>{isEditMode ? 'Edit Product' : 'Add New Product'}</h2>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="form-group">
-                                        <label>Product Name</label>
-                                        <input
-                                            type="text"
-                                            name="product_name"
-                                            value={productDetails.product_name}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Category</label>
-                                        <input
-                                            type="text"
-                                            name="category"
-                                            value={productDetails.category}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Stock</label>
-                                        <input
-                                            type="number"
-                                            name="stock"
-                                            value={productDetails.stock}
-                                            onChange={handleInputChange}
-                                            required
-                                            className={stockError ? 'input-error' : ''}
-                                        />
-                                        {stockError && <p className="error-message">{stockError}</p>}
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Unit</label>
-                                        <select 
-                                            className="inventory-select"
-                                            name="unit"
-                                            value={productDetails.unit}
-                                            onChange={handleInputChange}
-                                            required
-                                        >
-                                            <option value="">Select Unit</option>
-                                            <option value="piece">Piece</option>
-                                            <option value="box">Box</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Price</label>
-                                        <input
-                                            type="number"
-                                            name="price"
-                                            value={productDetails.price}
-                                            onChange={handleInputChange}
-                                            required
-                                            className={priceError ? 'input-error' : ''}
-                                            step="0.01"
-                                        />
-                                        {priceError && <p className="error-message">{priceError}</p>}
-                                    </div>
-                                    <div className="modal-actions">
-                                        <button type="button" onClick={toggleModal}>Cancel</button>
-                                        <button type="submit" disabled={isLoading}>
-                                            {isLoading 
-                                                ? (isEditMode ? 'Updating Product...' : 'Adding Product...') 
-                                                : (isEditMode ? 'Update Product' : 'Add Product')}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </>
                 )}
             </div>
-        </UserPanel>
+            <div className="inventory-info">
+                <div className="inventory-status">
+                    <button
+                        className={`status-button on-hand ${activeTab === 'onHand' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('onHand')}
+                    >
+                        <span>On Hand</span>
+                        <span className="on-hand-count">{products.filter(p => p.stock > 0).length}</span>
+                    </button>
+                    <button
+                        className={`status-button out-of-stock ${activeTab === 'outOfStock' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('outOfStock')}
+                    >
+                        <span>Out of Stock</span>
+                        <span className="out-of-stock-count">{products.filter(p => p.stock === 0).length}</span>
+                    </button>
+                </div>
+            </div>
+            <div className="sort-container">
+                <button className="sort-button" onClick={toggleDropdown}>
+                    {selectedSort}
+                    <span className="material-symbols-outlined">
+                        {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
+                    </span>
+                </button>
+                <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
+                    <div onClick={() => handleSortSelection('Price: High to Low')}>Price: High to Low</div>
+                    <div onClick={() => handleSortSelection('Price: Low to High')}>Price: Low to High</div>
+                    <div onClick={() => handleSortSelection('Stock: High to Low')}>Stock: High to Low</div>
+                    <div onClick={() => handleSortSelection('Stock: Low to High')}>Stock: Low to High</div>
+                </div>
+                <div className="search-container">
+                    <span className="material-symbols-outlined search-icon">search</span>
+                    <input
+                        type="text"
+                        placeholder="Search products"
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                    />
+                    <span
+                        className="material-symbols-outlined info-icon"
+                        data-tooltip="Only Product Name and Category are searchable."
+                    >
+                        info
+                    </span>
+                </div>
+                <div className="inventory-actions">
+                    <button className="add-product-button" onClick={toggleModal}>+ Add New Product</button>
+                </div>
+            </div>
+            <div className="inventory-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>INVENTORY NO.</th>
+                            <th>PRODUCT NAME</th>
+                            <th>CATEGORY</th>
+                            <th>STOCK</th>
+                            <th>UNIT</th>
+                            <th>PRICE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {paginatedProducts.map((product, index) => {
+                            // Calculate the correct absolute index in the products array
+                            const absoluteIndex = (currentPage - 1) * pageSize + index;
+
+                            return (
+                                <tr key={absoluteIndex}>
+                                    <td onClick={() => handleCheckboxChange(absoluteIndex, product.product_name)} style={{ cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            onChange={() => handleCheckboxChange(absoluteIndex)}
+                                            checked={selectedCheckboxes.includes(absoluteIndex)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </td>
+                                    <td>{product.id}</td>
+                                    <td>{product.product_name}</td>
+                                    <td>{product.category}</td>
+                                    <td>{product.stock}</td>
+                                    <td>{product.unit}</td>
+                                    <td>₱{parseFloat(product.price).toFixed(2)}</td>
+                                    <td>
+                                        <span
+                                            className="material-symbols-outlined edit-icon"
+                                            onClick={() => handleEdit(index)} // Use absoluteIndex here
+                                            title="Edit Product"
+                                        >
+                                            edit_note
+                                        </span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div className="lower-table">
+                <div className="clear-all-container">
+                    {selectedCheckboxes.length > 0 && (
+                        <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
+                    )}
+                </div>
+                <div className="pagination">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <span
+                            key={i}
+                            className={`page-number ${currentPage === i + 1 ? 'active' : ''}`}
+                            onClick={() => handlePageChange(i + 1)}
+                        >
+                            {i + 1}
+                        </span>
+                    ))}
+                </div>
+            </div>
+
+            {isModalOpen && (
+                <>
+                    <div className="modal-overlay" onClick={toggleModal}></div>
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h2>{isEditMode ? 'Edit Product' : 'Add New Product'}</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Product Name</label>
+                                    <input
+                                        type="text"
+                                        name="product_name"
+                                        value={productDetails.product_name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Category</label>
+                                    <input
+                                        type="text"
+                                        name="category"
+                                        value={productDetails.category}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Stock</label>
+                                    <input
+                                        type="number"
+                                        name="stock"
+                                        value={productDetails.stock}
+                                        onChange={handleInputChange}
+                                        required
+                                        className={stockError ? 'input-error' : ''}
+                                    />
+                                    {stockError && <p className="error-message">{stockError}</p>}
+                                </div>
+                                <div className="form-group">
+                                    <label>Unit</label>
+                                    <select 
+                                        className="inventory-select"
+                                        name="unit"
+                                        value={productDetails.unit}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        <option value="">Select Unit</option>
+                                        <option value="piece">Piece</option>
+                                        <option value="box">Box</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Price</label>
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        value={productDetails.price}
+                                        onChange={handleInputChange}
+                                        required
+                                        className={priceError ? 'input-error' : ''}
+                                        step="0.01"
+                                    />
+                                    {priceError && <p className="error-message">{priceError}</p>}
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" onClick={toggleModal}>Cancel</button>
+                                    <button type="submit" disabled={isLoading}>
+                                        {isLoading 
+                                            ? (isEditMode ? 'Updating Product...' : 'Adding Product...') 
+                                            : (isEditMode ? 'Update Product' : 'Add Product')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+        
     );
 }
 

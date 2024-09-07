@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import AdminPanel from './AdminPanel';
 import '../styles/Customers.css';
 
 function Customers() {
@@ -168,202 +167,200 @@ function Customers() {
     );
 
     return (
-        <AdminPanel>
-            <div className="customers">
-                <div className="customers-header">
-                    <h1>CUSTOMERS</h1>
-                    {selectedCheckboxes.length > 0 && (
-                        <div className="notification-box">
-                            <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
-                            <div className="notification-actions">
-                                <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
-                                <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
-                            </div>
+        <div className="customers">
+            <div className="customers-header">
+                <h1>CUSTOMERS</h1>
+                {selectedCheckboxes.length > 0 && (
+                    <div className="notification-box">
+                        <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
+                        <div className="notification-actions">
+                            <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
+                            <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
                         </div>
-                    )}
-                </div>
-
-                <div className="customers-info">
-                    <div className="customers-status">
-                        <button className="status-button all active">
-                            <span>All</span>
-                            <span className="all-count">{customers.length}</span>
-                        </button>
                     </div>
-                </div>
-                <div className="sort-container">
-                    <button className="sort-button" onClick={toggleDropdown}>
-                        {selectedSort}
-                        <span className="material-symbols-outlined">
-                            {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-                        </span>
-                    </button>
-                    <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
-                        <div onClick={() => handleSortSelection('Name: A to Z')}>Name: A to Z</div>
-                        <div onClick={() => handleSortSelection('Name: Z to A')}>Name: Z to A</div>
-                        <div onClick={() => handleSortSelection('Plate No: A to Z')}>Plate No: A to Z</div>
-                        <div onClick={() => handleSortSelection('Plate No: Z to A')}>Plate No: Z to A</div>
-                    </div>
-                    <div className="search-container">
-                        <span className="material-symbols-outlined search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search customers"
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
-                        />
-                        <span className="material-symbols-outlined info-icon" data-tooltip="Only Name, and Plate No. are searchable.">info</span>
-                    </div>
-                    <div className="customers-actions">
-                        <button className="add-customer-button" onClick={toggleModal}>+ Add New Customer</button>
-                    </div>
-                </div>
-                <div className="customers-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>NAME</th>
-                                <th>CAR MODEL</th>
-                                <th>PLATE NO.</th>
-                                <th>CONTACT NO.</th>
-                                <th>EMAIL</th>
-                                <th>ADDRESS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredCustomers.map((customer, index) => (
-                                <tr key={index}>
-                                    <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            onChange={() => handleCheckboxChange(index)}
-                                            checked={selectedCheckboxes.includes(index)}
-                                            onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
-                                        />
-                                    </td>
-                                    <td>{customer.name}</td>
-                                    <td>{customer.carModel}</td>
-                                    <td>{customer.plateNo}</td>
-                                    <td>{customer.contact}</td>
-                                    <td>{customer.email}</td>
-                                    <td>{customer.address}</td>
-                                    <td>
-                                        <span
-                                            className="material-symbols-outlined edit-icon"
-                                            onClick={() => handleEdit(index)}
-                                            title="Edit Customer"
-                                        >
-                                            edit_note
-                                        </span>
-                                        <span 
-                                            className="material-symbols-outlined save-pdf-icon"
-                                            onClick={() => handleSavePdf()}
-                                        >
-                                            picture_as_pdf
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="lower-table">
-                    {selectedCheckboxes.length > 0 && (
-                        <button className="clear-all-button" onClick={handleClearAll}>
-                            Clear All
-                        </button>
-                    )}
-                    <span className="page-number active">1</span>
-                    <span className="page-number">2</span>
-                    <span className="page-number">3</span>
-                    <span className="page-number">4</span>
-                    <span className="page-number">5</span>
-                </div>
-
-                {/* Modal for Adding/Editing Customer */}
-                {isModalOpen && (
-                    <>
-                        <div className="modal-overlay" onClick={toggleModal}></div>
-                        <div className="modal">
-                            <div className="modal-content">
-                                <h2>{isEditMode ? 'Edit Customer' : 'Add New Customer'}</h2>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="form-group">
-                                        <label>Name</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={customerDetails.name}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Plate No.</label>
-                                        <input
-                                            type="text"
-                                            name="plateNo"
-                                            value={customerDetails.plateNo}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Car Model</label>
-                                        <input
-                                            type="text"
-                                            name="carModel"
-                                            value={customerDetails.carModel}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Contact No.</label>
-                                        <input
-                                            type="tel" 
-                                            pattern="[0-9]{11}" 
-                                            maxLength="11"
-                                            name="contact"
-                                            value={customerDetails.contact}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Email</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={customerDetails.email}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Address</label>
-                                        <input
-                                            type="text"
-                                            name="address"
-                                            value={customerDetails.address}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="modal-actions">
-                                        <button type="button" onClick={toggleModal}>Cancel</button>
-                                        <button type="submit">{isEditMode ? 'Update Customer' : 'Add Customer'}</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </>
                 )}
             </div>
-        </AdminPanel>
+
+            <div className="customers-info">
+                <div className="customers-status">
+                    <button className="status-button all active">
+                        <span>All</span>
+                        <span className="all-count">{customers.length}</span>
+                    </button>
+                </div>
+            </div>
+            <div className="sort-container">
+                <button className="sort-button" onClick={toggleDropdown}>
+                    {selectedSort}
+                    <span className="material-symbols-outlined">
+                        {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
+                    </span>
+                </button>
+                <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
+                    <div onClick={() => handleSortSelection('Name: A to Z')}>Name: A to Z</div>
+                    <div onClick={() => handleSortSelection('Name: Z to A')}>Name: Z to A</div>
+                    <div onClick={() => handleSortSelection('Plate No: A to Z')}>Plate No: A to Z</div>
+                    <div onClick={() => handleSortSelection('Plate No: Z to A')}>Plate No: Z to A</div>
+                </div>
+                <div className="search-container">
+                    <span className="material-symbols-outlined search-icon">search</span>
+                    <input
+                        type="text"
+                        placeholder="Search customers"
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={handleSearchInputChange}
+                    />
+                    <span className="material-symbols-outlined info-icon" data-tooltip="Only Name, and Plate No. are searchable.">info</span>
+                </div>
+                <div className="customers-actions">
+                    <button className="add-customer-button" onClick={toggleModal}>+ Add New Customer</button>
+                </div>
+            </div>
+            <div className="customers-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>NAME</th>
+                            <th>CAR MODEL</th>
+                            <th>PLATE NO.</th>
+                            <th>CONTACT NO.</th>
+                            <th>EMAIL</th>
+                            <th>ADDRESS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredCustomers.map((customer, index) => (
+                            <tr key={index}>
+                                <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={() => handleCheckboxChange(index)}
+                                        checked={selectedCheckboxes.includes(index)}
+                                        onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
+                                    />
+                                </td>
+                                <td>{customer.name}</td>
+                                <td>{customer.carModel}</td>
+                                <td>{customer.plateNo}</td>
+                                <td>{customer.contact}</td>
+                                <td>{customer.email}</td>
+                                <td>{customer.address}</td>
+                                <td>
+                                    <span
+                                        className="material-symbols-outlined edit-icon"
+                                        onClick={() => handleEdit(index)}
+                                        title="Edit Customer"
+                                    >
+                                        edit_note
+                                    </span>
+                                    <span 
+                                        className="material-symbols-outlined save-pdf-icon"
+                                        onClick={() => handleSavePdf()}
+                                    >
+                                        picture_as_pdf
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="lower-table">
+                {selectedCheckboxes.length > 0 && (
+                    <button className="clear-all-button" onClick={handleClearAll}>
+                        Clear All
+                    </button>
+                )}
+                <span className="page-number active">1</span>
+                <span className="page-number">2</span>
+                <span className="page-number">3</span>
+                <span className="page-number">4</span>
+                <span className="page-number">5</span>
+            </div>
+
+            {/* Modal for Adding/Editing Customer */}
+            {isModalOpen && (
+                <>
+                    <div className="modal-overlay" onClick={toggleModal}></div>
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h2>{isEditMode ? 'Edit Customer' : 'Add New Customer'}</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Name</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={customerDetails.name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Plate No.</label>
+                                    <input
+                                        type="text"
+                                        name="plateNo"
+                                        value={customerDetails.plateNo}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Car Model</label>
+                                    <input
+                                        type="text"
+                                        name="carModel"
+                                        value={customerDetails.carModel}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Contact No.</label>
+                                    <input
+                                        type="tel" 
+                                        pattern="[0-9]{11}" 
+                                        maxLength="11"
+                                        name="contact"
+                                        value={customerDetails.contact}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={customerDetails.email}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Address</label>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={customerDetails.address}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" onClick={toggleModal}>Cancel</button>
+                                    <button type="submit">{isEditMode ? 'Update Customer' : 'Add Customer'}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
     );
 }
 

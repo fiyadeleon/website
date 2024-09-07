@@ -263,91 +263,199 @@ const PartsQuotation = () => {
     };
 
     return (
-        <UserPanel>
-            <div className="pq-parts-quotation">
-                <div className="pq-header">
-                    <h1>PARTS QUOTATION</h1>
-                    <button className="pq-clear-button" onClick={handleClear}>Clear</button>
-                </div>
+        <div className="pq-parts-quotation">
+            <div className="pq-header">
+                <h1>PARTS QUOTATION</h1>
+                <button className="pq-clear-button" onClick={handleClear}>Clear</button>
+            </div>
 
-                <div className="pq-user-info">
-                <form className="pq-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
-                    <h2>CUSTOMER</h2>
-                    {!showCustomerDetails && (
+            <div className="pq-user-info">
+            <form className="pq-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
+                <h2>CUSTOMER</h2>
+                {!showCustomerDetails && (
+                    <div className="pq-search-bar">
+                        <span className="material-symbols-outlined pq-search-icon">search</span>
+                        <input
+                            type="text"
+                            placeholder="Search Customer"
+                            className="pq-search-input"
+                            value={customerQuery}
+                            onChange={handleCustomerSearch}
+                            onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                        />
+                    </div>
+                )}
+                {filteredCustomers.length > 0 && (
+                    <div className="pq-dropdown">
+                        {filteredCustomers.map((customer, index) => (
+                            <div className="pq-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
+                                <span className="pq-dropdown-text">{customer.name}</span>
+                                <span className="pq-dropdown-actions">{customer.plateNo}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {selectedCustomer && !showCustomerDetails && (
+                    <div className="pq-customer-details">
+                        <p><strong>Name:</strong> {selectedCustomer.name}</p>
+                        <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
+                        <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
+                        <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
+                        <p><strong>Email:</strong> {selectedCustomer.email}</p>
+                        <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                    </div>
+                )}
+                <button
+                    type="button"
+                    className={`pq-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`}
+                    onClick={handleToggleCustomer}
+                >
+                    {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                </button>
+
+                {showCustomerDetails && (
+                    <div className="pq-customer-details">
+                        <p><strong>Name:</strong></p>
+                        <input
+                            className="pq-placeholder"
+                            type="text"
+                            placeholder="Enter name"
+                            value={newCustomer.name}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                            required
+                        />
+                        {errors.name && <span className="error">{errors.name}</span>}
+
+                        <p><strong>Car Model:</strong></p>
+                        <input
+                            className="pq-placeholder"
+                            type="text"
+                            placeholder="Enter car model"
+                            value={newCustomer.carModel}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                            required
+                        />
+                        {errors.carModel && <span className="error">{errors.carModel}</span>}
+
+                        <p><strong>Plate No:</strong></p>
+                        <input
+                            className="pq-placeholder"
+                            type="text"
+                            placeholder="Enter plate number"
+                            value={newCustomer.plateNo}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
+                            required
+                        />
+                        {errors.plateNo && <span className="error">{errors.plateNo}</span>}
+
+                        <p><strong>Contact No:</strong></p>
+                        <input
+                            className="pq-placeholder"
+                            type="tel" 
+                            pattern="[0-9]{11}" 
+                            maxLength="11"
+                            placeholder="Enter contact number"
+                            value={newCustomer.contact}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                            required
+                        />
+                        {errors.contact && <span className="error">{errors.contact}</span>}
+
+                        <p><strong>Email:</strong></p>
+                        <input
+                            className="pq-placeholder"
+                            type="email"
+                            placeholder="Enter email"
+                            value={newCustomer.email}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                            required
+                        />
+                        {errors.email && <span className="error">{errors.email}</span>}
+
+                        <p><strong>Address:</strong></p>
+                        <input
+                            className="pq-placeholder"
+                            type="text"
+                            placeholder="Enter address"
+                            value={newCustomer.address}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                            required
+                        />
+                        {errors.address && <span className="error">{errors.address}</span>}
+
+                        <button
+                            className="pq-submit-btn"
+                            type="submit"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                )}
+            </form>
+
+                <form className="pq-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
+                    <h2>EMPLOYEE</h2>
+                    {!showEmployeeDetails && (
                         <div className="pq-search-bar">
                             <span className="material-symbols-outlined pq-search-icon">search</span>
                             <input
                                 type="text"
-                                placeholder="Search Customer"
+                                placeholder="Search Employee"
                                 className="pq-search-input"
-                                value={customerQuery}
-                                onChange={handleCustomerSearch}
-                                onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                                value={employeeQuery}
+                                onChange={handleEmployeeSearch}
+                                onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
                             />
                         </div>
                     )}
-                    {filteredCustomers.length > 0 && (
+                    {filteredEmployees.length > 0 && (
                         <div className="pq-dropdown">
-                            {filteredCustomers.map((customer, index) => (
-                                <div className="pq-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
-                                    <span className="pq-dropdown-text">{customer.name}</span>
-                                    <span className="pq-dropdown-actions">{customer.plateNo}</span>
+                            {filteredEmployees.map((employee, index) => (
+                                <div className="pq-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
+                                    <span className="pq-dropdown-text">{employee.name}</span>
+                                    <span className="pq-dropdown-actions">{employee.jobTitle}</span>
                                 </div>
                             ))}
                         </div>
                     )}
-                    {selectedCustomer && !showCustomerDetails && (
-                        <div className="pq-customer-details">
-                            <p><strong>Name:</strong> {selectedCustomer.name}</p>
-                            <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
-                            <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
-                            <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                    {selectedEmployee && !showEmployeeDetails && (
+                        <div className="pq-employee-details">
+                            <p><strong>Name:</strong> {selectedEmployee.name}</p>
+                            <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
+                            <p><strong>Contact:</strong> {selectedEmployee.contact}</p>
+                            <p><strong>Email:</strong> {selectedEmployee.email}</p>
                         </div>
                     )}
                     <button
-                        type="button"
-                        className={`pq-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`}
-                        onClick={handleToggleCustomer}
+                        className={`pq-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`}
+                        onClick={handleToggleEmployee}
                     >
-                        {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                        {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
                     </button>
 
-                    {showCustomerDetails && (
-                        <div className="pq-customer-details">
+                    {showEmployeeDetails && (
+                        <div className="pq-employee-details">
                             <p><strong>Name:</strong></p>
                             <input
                                 className="pq-placeholder"
                                 type="text"
                                 placeholder="Enter name"
-                                value={newCustomer.name}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                value={newEmployee.name}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
                                 required
                             />
                             {errors.name && <span className="error">{errors.name}</span>}
 
-                            <p><strong>Car Model:</strong></p>
+                            <p><strong>Job Title:</strong></p>
                             <input
                                 className="pq-placeholder"
                                 type="text"
-                                placeholder="Enter car model"
-                                value={newCustomer.carModel}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                                placeholder="Enter job title"
+                                value={newEmployee.jobTitle}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
                                 required
                             />
-                            {errors.carModel && <span className="error">{errors.carModel}</span>}
-
-                            <p><strong>Plate No:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="text"
-                                placeholder="Enter plate number"
-                                value={newCustomer.plateNo}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
-                                required
-                            />
-                            {errors.plateNo && <span className="error">{errors.plateNo}</span>}
+                            {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
 
                             <p><strong>Contact No:</strong></p>
                             <input
@@ -356,8 +464,8 @@ const PartsQuotation = () => {
                                 pattern="[0-9]{11}" 
                                 maxLength="11"
                                 placeholder="Enter contact number"
-                                value={newCustomer.contact}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                                value={newEmployee.contact}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
                                 required
                             />
                             {errors.contact && <span className="error">{errors.contact}</span>}
@@ -367,22 +475,11 @@ const PartsQuotation = () => {
                                 className="pq-placeholder"
                                 type="email"
                                 placeholder="Enter email"
-                                value={newCustomer.email}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                value={newEmployee.email}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                                 required
                             />
                             {errors.email && <span className="error">{errors.email}</span>}
-
-                            <p><strong>Address:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="text"
-                                placeholder="Enter address"
-                                value={newCustomer.address}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                                required
-                            />
-                            {errors.address && <span className="error">{errors.address}</span>}
 
                             <button
                                 className="pq-submit-btn"
@@ -393,197 +490,98 @@ const PartsQuotation = () => {
                         </div>
                     )}
                 </form>
-
-                    <form className="pq-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
-                        <h2>EMPLOYEE</h2>
-                        {!showEmployeeDetails && (
-                            <div className="pq-search-bar">
-                                <span className="material-symbols-outlined pq-search-icon">search</span>
-                                <input
-                                    type="text"
-                                    placeholder="Search Employee"
-                                    className="pq-search-input"
-                                    value={employeeQuery}
-                                    onChange={handleEmployeeSearch}
-                                    onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
-                                />
-                            </div>
-                        )}
-                        {filteredEmployees.length > 0 && (
-                            <div className="pq-dropdown">
-                                {filteredEmployees.map((employee, index) => (
-                                    <div className="pq-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
-                                        <span className="pq-dropdown-text">{employee.name}</span>
-                                        <span className="pq-dropdown-actions">{employee.jobTitle}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {selectedEmployee && !showEmployeeDetails && (
-                            <div className="pq-employee-details">
-                                <p><strong>Name:</strong> {selectedEmployee.name}</p>
-                                <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
-                                <p><strong>Contact:</strong> {selectedEmployee.contact}</p>
-                                <p><strong>Email:</strong> {selectedEmployee.email}</p>
-                            </div>
-                        )}
-                        <button
-                            className={`pq-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`}
-                            onClick={handleToggleEmployee}
-                        >
-                            {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
-                        </button>
-
-                        {showEmployeeDetails && (
-                            <div className="pq-employee-details">
-                                <p><strong>Name:</strong></p>
-                                <input
-                                    className="pq-placeholder"
-                                    type="text"
-                                    placeholder="Enter name"
-                                    value={newEmployee.name}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-                                    required
-                                />
-                                {errors.name && <span className="error">{errors.name}</span>}
-
-                                <p><strong>Job Title:</strong></p>
-                                <input
-                                    className="pq-placeholder"
-                                    type="text"
-                                    placeholder="Enter job title"
-                                    value={newEmployee.jobTitle}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
-                                    required
-                                />
-                                {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
-
-                                <p><strong>Contact No:</strong></p>
-                                <input
-                                    className="pq-placeholder"
-                                    type="tel" 
-                                    pattern="[0-9]{11}" 
-                                    maxLength="11"
-                                    placeholder="Enter contact number"
-                                    value={newEmployee.contact}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
-                                    required
-                                />
-                                {errors.contact && <span className="error">{errors.contact}</span>}
-
-                                <p><strong>Email:</strong></p>
-                                <input
-                                    className="pq-placeholder"
-                                    type="email"
-                                    placeholder="Enter email"
-                                    value={newEmployee.email}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
-                                    required
-                                />
-                                {errors.email && <span className="error">{errors.email}</span>}
-
-                                <button
-                                    className="pq-submit-btn"
-                                    type="submit"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        )}
-                    </form>
-                </div>
-
-                <div className="pq-parts-section" ref={inventorySearchRef}>
-                    <div className="pq-header-section">
-                        <h3>Inventory</h3>
-                        <span className="material-symbols-outlined pq-info-icon" data-tooltip="Select the part(s) or item(s) required for the quotation.">info</span>
-                    </div>
-                    <div className="pq-search-bar">
-                        <span className="material-symbols-outlined pq-search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search for parts or items"
-                            className="pq-search-input"
-                            value={inventoryQuery}
-                            onChange={handleInventorySearch}
-                            onFocus={handleInventoryFocus}
-                        />
-                    </div>
-                    {isInventoryInputFocused && filteredInventory.length > 0 && (
-                        <div className="pq-dropdown">
-                            {filteredInventory.map((item, index) => (
-                                <div className="pq-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
-                                    <span className="pq-dropdown-text">{item.product_name}</span>
-                                    <span className="pq-dropdown-actions">
-                                        {item.stock} {item.unit}{item.unit === 'box' ? 'es' : 's'}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="pq-inventory-table">
-                        {selectedInventoryItems.length > 0 && (
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Product Name</th>
-                                        <th>Stock</th>
-                                        <th>Purchase Quantity</th>
-                                        <th>Remove</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedInventoryItems.map((item) => (
-                                        <tr key={item.id}>
-                                            <td>{item.product_name}</td>
-                                            <td>{item.stock - (item.purchaseQuantity || 0)} {item.unit}{item.unit === 'box' ? 'es' : 's'}</td>
-                                            <td>
-                                                <input
-                                                    type="number"
-                                                    value={item.purchaseQuantity === 0 ? '' : item.purchaseQuantity}
-                                                    min="1"
-                                                    max={item.stock}
-                                                    onChange={(e) => handlePurchaseQuantityChange(item.id, e.target.value)}
-                                                    className="purchase-quantity-input"
-                                                />
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="remove-item-btn"
-                                                    onClick={() => handleRemoveInventoryItem(item.id)}
-                                                >
-                                                    <span className="material-symbols-outlined">delete</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
-                </div>
-
-                <div className="pq-services-section">
-                    <div className="pq-header-section">
-                        <h3>Services</h3>
-                        <span className="material-symbols-outlined pq-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
-                    </div>
-                    <textarea className="pq-services-textarea" placeholder="Enter service details here..." required></textarea>
-                </div>
-
-                <div className="pq-remarks-section">
-                    <div className="pq-header-section">
-                        <h3>Remarks</h3>
-                        <span className="material-symbols-outlined pq-info-icon" data-tooltip="Further details regarding the quotation.">info</span>
-                    </div>
-                    <textarea className="pq-remarks-textarea" placeholder="Enter remarks here..."></textarea>
-                </div>
-
-                <button className="pq-save-button">Save as .PDF</button>
-
             </div>
-        </UserPanel>
+
+            <div className="pq-parts-section" ref={inventorySearchRef}>
+                <div className="pq-header-section">
+                    <h3>Inventory</h3>
+                    <span className="material-symbols-outlined pq-info-icon" data-tooltip="Select the part(s) or item(s) required for the quotation.">info</span>
+                </div>
+                <div className="pq-search-bar">
+                    <span className="material-symbols-outlined pq-search-icon">search</span>
+                    <input
+                        type="text"
+                        placeholder="Search for parts or items"
+                        className="pq-search-input"
+                        value={inventoryQuery}
+                        onChange={handleInventorySearch}
+                        onFocus={handleInventoryFocus}
+                    />
+                </div>
+                {isInventoryInputFocused && filteredInventory.length > 0 && (
+                    <div className="pq-dropdown">
+                        {filteredInventory.map((item, index) => (
+                            <div className="pq-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
+                                <span className="pq-dropdown-text">{item.product_name}</span>
+                                <span className="pq-dropdown-actions">
+                                    {item.stock} {item.unit}{item.unit === 'box' ? 'es' : 's'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="pq-inventory-table">
+                    {selectedInventoryItems.length > 0 && (
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Stock</th>
+                                    <th>Purchase Quantity</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {selectedInventoryItems.map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{item.product_name}</td>
+                                        <td>{item.stock - (item.purchaseQuantity || 0)} {item.unit}{item.unit === 'box' ? 'es' : 's'}</td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                value={item.purchaseQuantity === 0 ? '' : item.purchaseQuantity}
+                                                min="1"
+                                                max={item.stock}
+                                                onChange={(e) => handlePurchaseQuantityChange(item.id, e.target.value)}
+                                                className="purchase-quantity-input"
+                                            />
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="remove-item-btn"
+                                                onClick={() => handleRemoveInventoryItem(item.id)}
+                                            >
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+
+            <div className="pq-services-section">
+                <div className="pq-header-section">
+                    <h3>Services</h3>
+                    <span className="material-symbols-outlined pq-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
+                </div>
+                <textarea className="pq-services-textarea" placeholder="Enter service details here..." required></textarea>
+            </div>
+
+            <div className="pq-remarks-section">
+                <div className="pq-header-section">
+                    <h3>Remarks</h3>
+                    <span className="material-symbols-outlined pq-info-icon" data-tooltip="Further details regarding the quotation.">info</span>
+                </div>
+                <textarea className="pq-remarks-textarea" placeholder="Enter remarks here..."></textarea>
+            </div>
+
+            <button className="pq-save-button">Save as .PDF</button>
+
+        </div>
     );
 };
 

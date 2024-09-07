@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import AdminPanel from './AdminPanel';
 import '../styles/Employees.css';
 
 function Employees() {
@@ -162,186 +161,184 @@ function Employees() {
     );
 
     return (
-        <AdminPanel>
-            <div className="employees">
-                <div className="employees-header">
-                    <h1>EMPLOYEES</h1>
-                    {selectedCheckboxes.length > 0 && (
-                        <div className="notification-box">
-                            <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
-                            <div className="notification-actions">
-                                <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
-                                <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
-                            </div>
+        <div className="employees">
+            <div className="employees-header">
+                <h1>EMPLOYEES</h1>
+                {selectedCheckboxes.length > 0 && (
+                    <div className="notification-box">
+                        <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
+                        <div className="notification-actions">
+                            <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
+                            <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
                         </div>
-                    )}
-                </div>
-
-                <div className="employees-info">
-                    <div className="employees-status">
-                        <button className="status-button all active">
-                            <span>All</span>
-                            <span className="all-count">{employees.length}</span>
-                        </button>
                     </div>
-                </div>
-                <div className="sort-container">
-                    <button className="sort-button" onClick={toggleDropdown}>
-                        {selectedSort}
-                        <span className="material-symbols-outlined">
-                            {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-                        </span>
-                    </button>
-                    <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
-                        <div onClick={() => handleSortSelection('Name: A to Z')}>Name: A to Z</div>
-                        <div onClick={() => handleSortSelection('Name: Z to A')}>Name: Z to A</div>
-                        <div onClick={() => handleSortSelection('Employee No: High to Low')}>Employee No: High to Low</div>
-                        <div onClick={() => handleSortSelection('Employee No: Low to High')}>Employee No: Low to High</div>
-                    </div>
-                    <div className="search-container">
-                        <span className="material-symbols-outlined search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search employees"
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
-                        />
-                        <span className="material-symbols-outlined info-icon" data-tooltip="Only Employee No., Name, and Job Title are searchable.">info</span>
-                    </div>
-                    <div className="employees-actions">
-                        <button className="add-employee-button" onClick={toggleModal}>+ Add New Employee</button>
-                    </div>
-                </div>
-                <div className="employees-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>EMPLOYEE NO.</th>
-                                <th>NAME</th>
-                                <th>CONTACT NO.</th>
-                                <th>EMAIL</th>
-                                <th>JOB TITLE</th>
-                                <th>SALARY</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredEmployees.map((employee, index) => (
-                                <tr key={index}>
-                                    <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            onChange={() => handleCheckboxChange(index)}
-                                            checked={selectedCheckboxes.includes(index)}
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                    </td>
-                                    <td>{employee.id}</td>
-                                    <td>{employee.name}</td>
-                                    <td>{employee.contact}</td>
-                                    <td>{employee.email}</td>
-                                    <td>{employee.jobTitle}</td>
-                                    <td>₱{employee.salary.toFixed(2)}</td>
-                                    <td>
-                                        <span
-                                            className="material-symbols-outlined edit-icon"
-                                            onClick={() => handleEdit(index)}
-                                            title="Edit Employee"
-                                        >
-                                            edit_note
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="lower-table">
-                    {selectedCheckboxes.length > 0 && (
-                        <button className="clear-all-button" onClick={handleClearAll}>
-                            Clear All
-                        </button>
-                    )}
-                    <span className="page-number active">1</span>
-                    <span className="page-number">2</span>
-                    <span className="page-number">3</span>
-                    <span className="page-number">4</span>
-                    <span className="page-number">5</span>
-                </div>
-
-                {isModalOpen && (
-                    <>
-                        <div className="modal-overlay" onClick={toggleModal}></div>
-                        <div className="modal">
-                            <div className="modal-content">
-                                <h2>{isEditMode ? 'Edit Employee' : 'Add New Employee'}</h2>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="form-group">
-                                        <label>Name</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={employeeDetails.name}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Contact No.</label>
-                                        <input
-                                            type="tel" 
-                                            pattern="[0-9]{11}" 
-                                            maxLength="11"
-                                            name="contact"
-                                            value={employeeDetails.contact}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Email</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={employeeDetails.email}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Job Title</label>
-                                        <input
-                                            type="text"
-                                            name="jobTitle"
-                                            value={employeeDetails.jobTitle}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Salary</label>
-                                        <input
-                                            type="number"
-                                            name="salary"
-                                            value={employeeDetails.salary}
-                                            onChange={handleInputChange}
-                                            required
-                                            step="0.01"
-                                        />
-                                    </div>
-                                    <div className="modal-actions">
-                                        <button type="button" onClick={toggleModal}>Cancel</button>
-                                        <button type="submit">{isEditMode ? 'Update Employee' : 'Add Employee'}</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </>
                 )}
             </div>
-        </AdminPanel>
+
+            <div className="employees-info">
+                <div className="employees-status">
+                    <button className="status-button all active">
+                        <span>All</span>
+                        <span className="all-count">{employees.length}</span>
+                    </button>
+                </div>
+            </div>
+            <div className="sort-container">
+                <button className="sort-button" onClick={toggleDropdown}>
+                    {selectedSort}
+                    <span className="material-symbols-outlined">
+                        {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
+                    </span>
+                </button>
+                <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
+                    <div onClick={() => handleSortSelection('Name: A to Z')}>Name: A to Z</div>
+                    <div onClick={() => handleSortSelection('Name: Z to A')}>Name: Z to A</div>
+                    <div onClick={() => handleSortSelection('Employee No: High to Low')}>Employee No: High to Low</div>
+                    <div onClick={() => handleSortSelection('Employee No: Low to High')}>Employee No: Low to High</div>
+                </div>
+                <div className="search-container">
+                    <span className="material-symbols-outlined search-icon">search</span>
+                    <input
+                        type="text"
+                        placeholder="Search employees"
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={handleSearchInputChange}
+                    />
+                    <span className="material-symbols-outlined info-icon" data-tooltip="Only Employee No., Name, and Job Title are searchable.">info</span>
+                </div>
+                <div className="employees-actions">
+                    <button className="add-employee-button" onClick={toggleModal}>+ Add New Employee</button>
+                </div>
+            </div>
+            <div className="employees-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>EMPLOYEE NO.</th>
+                            <th>NAME</th>
+                            <th>CONTACT NO.</th>
+                            <th>EMAIL</th>
+                            <th>JOB TITLE</th>
+                            <th>SALARY</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredEmployees.map((employee, index) => (
+                            <tr key={index}>
+                                <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={() => handleCheckboxChange(index)}
+                                        checked={selectedCheckboxes.includes(index)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </td>
+                                <td>{employee.id}</td>
+                                <td>{employee.name}</td>
+                                <td>{employee.contact}</td>
+                                <td>{employee.email}</td>
+                                <td>{employee.jobTitle}</td>
+                                <td>₱{employee.salary.toFixed(2)}</td>
+                                <td>
+                                    <span
+                                        className="material-symbols-outlined edit-icon"
+                                        onClick={() => handleEdit(index)}
+                                        title="Edit Employee"
+                                    >
+                                        edit_note
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="lower-table">
+                {selectedCheckboxes.length > 0 && (
+                    <button className="clear-all-button" onClick={handleClearAll}>
+                        Clear All
+                    </button>
+                )}
+                <span className="page-number active">1</span>
+                <span className="page-number">2</span>
+                <span className="page-number">3</span>
+                <span className="page-number">4</span>
+                <span className="page-number">5</span>
+            </div>
+
+            {isModalOpen && (
+                <>
+                    <div className="modal-overlay" onClick={toggleModal}></div>
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h2>{isEditMode ? 'Edit Employee' : 'Add New Employee'}</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Name</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={employeeDetails.name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Contact No.</label>
+                                    <input
+                                        type="tel" 
+                                        pattern="[0-9]{11}" 
+                                        maxLength="11"
+                                        name="contact"
+                                        value={employeeDetails.contact}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={employeeDetails.email}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Job Title</label>
+                                    <input
+                                        type="text"
+                                        name="jobTitle"
+                                        value={employeeDetails.jobTitle}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Salary</label>
+                                    <input
+                                        type="number"
+                                        name="salary"
+                                        value={employeeDetails.salary}
+                                        onChange={handleInputChange}
+                                        required
+                                        step="0.01"
+                                    />
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" onClick={toggleModal}>Cancel</button>
+                                    <button type="submit">{isEditMode ? 'Update Employee' : 'Add Employee'}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
     );
 }
 

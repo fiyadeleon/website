@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import UserPanel from './UserPanel';
 import '../styles/Transactions.css';
 
 function Transactions() {
@@ -180,193 +179,191 @@ function Transactions() {
     );
 
     return (
-        <UserPanel>
-            <div className="transactions">
-                <div className="transactions-header">
-                    <h1>TRANSACTIONS</h1>
-                    {selectedCheckboxes.length > 0 && (
-                        <div className="notification-box">
-                            <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
-                            <div className="notification-actions">
-                                <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
-                                <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
-                            </div>
+        <div className="transactions">
+            <div className="transactions-header">
+                <h1>TRANSACTIONS</h1>
+                {selectedCheckboxes.length > 0 && (
+                    <div className="notification-box">
+                        <p>{selectedCheckboxes.length} item(s) selected. Delete selected?</p>
+                        <div className="notification-actions">
+                            <button onClick={() => handleDeleteConfirmation(true)} className="yes-button">Yes</button>
+                            <button onClick={() => handleDeleteConfirmation(false)} className="no-button">No</button>
                         </div>
-                    )}
-                </div>
-
-                <div className="transactions-info">
-                  <div className="transactions-status">
-                      <button className="status-button all active">
-                          <span>All</span>
-                          <span className="all-count">{transactions.length}</span>
-                      </button>
-                  </div>
-                </div>
-                <div className="sort-container">
-                    <button className="sort-button" onClick={toggleDropdown}>
-                        {selectedSort}
-                        <span className="material-symbols-outlined">
-                            {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
-                        </span>
-                    </button>
-                    <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
-                    <div onClick={() => handleSortSelection('Customer Name: A to Z')}>Customer Name: A to Z</div>
-                        <div onClick={() => handleSortSelection('Customer Name: Z to A')}>Customer Name: Z to A</div>
-                        <div onClick={() => handleSortSelection('Plate No: A to Z')}>Plate No: A to Z</div>
-                        <div onClick={() => handleSortSelection('Plate No: Z to A')}>Plate No: Z to A</div>
-                        <div onClick={() => handleSortSelection('Transaction No: High to Low')}>Transaction No: High to Low</div>
-                        <div onClick={() => handleSortSelection('Transaction No: Low to High')}>Transaction No: Low to High</div>
                     </div>
-                    <div className="search-container">
-                        <span className="material-symbols-outlined search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search transactions"
-                            className="search-input"
-                            value={searchQuery}
-                            onChange={handleSearchInputChange}
-                        />
-                        <span className="material-symbols-outlined info-icon" data-tooltip="Only Transaction No., Customer Name, and Plate No. are searchable.">info</span>
-                    </div>
-                    <div className="transactions-actions">
-                        <button className="add-transaction-button" onClick={toggleModal}>+ Add New Transaction</button>
-                    </div>
-                </div>
-                <div className="transactions-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>TRANSACTION NO.</th>
-                                <th>TYPE</th>
-                                <th>DATE & TIME</th>
-                                <th>CUSTOMER NAME</th>
-                                <th>PLATE NO.</th>
-                                <th>AMOUNT</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredTransactions.map((transaction, index) => (
-                                <tr key={index}>
-                                    <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            onChange={() => handleCheckboxChange(index)}
-                                            checked={selectedCheckboxes.includes(index)}
-                                            onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
-                                        />
-                                    </td>
-                                    <td>{transaction.transactionNo}</td>
-                                    <td>{transaction.type}</td>
-                                    <td>{transaction.dateTime}</td>
-                                    <td>{transaction.customerName}</td>
-                                    <td>{transaction.plateNo}</td>
-                                    <td>₱{transaction.amount.toFixed(2)}</td>
-                                    <td>
-                                        <span
-                                            className="material-symbols-outlined edit-icon"
-                                            onClick={() => handleEdit(index)}
-                                            title="Edit Transaction"
-                                        >
-                                            edit_note
-                                        </span>
-                                        <span 
-                                            className="material-symbols-outlined save-pdf-icon"
-                                            onClick={() => handleSavePdf()}
-                                        >
-                                            picture_as_pdf
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="lower-table">
-                    {selectedCheckboxes.length > 0 && (
-                        <button className="clear-all-button" onClick={handleClearAll}>
-                            Clear All
-                        </button>
-                    )}
-                    <span className="page-number active">1</span>
-                    <span className="page-number">2</span>
-                    <span className="page-number">3</span>
-                    <span className="page-number">4</span>
-                    <span className="page-number">5</span>
-                </div>
-
-                {/* Modal for Adding/Editing Transaction */}
-                {isModalOpen && (
-                    <>
-                        <div className="modal-overlay" onClick={toggleModal}></div>
-                        <div className="modal">
-                            <div className="modal-content">
-                                <h2>{isEditMode ? 'Edit Transaction' : 'Add New Transaction'}</h2>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="form-group">
-                                        <label>Type</label>
-                                        <input
-                                            type="text"
-                                            name="type"
-                                            value={transactionDetails.type}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Date & Time</label>
-                                        <input
-                                            type="datetime-local"
-                                            name="dateTime"
-                                            value={transactionDetails.dateTime}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Customer Name</label>
-                                        <input
-                                            type="text"
-                                            name="customerName"
-                                            value={transactionDetails.customerName}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Plate No.</label>
-                                        <input
-                                            type="text"
-                                            name="plateNo"
-                                            value={transactionDetails.plateNo}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Amount</label>
-                                        <input
-                                            type="number"
-                                            name="amount"
-                                            value={transactionDetails.amount}
-                                            onChange={handleInputChange}
-                                            required
-                                            step="0.01"
-                                        />
-                                    </div>
-                                    <div className="modal-actions">
-                                        <button type="button" onClick={toggleModal}>Cancel</button>
-                                        <button type="submit">{isEditMode ? 'Update Transaction' : 'Add Transaction'}</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </>
                 )}
             </div>
-        </UserPanel>
+
+            <div className="transactions-info">
+                <div className="transactions-status">
+                    <button className="status-button all active">
+                        <span>All</span>
+                        <span className="all-count">{transactions.length}</span>
+                    </button>
+                </div>
+            </div>
+            <div className="sort-container">
+                <button className="sort-button" onClick={toggleDropdown}>
+                    {selectedSort}
+                    <span className="material-symbols-outlined">
+                        {dropdownOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
+                    </span>
+                </button>
+                <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
+                <div onClick={() => handleSortSelection('Customer Name: A to Z')}>Customer Name: A to Z</div>
+                    <div onClick={() => handleSortSelection('Customer Name: Z to A')}>Customer Name: Z to A</div>
+                    <div onClick={() => handleSortSelection('Plate No: A to Z')}>Plate No: A to Z</div>
+                    <div onClick={() => handleSortSelection('Plate No: Z to A')}>Plate No: Z to A</div>
+                    <div onClick={() => handleSortSelection('Transaction No: High to Low')}>Transaction No: High to Low</div>
+                    <div onClick={() => handleSortSelection('Transaction No: Low to High')}>Transaction No: Low to High</div>
+                </div>
+                <div className="search-container">
+                    <span className="material-symbols-outlined search-icon">search</span>
+                    <input
+                        type="text"
+                        placeholder="Search transactions"
+                        className="search-input"
+                        value={searchQuery}
+                        onChange={handleSearchInputChange}
+                    />
+                    <span className="material-symbols-outlined info-icon" data-tooltip="Only Transaction No., Customer Name, and Plate No. are searchable.">info</span>
+                </div>
+                <div className="transactions-actions">
+                    <button className="add-transaction-button" onClick={toggleModal}>+ Add New Transaction</button>
+                </div>
+            </div>
+            <div className="transactions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>TRANSACTION NO.</th>
+                            <th>TYPE</th>
+                            <th>DATE & TIME</th>
+                            <th>CUSTOMER NAME</th>
+                            <th>PLATE NO.</th>
+                            <th>AMOUNT</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredTransactions.map((transaction, index) => (
+                            <tr key={index}>
+                                <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={() => handleCheckboxChange(index)}
+                                        checked={selectedCheckboxes.includes(index)}
+                                        onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
+                                    />
+                                </td>
+                                <td>{transaction.transactionNo}</td>
+                                <td>{transaction.type}</td>
+                                <td>{transaction.dateTime}</td>
+                                <td>{transaction.customerName}</td>
+                                <td>{transaction.plateNo}</td>
+                                <td>₱{transaction.amount.toFixed(2)}</td>
+                                <td>
+                                    <span
+                                        className="material-symbols-outlined edit-icon"
+                                        onClick={() => handleEdit(index)}
+                                        title="Edit Transaction"
+                                    >
+                                        edit_note
+                                    </span>
+                                    <span 
+                                        className="material-symbols-outlined save-pdf-icon"
+                                        onClick={() => handleSavePdf()}
+                                    >
+                                        picture_as_pdf
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="lower-table">
+                {selectedCheckboxes.length > 0 && (
+                    <button className="clear-all-button" onClick={handleClearAll}>
+                        Clear All
+                    </button>
+                )}
+                <span className="page-number active">1</span>
+                <span className="page-number">2</span>
+                <span className="page-number">3</span>
+                <span className="page-number">4</span>
+                <span className="page-number">5</span>
+            </div>
+
+            {/* Modal for Adding/Editing Transaction */}
+            {isModalOpen && (
+                <>
+                    <div className="modal-overlay" onClick={toggleModal}></div>
+                    <div className="modal">
+                        <div className="modal-content">
+                            <h2>{isEditMode ? 'Edit Transaction' : 'Add New Transaction'}</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Type</label>
+                                    <input
+                                        type="text"
+                                        name="type"
+                                        value={transactionDetails.type}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Date & Time</label>
+                                    <input
+                                        type="datetime-local"
+                                        name="dateTime"
+                                        value={transactionDetails.dateTime}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Customer Name</label>
+                                    <input
+                                        type="text"
+                                        name="customerName"
+                                        value={transactionDetails.customerName}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Plate No.</label>
+                                    <input
+                                        type="text"
+                                        name="plateNo"
+                                        value={transactionDetails.plateNo}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Amount</label>
+                                    <input
+                                        type="number"
+                                        name="amount"
+                                        value={transactionDetails.amount}
+                                        onChange={handleInputChange}
+                                        required
+                                        step="0.01"
+                                    />
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" onClick={toggleModal}>Cancel</button>
+                                    <button type="submit">{isEditMode ? 'Update Transaction' : 'Add Transaction'}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
     );
 }
 

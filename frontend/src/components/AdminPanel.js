@@ -115,7 +115,7 @@ const AdminPanel = ({ children, onCircleSelect }) => {
           </button>
         </div>
       </div>
-      <div className="content-wrapper">
+      <div className="admin-content-wrapper">
         {children}
       </div>
     </div>

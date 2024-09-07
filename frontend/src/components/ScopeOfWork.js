@@ -237,91 +237,199 @@ const ScopeOfWork = () => {
     };
 
     return (
-        <UserPanel>
-            <div className="sow-scope-of-work">
-                <div className="sow-header">
-                    <h1>SCOPE OF WORK</h1>
-                    <button className="sow-clear-button" onClick={handleClear}>Clear</button>
-                </div>
+        <div className="sow-scope-of-work">
+            <div className="sow-header">
+                <h1>SCOPE OF WORK</h1>
+                <button className="sow-clear-button" onClick={handleClear}>Clear</button>
+            </div>
 
-                <div className="sow-user-info">
-                <form className="sow-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
-                    <h2>CUSTOMER</h2>
-                    {!showCustomerDetails && (
+            <div className="sow-user-info">
+            <form className="sow-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
+                <h2>CUSTOMER</h2>
+                {!showCustomerDetails && (
+                    <div className="sow-search-bar">
+                        <span className="material-symbols-outlined sow-search-icon">search</span>
+                        <input
+                            type="text"
+                            placeholder="Search Customer"
+                            className="sow-search-input"
+                            value={customerQuery}
+                            onChange={handleCustomerSearch}
+                            onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                        />
+                    </div>
+                )}
+                {filteredCustomers.length > 0 && (
+                    <div className="sow-dropdown">
+                        {filteredCustomers.map((customer, index) => (
+                            <div className="sow-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
+                                <span className="sow-dropdown-text">{customer.name}</span>
+                                <span className="sow-dropdown-actions">{customer.plateNo}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {selectedCustomer && !showCustomerDetails && (
+                    <div className="sow-customer-details">
+                        <p><strong>Name:</strong> {selectedCustomer.name}</p>
+                        <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
+                        <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
+                        <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
+                        <p><strong>Email:</strong> {selectedCustomer.email}</p>
+                        <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                    </div>
+                )}
+                <button 
+                    type="button" // Changed to "button" to prevent triggering form submit on toggle
+                    className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
+                    onClick={handleToggleCustomer}
+                >
+                    {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                </button>
+
+                {showCustomerDetails && (
+                    <div className="sow-customer-details">
+                        <p><strong>Name:</strong></p>
+                        <input
+                            className="sow-placeholder"
+                            type="text"
+                            placeholder="Enter name"
+                            value={newCustomer.name}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                            required
+                        />
+                        {errors.name && <span className="error">{errors.name}</span>}
+
+                        <p><strong>Car Model:</strong></p>
+                        <input
+                            className="sow-placeholder"
+                            type="text"
+                            placeholder="Enter car model"
+                            value={newCustomer.carModel}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                            required
+                        />
+                        {errors.carModel && <span className="error">{errors.carModel}</span>}
+
+                        <p><strong>Plate No:</strong></p>
+                        <input
+                            className="sow-placeholder"
+                            type="text"
+                            placeholder="Enter plate number"
+                            value={newCustomer.plateNo}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
+                            required
+                        />
+                        {errors.plateNo && <span className="error">{errors.plateNo}</span>}
+
+                        <p><strong>Contact No:</strong></p>
+                        <input
+                            className="sow-placeholder"
+                            type="tel" 
+                            pattern="[0-9]{11}" 
+                            maxLength="11"
+                            placeholder="Enter contact number"
+                            value={newCustomer.contact}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                            required
+                        />
+                        {errors.contact && <span className="error">{errors.contact}</span>}
+
+                        <p><strong>Email:</strong></p>
+                        <input
+                            className="sow-placeholder"
+                            type="email"
+                            placeholder="Enter email"
+                            value={newCustomer.email}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                            required
+                        />
+                        {errors.email && <span className="error">{errors.email}</span>}
+
+                        <p><strong>Address:</strong></p>
+                        <input
+                            className="sow-placeholder"
+                            type="text"
+                            placeholder="Enter address"
+                            value={newCustomer.address}
+                            onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                            required
+                        />
+                        {errors.address && <span className="error">{errors.address}</span>}
+
+                        <button
+                            className="sow-submit-btn"
+                            type="submit" // Make this a submit button
+                        >
+                            Submit
+                        </button>
+                    </div>
+                )}
+            </form>
+
+                <form className="sow-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
+                    <h2>EMPLOYEE</h2>
+                    {!showEmployeeDetails && (
                         <div className="sow-search-bar">
                             <span className="material-symbols-outlined sow-search-icon">search</span>
                             <input
                                 type="text"
-                                placeholder="Search Customer"
+                                placeholder="Search Employee"
                                 className="sow-search-input"
-                                value={customerQuery}
-                                onChange={handleCustomerSearch}
-                                onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                                value={employeeQuery}
+                                onChange={handleEmployeeSearch}
+                                onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
                             />
                         </div>
                     )}
-                    {filteredCustomers.length > 0 && (
+                    {filteredEmployees.length > 0 && (
                         <div className="sow-dropdown">
-                            {filteredCustomers.map((customer, index) => (
-                                <div className="sow-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
-                                    <span className="sow-dropdown-text">{customer.name}</span>
-                                    <span className="sow-dropdown-actions">{customer.plateNo}</span>
+                            {filteredEmployees.map((employee, index) => (
+                                <div className="sow-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
+                                    <span className="sow-dropdown-text">{employee.name}</span>
+                                    <span className="sow-dropdown-actions">{employee.jobTitle}</span>
                                 </div>
                             ))}
                         </div>
                     )}
-                    {selectedCustomer && !showCustomerDetails && (
-                        <div className="sow-customer-details">
-                            <p><strong>Name:</strong> {selectedCustomer.name}</p>
-                            <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
-                            <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
-                            <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                    {selectedEmployee && !showEmployeeDetails && (
+                        <div className="sow-employee-details">
+                            <p><strong>Name:</strong> {selectedEmployee.name}</p>
+                            <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
+                            <p><strong>Contact:</strong> {selectedEmployee.contact}</p>
+                            <p><strong>Email:</strong> {selectedEmployee.email}</p>
                         </div>
                     )}
                     <button 
-                        type="button" // Changed to "button" to prevent triggering form submit on toggle
-                        className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
-                        onClick={handleToggleCustomer}
+                        className={`sow-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
+                        onClick={handleToggleEmployee}
                     >
-                        {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                        {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
                     </button>
 
-                    {showCustomerDetails && (
-                        <div className="sow-customer-details">
+                    {showEmployeeDetails && (
+                        <div className="sow-employee-details">
                             <p><strong>Name:</strong></p>
                             <input
                                 className="sow-placeholder"
                                 type="text"
                                 placeholder="Enter name"
-                                value={newCustomer.name}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                value={newEmployee.name}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
                                 required
                             />
                             {errors.name && <span className="error">{errors.name}</span>}
 
-                            <p><strong>Car Model:</strong></p>
+                            <p><strong>Job Title:</strong></p>
                             <input
                                 className="sow-placeholder"
                                 type="text"
-                                placeholder="Enter car model"
-                                value={newCustomer.carModel}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                                placeholder="Enter job title"
+                                value={newEmployee.jobTitle}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
                                 required
                             />
-                            {errors.carModel && <span className="error">{errors.carModel}</span>}
-
-                            <p><strong>Plate No:</strong></p>
-                            <input
-                                className="sow-placeholder"
-                                type="text"
-                                placeholder="Enter plate number"
-                                value={newCustomer.plateNo}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
-                                required
-                            />
-                            {errors.plateNo && <span className="error">{errors.plateNo}</span>}
+                            {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
 
                             <p><strong>Contact No:</strong></p>
                             <input
@@ -330,8 +438,8 @@ const ScopeOfWork = () => {
                                 pattern="[0-9]{11}" 
                                 maxLength="11"
                                 placeholder="Enter contact number"
-                                value={newCustomer.contact}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                                value={newEmployee.contact}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
                                 required
                             />
                             {errors.contact && <span className="error">{errors.contact}</span>}
@@ -341,195 +449,85 @@ const ScopeOfWork = () => {
                                 className="sow-placeholder"
                                 type="email"
                                 placeholder="Enter email"
-                                value={newCustomer.email}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                value={newEmployee.email}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                                 required
                             />
                             {errors.email && <span className="error">{errors.email}</span>}
 
-                            <p><strong>Address:</strong></p>
-                            <input
-                                className="sow-placeholder"
-                                type="text"
-                                placeholder="Enter address"
-                                value={newCustomer.address}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                                required
-                            />
-                            {errors.address && <span className="error">{errors.address}</span>}
-
                             <button
                                 className="sow-submit-btn"
-                                type="submit" // Make this a submit button
+                                type="submit"
                             >
                                 Submit
                             </button>
                         </div>
                     )}
                 </form>
+            </div>
 
-                    <form className="sow-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
-                        <h2>EMPLOYEE</h2>
-                        {!showEmployeeDetails && (
-                            <div className="sow-search-bar">
-                                <span className="material-symbols-outlined sow-search-icon">search</span>
-                                <input
-                                    type="text"
-                                    placeholder="Search Employee"
-                                    className="sow-search-input"
-                                    value={employeeQuery}
-                                    onChange={handleEmployeeSearch}
-                                    onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
-                                />
-                            </div>
-                        )}
-                        {filteredEmployees.length > 0 && (
-                            <div className="sow-dropdown">
-                                {filteredEmployees.map((employee, index) => (
-                                    <div className="sow-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
-                                        <span className="sow-dropdown-text">{employee.name}</span>
-                                        <span className="sow-dropdown-actions">{employee.jobTitle}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {selectedEmployee && !showEmployeeDetails && (
-                            <div className="sow-employee-details">
-                                <p><strong>Name:</strong> {selectedEmployee.name}</p>
-                                <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
-                                <p><strong>Contact:</strong> {selectedEmployee.contact}</p>
-                                <p><strong>Email:</strong> {selectedEmployee.email}</p>
-                            </div>
-                        )}
-                        <button 
-                            className={`sow-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
-                            onClick={handleToggleEmployee}
-                        >
-                            {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
-                        </button>
-
-                        {showEmployeeDetails && (
-                            <div className="sow-employee-details">
-                                <p><strong>Name:</strong></p>
-                                <input
-                                    className="sow-placeholder"
-                                    type="text"
-                                    placeholder="Enter name"
-                                    value={newEmployee.name}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-                                    required
-                                />
-                                {errors.name && <span className="error">{errors.name}</span>}
-
-                                <p><strong>Job Title:</strong></p>
-                                <input
-                                    className="sow-placeholder"
-                                    type="text"
-                                    placeholder="Enter job title"
-                                    value={newEmployee.jobTitle}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
-                                    required
-                                />
-                                {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
-
-                                <p><strong>Contact No:</strong></p>
-                                <input
-                                    className="sow-placeholder"
-                                    type="tel" 
-                                    pattern="[0-9]{11}" 
-                                    maxLength="11"
-                                    placeholder="Enter contact number"
-                                    value={newEmployee.contact}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
-                                    required
-                                />
-                                {errors.contact && <span className="error">{errors.contact}</span>}
-
-                                <p><strong>Email:</strong></p>
-                                <input
-                                    className="sow-placeholder"
-                                    type="email"
-                                    placeholder="Enter email"
-                                    value={newEmployee.email}
-                                    onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
-                                    required
-                                />
-                                {errors.email && <span className="error">{errors.email}</span>}
-
-                                <button
-                                    className="sow-submit-btn"
-                                    type="submit"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        )}
-                    </form>
+            <div className="sow-parts-section" ref={inventorySearchRef}>
+                <div className="sow-header-section">
+                    <h3>Inventory</h3>
+                    <span className="material-symbols-outlined sow-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
                 </div>
-
-                <div className="sow-parts-section" ref={inventorySearchRef}>
-                    <div className="sow-header-section">
-                        <h3>Inventory</h3>
-                        <span className="material-symbols-outlined sow-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
-                    </div>
-                    <div className="sow-search-bar">
-                        <span className="material-symbols-outlined sow-search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search for parts or items"
-                            className="sow-search-input"
-                            value={inventoryQuery}
-                            onChange={handleInventorySearch}
-                            onFocus={handleInventoryFocus}
-                        />
-                    </div>
-                    {isInventoryInputFocused && filteredInventory.length > 0 && (
-                        <div className="sow-dropdown">
-                            {filteredInventory.map((item, index) => (
-                                <div className="sow-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
-                                    <span className="sow-dropdown-text">{item.product_name}</span>
-                                    <span className="sow-dropdown-actions">
-                                        {item.stock} {item.unit}{item.unit === 'box' ? 'es' : 's'}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    <div className="sow-selected-items">
-                        {selectedInventoryItems.map((item) => (
-                            <div key={item.id} className="sow-selected-item">
-                                <span>{item.product_name}</span>
-                                <button
-                                    className="remove-item-btn"
-                                    onClick={() => handleRemoveInventoryItem(item.id)}
-                                >
-                                    &times;
-                                </button>
+                <div className="sow-search-bar">
+                    <span className="material-symbols-outlined sow-search-icon">search</span>
+                    <input
+                        type="text"
+                        placeholder="Search for parts or items"
+                        className="sow-search-input"
+                        value={inventoryQuery}
+                        onChange={handleInventorySearch}
+                        onFocus={handleInventoryFocus}
+                    />
+                </div>
+                {isInventoryInputFocused && filteredInventory.length > 0 && (
+                    <div className="sow-dropdown">
+                        {filteredInventory.map((item, index) => (
+                            <div className="sow-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
+                                <span className="sow-dropdown-text">{item.product_name}</span>
+                                <span className="sow-dropdown-actions">
+                                    {item.stock} {item.unit}{item.unit === 'box' ? 'es' : 's'}
+                                </span>
                             </div>
                         ))}
                     </div>
+                )}
+                <div className="sow-selected-items">
+                    {selectedInventoryItems.map((item) => (
+                        <div key={item.id} className="sow-selected-item">
+                            <span>{item.product_name}</span>
+                            <button
+                                className="remove-item-btn"
+                                onClick={() => handleRemoveInventoryItem(item.id)}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
                 </div>
-
-                <div className="sow-services-section">
-                    <div className="sow-header-section">
-                        <h3>Services</h3>
-                        <span className="material-symbols-outlined sow-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
-                    </div>
-                    <textarea className="sow-services-textarea" placeholder="Enter service details here..." required></textarea>
-                </div>
-
-                <div className="sow-remarks-section">
-                    <div className="sow-header-section">
-                        <h3>Remarks</h3>
-                        <span className="material-symbols-outlined sow-info-icon" data-tooltip="Further details regarding the completed inspections.">info</span>
-                    </div>
-                    <textarea className="sow-remarks-textarea" placeholder="Enter remarks here..."></textarea>
-                </div>
-
-                <button className="sow-save-button">Save as .PDF</button>
-
             </div>
-        </UserPanel>
+
+            <div className="sow-services-section">
+                <div className="sow-header-section">
+                    <h3>Services</h3>
+                    <span className="material-symbols-outlined sow-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
+                </div>
+                <textarea className="sow-services-textarea" placeholder="Enter service details here..." required></textarea>
+            </div>
+
+            <div className="sow-remarks-section">
+                <div className="sow-header-section">
+                    <h3>Remarks</h3>
+                    <span className="material-symbols-outlined sow-info-icon" data-tooltip="Further details regarding the completed inspections.">info</span>
+                </div>
+                <textarea className="sow-remarks-textarea" placeholder="Enter remarks here..."></textarea>
+            </div>
+
+            <button className="sow-save-button">Save as .PDF</button>
+
+        </div>
     );
 };
 
