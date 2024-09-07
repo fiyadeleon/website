@@ -1,22 +1,22 @@
-# app.py
+import os
+
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_cors import CORS
+from pymongo import MongoClient
 from datetime import timedelta
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'default_secret_key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-
 jwt = JWTManager(app)
 
-# Mock database for demonstration
-users = {
-    "user": {"password": "123", "role": "user"},
-    "admin": {"password": "admin", "role": "admin"}
-}
+conn = os.getenv('MONGODB_CONNECTION_STRING', 'mongodb+srv://stanghero-admin:paWstimes4!@stanghero-cluster.snyvg.mongodb.net/')
+client = MongoClient(f"{conn}") 
+db = client["stanghero"] 
+users_collection = db["users"] 
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -24,11 +24,11 @@ def login():
     username = data.get('username')
     password = data.get('password')
 
-    # Validate user credentials
-    if username in users and users[username]["password"] == password:
-        # Generate JWT token and return user role (admin or user)
+    user = users_collection.find_one({"username": username})
+
+    if user and user["password"] == password:
         access_token = create_access_token(identity=username)
-        role = users[username]["role"]  # Get role from the mock database
+        role = user["role"]
         return jsonify(token=access_token, role=role), 200
     else:
         return jsonify({"msg": "Invalid credentials"}), 401

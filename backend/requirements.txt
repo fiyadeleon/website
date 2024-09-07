@@ -2,3 +2,5 @@ flask
 Flask 
 Flask-JWT-Extended 
 Flask-CORS
+pymongo
+flask-pymongo
