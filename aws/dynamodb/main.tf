@@ -1,3 +1,19 @@
+resource "aws_dynamodb_table" "stanghero_users" {
+  name         = "${var.prefix_name}_users"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "id"
+  
+  attribute {
+    name = "username"
+    type = "S"
+  }
+
+  tags = {
+    Name = var.prefix_name
+  }
+}
+
 resource "aws_dynamodb_table" "stanghero_inventory" {
   name         = "${var.prefix_name}_inventory"
   billing_mode = "PAY_PER_REQUEST"

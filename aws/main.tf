@@ -6,11 +6,11 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "stanghero-tf-state"
+    bucket         = "stanghero-tfstate"
     key            = "terraform.tfstate"
     region         = "ap-southeast-1"
     encrypt        = true
-    dynamodb_table = "stanghero-tf-state"
+    dynamodb_table = "stanghero-tfstate"
   }
 }
 
@@ -19,18 +19,18 @@ provider "aws" {
 }
 
 module "dynamodb" {
-  source      = "git::https://git-codecommit.ap-southeast-1.amazonaws.com/v1/repos/stanghero-website.git//aws/dynamodb?ref=master"
+  source      = "git::https://github.com/fiyadeleon/website.git//aws/dynamodb?ref=main"
   prefix_name = var.prefix_name
 }
 
 module "lambda_inventory" {
-  source                         = "git::https://git-codecommit.ap-southeast-1.amazonaws.com/v1/repos/stanghero-website.git//aws/lambda/inventory?ref=master"
+  source                         = "git::https://github.com/fiyadeleon/website.git//aws/lambda/inventory?ref=main"
   prefix_name                    = var.prefix_name
   stanghero_inventory_table_name = module.dynamodb.stanghero_inventory_table_name
 }
 
 module "api_gateway" {
-  source                      = "git::https://git-codecommit.ap-southeast-1.amazonaws.com/v1/repos/stanghero-website.git//aws/api_gateway?ref=master"
+  source                      = "git::https://github.com/fiyadeleon/website.git//aws/api_gateway?ref=main"
   prefix_name                 = var.prefix_name
   get_inventory_invoke_arn    = module.lambda_inventory.get_inventory_invoke_arn
   post_inventory_invoke_arn   = module.lambda_inventory.post_inventory_invoke_arn

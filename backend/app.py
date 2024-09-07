@@ -15,7 +15,7 @@ print(os.getenv('JWT_SECRET_KEY'))
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 jwt = JWTManager(app)
 
-conn = os.getenv('MONGODB_URI', 'mongodb+srv://stanghero-admin:paWstimes4!@stanghero-cluster.snyvg.mongodb.net/')
+conn = os.getenv('mongodb+srv://stanghero-admin:paWstimes4!@stanghero-cluster.snyvg.mongodb.net/')
 print(os.getenv('MONGODB_URI'))
 client = MongoClient(f"{conn}") 
 db = client["stanghero"] 
