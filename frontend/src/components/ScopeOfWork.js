@@ -7,6 +7,23 @@ const ScopeOfWork = () => {
     const [employeeQuery, setEmployeeQuery] = useState('');
     const [inventoryQuery, setInventoryQuery] = useState('');
 
+    const [newCustomer, setNewCustomer] = useState({
+        name: '',
+        carModel: '',
+        plateNo: '',
+        contact: '',
+        email: '',
+        address: ''
+    });
+
+    const [newEmployee, setNewEmployee] = useState({
+        name: '',
+        jobTitle: '',
+        contact: '',
+        email: '',
+        address: ''
+    });
+
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [filteredInventory, setFilteredInventory] = useState([]);
@@ -19,12 +36,13 @@ const ScopeOfWork = () => {
     const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
 
     const [isInventoryInputFocused, setIsInventoryInputFocused] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const customerSearchRef = useRef();
     const employeeSearchRef = useRef();
     const inventorySearchRef = useRef();
     
-    const customers = [
+    const [customers, setCustomers] = useState([
         { id: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
         { id: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
         { id: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
@@ -35,9 +53,9 @@ const ScopeOfWork = () => {
         { id: 'CUST008', name: 'Chris Evans', contact: '7776665555', email: 'chris@example.com', address: '303 Spruce St', plateNo: 'STU123', carModel: 'Chevrolet Corvette' },
         { id: 'CUST009', name: 'Laura Green', contact: '6665554444', email: 'laura@example.com', address: '404 Oak St', plateNo: 'VWX987', carModel: 'BMW X5' },
         { id: 'CUST010', name: 'Kevin White', contact: '5554443333', email: 'kevin@example.com', address: '505 Pine St', plateNo: 'ZAB456', carModel: 'Mercedes-Benz C-Class' }
-    ];
+    ]);
     
-    const employees = [
+    const [employees, setEmployee] = useState([
         { id: 'EMP001', jobTitle: 'Senior Mechanic', name: 'Liam Jackson', contact: '1234567890', email: 'liam@example.com', salary: 55000 },
         { id: 'EMP002', jobTitle: 'Engine Specialist', name: 'Olivia Parker', contact: '0987654321', email: 'olivia@example.com', salary: 60000 },
         { id: 'EMP003', jobTitle: 'Transmission Technician', name: 'Noah Miller', contact: '5555555555', email: 'noah@example.com', salary: 58000 },
@@ -48,9 +66,9 @@ const ScopeOfWork = () => {
         { id: 'EMP008', jobTitle: 'Air Conditioning Technician', name: 'Isabella Moore', contact: '1110009999', email: 'isabella@example.com', salary: 61000 },
         { id: 'EMP009', jobTitle: 'Painter', name: 'Benjamin Harris', contact: '9991118888', email: 'benjamin@example.com', salary: 56000 },
         { id: 'EMP010', jobTitle: 'Tire Specialist', name: 'Charlotte Thompson', contact: '8887776666', email: 'charlotte@example.com', salary: 54000 }
-    ];        
+    ]);        
     
-    const inventoryItems = [
+    const [inventoryItems, setInventoryItems] = useState([
         { id: "PROD-CA1234-20240101", product_name: "Engine Oil", category: "Lubricants", stock: 120, unit: "box", price: 450.00},
         { id: "PROD-BR5678-20240101", product_name: "Brake Pads", category: "Brakes", stock: 75, unit: "box", price: 1500.50},
         { id: "PROD-TY9101-20240101", product_name: "All-Season Tires", category: "Tires", stock: 40, unit: "piece", price: 5500.00},
@@ -66,10 +84,9 @@ const ScopeOfWork = () => {
         { id: "PROD-TR6789-20240106", product_name: "Transmission Fluid", category: "Fluids", stock: 60, unit: "box", price: 1600.00},
         { id: "PROD-SP8901-20240106", product_name: "Spark Plug", category: "Engine Parts", stock: 220, unit: "piece", price: 300.00},
         { id: "PROD-TB9012-20240107", product_name: "Timing Belt", category: "Belts", stock: 35, unit: "piece", price: 2500.00}
-    ]; 
+    ]); 
 
     useEffect(() => {
-        // Event listener to close dropdowns when clicking outside
         const handleClickOutside = (event) => {
             if (
                 customerSearchRef.current && !customerSearchRef.current.contains(event.target) &&
@@ -88,62 +105,52 @@ const ScopeOfWork = () => {
         };
     }, []);
 
-    // Customer search handler
     const handleCustomerSearch = (event) => {
         const query = event.target.value.toLowerCase();
         setCustomerQuery(query);
-
         const customerResults = customers.filter(customer => 
             customer.name.toLowerCase().includes(query) || 
             customer.plateNo.toLowerCase().includes(query)
         );
-
-        setFilteredCustomers(customerResults.slice(0, 5)); // Show max 5 results
+        setFilteredCustomers(customerResults.slice(0, 5));
     };
 
-    // Employee search handler
     const handleEmployeeSearch = (event) => {
         const query = event.target.value.toLowerCase();
         setEmployeeQuery(query);
-
         const employeeResults = employees.filter(employee =>
             employee.name.toLowerCase().includes(query) ||
             employee.jobTitle.toLowerCase().includes(query)
         );
-
-        setFilteredEmployees(employeeResults.slice(0, 5)); // Show max 5 results
+        setFilteredEmployees(employeeResults.slice(0, 5));
     };
 
-    // Display selected customer details
     const handleCustomerSelect = (customer) => {
         setSelectedCustomer(customer);
-        setFilteredCustomers([]);  // Clear dropdown options
-        setShowCustomerDetails(false); // Hide add new form
+        setFilteredCustomers([]);
+        setShowCustomerDetails(false);
     };
 
-    // Display selected employee details
     const handleEmployeeSelect = (employee) => {
         setSelectedEmployee(employee);
-        setFilteredEmployees([]);  // Clear dropdown options
-        setShowEmployeeDetails(false); // Hide add new form
+        setFilteredEmployees([]);
+        setShowEmployeeDetails(false);
     };
 
     const handleInventorySearch = (event) => {
         const query = event.target.value.toLowerCase();
         setInventoryQuery(query);
-
         const inventoryResults = inventoryItems.filter(item =>
             item.product_name.toLowerCase().includes(query) &&
             !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id)
         );
-
-        setFilteredInventory(inventoryResults.slice(0, 5)); // Show max 5 results
+        setFilteredInventory(inventoryResults.slice(0, 5));
     };
 
     const handleInventorySelect = (item) => {
         setSelectedInventoryItems((prevSelectedItems) => [...prevSelectedItems, item]);
-        setFilteredInventory([]);  // Clear dropdown options
-        setInventoryQuery('');     // Clear search input
+        setFilteredInventory([]);
+        setInventoryQuery('');
         setIsInventoryInputFocused(false);
     };
 
@@ -154,36 +161,68 @@ const ScopeOfWork = () => {
     };
 
     const handleInventoryFocus = () => {
-        // Show max 5 inventory items, excluding already selected items
         const availableInventory = inventoryItems.filter(item =>
-            !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id) // Exclude selected items
+            !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id)
         );
-        setFilteredInventory(availableInventory.slice(0, 5)); // Default dropdown on focus
-        setIsInventoryInputFocused(true); // Show dropdown when focused
+        setFilteredInventory(availableInventory.slice(0, 5));
+        setIsInventoryInputFocused(true);
     };
 
-    // Toggle Add New Customer
     const handleToggleCustomer = () => {
         setShowCustomerDetails(!showCustomerDetails);
         if (showCustomerDetails) {
-            // If toggling off, reset customer selection and query
             setSelectedCustomer(null);
             setCustomerQuery('');
         }
     };
 
-    // Toggle Add New Employee
     const handleToggleEmployee = () => {
         setShowEmployeeDetails(!showEmployeeDetails);
         if (showEmployeeDetails) {
-            // If toggling off, reset employee selection and query
             setSelectedEmployee(null);
             setEmployeeQuery('');
         }
     };
 
+    const validateCustomer = () => {
+        let newErrors = {};
+        if (!newCustomer.name) newErrors.name = 'Name is required';
+        if (!newCustomer.carModel) newErrors.carModel = 'Car Model is required';
+        if (!newCustomer.plateNo) newErrors.plateNo = 'Plate Number is required';
+        if (!newCustomer.contact) newErrors.contact = 'Contact is required';
+        if (!newCustomer.email) newErrors.email = 'Email is required';
+        if (!newCustomer.address) newErrors.address = 'Address is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const validateEmployee = () => {
+        let newErrors = {};
+        if (!newEmployee.name) newErrors.name = 'Name is required';
+        if (!newEmployee.jobTitle) newErrors.jobTitle = 'Job Title is required';
+        if (!newEmployee.contact) newErrors.contact = 'Contact is required';
+        if (!newEmployee.email) newErrors.email = 'Email is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSaveNewCustomer = (e) => {
+        e.preventDefault();
+        if (validateCustomer()) {
+            console.log('Customer validated and saved');
+            // Handle saving the customer
+        }
+    };
+
+    const handleSaveNewEmployee = (e) => {
+        e.preventDefault();
+        if (validateEmployee()) {
+            console.log('Employee validated and saved');
+            // Handle saving the employee
+        }
+    };
+
     const handleClear = () => {
-        // Reset all states to initial values
         setCustomerQuery('');
         setEmployeeQuery('');
         setInventoryQuery('');
@@ -195,7 +234,7 @@ const ScopeOfWork = () => {
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
         setShowEmployeeDetails(false);
-    };    
+    };
 
     return (
         <UserPanel>
@@ -206,72 +245,130 @@ const ScopeOfWork = () => {
                 </div>
 
                 <div className="sow-user-info">
-                    <div className="sow-customer-section" ref={customerSearchRef}>
-                        <h2>CUSTOMER</h2>
-                        {!showCustomerDetails && (
-                            <div className="sow-search-bar">
-                                <span className="material-symbols-outlined sow-search-icon">search</span>
-                                <input
-                                    type="text"
-                                    placeholder="Search Customer"
-                                    className="sow-search-input"
-                                    value={customerQuery}
-                                    onChange={handleCustomerSearch}
-                                    onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
-                                />
-                            </div>
-                        )}
-                        {filteredCustomers.length > 0 && (
-                            <div className="sow-dropdown">
-                                {filteredCustomers.map((customer, index) => (
-                                    <div className="sow-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
-                                        <span className="sow-dropdown-text">{customer.name}</span>
-                                        <span className="sow-dropdown-actions">{customer.plateNo}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {selectedCustomer && !showCustomerDetails && (
-                            <div className="sow-customer-details">
-                                <p><strong>Name:</strong> {selectedCustomer.name}</p>
-                                <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
-                                <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
-                                <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                                <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                                <p><strong>Address:</strong> {selectedCustomer.address}</p>
-                            </div>
-                        )}
-                        <button 
-                            className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
-                            onClick={handleToggleCustomer}
-                        >
-                            {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
-                        </button>
+                <form className="sow-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
+                    <h2>CUSTOMER</h2>
+                    {!showCustomerDetails && (
+                        <div className="sow-search-bar">
+                            <span className="material-symbols-outlined sow-search-icon">search</span>
+                            <input
+                                type="text"
+                                placeholder="Search Customer"
+                                className="sow-search-input"
+                                value={customerQuery}
+                                onChange={handleCustomerSearch}
+                                onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                            />
+                        </div>
+                    )}
+                    {filteredCustomers.length > 0 && (
+                        <div className="sow-dropdown">
+                            {filteredCustomers.map((customer, index) => (
+                                <div className="sow-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
+                                    <span className="sow-dropdown-text">{customer.name}</span>
+                                    <span className="sow-dropdown-actions">{customer.plateNo}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {selectedCustomer && !showCustomerDetails && (
+                        <div className="sow-customer-details">
+                            <p><strong>Name:</strong> {selectedCustomer.name}</p>
+                            <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
+                            <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
+                            <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
+                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                        </div>
+                    )}
+                    <button 
+                        type="button" // Changed to "button" to prevent triggering form submit on toggle
+                        className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
+                        onClick={handleToggleCustomer}
+                    >
+                        {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                    </button>
 
-                        {showCustomerDetails && (
-                            <div className="sow-customer-details">
-                                <p><strong>Name:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter name" required />
+                    {showCustomerDetails && (
+                        <div className="sow-customer-details">
+                            <p><strong>Name:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter name"
+                                value={newCustomer.name}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                required
+                            />
+                            {errors.name && <span className="error">{errors.name}</span>}
 
-                                <p><strong>Car Model:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter car model" required />
-                                
-                                <p><strong>Plate No:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter plate number" required />
-                                
-                                <p><strong>Contact No:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter contact number" required />
+                            <p><strong>Car Model:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter car model"
+                                value={newCustomer.carModel}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                                required
+                            />
+                            {errors.carModel && <span className="error">{errors.carModel}</span>}
 
-                                <p><strong>Email:</strong></p>
-                                <input className="sow-placeholder" type="email" placeholder="Enter email" required />
-                                
-                                <p><strong>Address:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter address" required />
-                            </div>
-                        )}
-                    </div>
+                            <p><strong>Plate No:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter plate number"
+                                value={newCustomer.plateNo}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
+                                required
+                            />
+                            {errors.plateNo && <span className="error">{errors.plateNo}</span>}
 
-                    <div className="sow-employee-section" ref={employeeSearchRef}>
+                            <p><strong>Contact No:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="tel" 
+                                pattern="[0-9]{11}" 
+                                maxLength="11"
+                                placeholder="Enter contact number"
+                                value={newCustomer.contact}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                                required
+                            />
+                            {errors.contact && <span className="error">{errors.contact}</span>}
+
+                            <p><strong>Email:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="email"
+                                placeholder="Enter email"
+                                value={newCustomer.email}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                required
+                            />
+                            {errors.email && <span className="error">{errors.email}</span>}
+
+                            <p><strong>Address:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter address"
+                                value={newCustomer.address}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                                required
+                            />
+                            {errors.address && <span className="error">{errors.address}</span>}
+
+                            <button
+                                className="sow-submit-btn"
+                                type="submit" // Make this a submit button
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    )}
+                </form>
+
+                    <form className="sow-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
                         <h2>EMPLOYEE</h2>
                         {!showEmployeeDetails && (
                             <div className="sow-search-bar">
@@ -314,22 +411,60 @@ const ScopeOfWork = () => {
                         {showEmployeeDetails && (
                             <div className="sow-employee-details">
                                 <p><strong>Name:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter name" required />
-                                
+                                <input
+                                    className="sow-placeholder"
+                                    type="text"
+                                    placeholder="Enter name"
+                                    value={newEmployee.name}
+                                    onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
+                                    required
+                                />
+                                {errors.name && <span className="error">{errors.name}</span>}
+
                                 <p><strong>Job Title:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter job title" required />
-                                
+                                <input
+                                    className="sow-placeholder"
+                                    type="text"
+                                    placeholder="Enter job title"
+                                    value={newEmployee.jobTitle}
+                                    onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
+                                    required
+                                />
+                                {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
+
                                 <p><strong>Contact No:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter contact number" required />
+                                <input
+                                    className="sow-placeholder"
+                                    type="tel" 
+                                    pattern="[0-9]{11}" 
+                                    maxLength="11"
+                                    placeholder="Enter contact number"
+                                    value={newEmployee.contact}
+                                    onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
+                                    required
+                                />
+                                {errors.contact && <span className="error">{errors.contact}</span>}
 
                                 <p><strong>Email:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter email" required />
-                                
-                                <p><strong>Address:</strong></p>
-                                <input className="sow-placeholder" type="text" placeholder="Enter address" required />
+                                <input
+                                    className="sow-placeholder"
+                                    type="email"
+                                    placeholder="Enter email"
+                                    value={newEmployee.email}
+                                    onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
+                                    required
+                                />
+                                {errors.email && <span className="error">{errors.email}</span>}
+
+                                <button
+                                    className="sow-submit-btn"
+                                    type="submit"
+                                >
+                                    Submit
+                                </button>
                             </div>
                         )}
-                    </div>
+                    </form>
                 </div>
 
                 <div className="sow-parts-section" ref={inventorySearchRef}>
@@ -380,7 +515,7 @@ const ScopeOfWork = () => {
                         <h3>Services</h3>
                         <span className="material-symbols-outlined sow-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
                     </div>
-                    <textarea className="sow-services-textarea" placeholder="Enter service details here..."></textarea>
+                    <textarea className="sow-services-textarea" placeholder="Enter service details here..." required></textarea>
                 </div>
 
                 <div className="sow-remarks-section">
@@ -392,6 +527,7 @@ const ScopeOfWork = () => {
                 </div>
 
                 <button className="sow-save-button">Save as .PDF</button>
+
             </div>
         </UserPanel>
     );

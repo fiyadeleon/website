@@ -289,9 +289,11 @@ function Employees() {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label>Contact</label>
+                                        <label>Contact No.</label>
                                         <input
-                                            type="text"
+                                            type="tel" 
+                                            pattern="[0-9]{11}" 
+                                            maxLength="11"
                                             name="contact"
                                             value={employeeDetails.contact}
                                             onChange={handleInputChange}

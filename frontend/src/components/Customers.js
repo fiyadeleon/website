@@ -227,7 +227,7 @@ function Customers() {
                                 <th>NAME</th>
                                 <th>CAR MODEL</th>
                                 <th>PLATE NO.</th>
-                                <th>CONTACT</th>
+                                <th>CONTACT NO.</th>
                                 <th>EMAIL</th>
                                 <th>ADDRESS</th>
                                 <th>ACTION</th>
@@ -322,9 +322,11 @@ function Customers() {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label>Contact</label>
+                                        <label>Contact No.</label>
                                         <input
-                                            type="text"
+                                            type="tel" 
+                                            pattern="[0-9]{11}" 
+                                            maxLength="11"
                                             name="contact"
                                             value={customerDetails.contact}
                                             onChange={handleInputChange}

@@ -60,7 +60,7 @@ const Settings = () => {
                 type="tel" 
                 id="contactNo" 
                 name="contactNo" 
-                pattern="\d{11}" 
+                pattern="[0-9]{11}" 
                 maxLength="11"
                 value={contactNo} 
                 onChange={(e) => setContactNo(e.target.value)} 

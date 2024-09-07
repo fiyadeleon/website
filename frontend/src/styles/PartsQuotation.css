@@ -1,11 +1,11 @@
-.sow-scope-of-work {
+.pq-parts-quotation {
   padding: 20px;
   font-family: 'Poppins', sans-serif;
   width: 100%; /* Full width */
   box-sizing: border-box;
 }
 
-.sow-header {
+.pq-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,7 +13,7 @@
   gap: 10px;
 }
 
-.sow-header h1 {
+.pq-header h1 {
   font-size: 35px;
   color: #333;
   font-weight: bold;
@@ -21,14 +21,14 @@
   margin: 0;
 }
 
-.sow-header-section {
+.pq-header-section {
   color: #333;
   margin-top: -20px;
   display: flex;
   align-items: center;
 }
 
-.sow-clear-button {
+.pq-clear-button {
   background-color: #F8CE00; /* Yellow */
   border: none;
   padding: 10px 20px;
@@ -42,18 +42,18 @@
   margin-top: 20px;
 }
 
-.sow-clear-button:hover {
+.pq-clear-button:hover {
   background-color: #FFC107;
 }
 
-.sow-user-info {
+.pq-user-info {
   display: flex;
   justify-content: space-between;
   align-items: flex-start; 
   gap: 20px; 
 }
 
-.sow-customer-section, .sow-employee-section {
+.pq-customer-section, .pq-employee-section {
   width: 48%;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -63,14 +63,14 @@
   transition: all 0.3s ease-in-out;
 }
 
-.sow-search-bar {
+.pq-search-bar {
   position: relative;
   display: flex;
   align-items: center;
   margin-left: 5px; 
 }
 
-.sow-search-icon {
+.pq-search-icon {
   position: absolute;
   left: 12px; /* Adjusted for better alignment */
   top: 50%; /* Vertically center the icon */
@@ -80,7 +80,7 @@
   pointer-events: none; /* Make sure the icon doesn't block input interaction */
 }
 
-.sow-search-input {
+.pq-search-input {
   border: 1px solid #dddddd;
   border-radius: 4px;
   padding: 8px 12px 8px 36px; /* Adjust padding to leave space for the icon */
@@ -90,12 +90,12 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-search-input::placeholder {
+.pq-search-input::placeholder {
   color: gray;
   font-size: 14px;
 }
 
-.sow-placeholder {
+.pq-placeholder {
   width: 100%;
   padding: 10px;
   margin-top: -35px;
@@ -106,17 +106,17 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-placeholder:focus {
+.pq-placeholder:focus {
   outline: none;
   border-color: #888;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
-.sow-placeholder::placeholder {
+.pq-placeholder::placeholder {
   color: #aaa;
 }
 
-.sow-parts-section, .sow-services-section, .sow-remarks-section {
+.pq-parts-section, .pq-services-section, .pq-remarks-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -124,7 +124,7 @@
   margin-top: 20px;
 }
 
-.sow-services-textarea, .sow-remarks-textarea {
+.pq-services-textarea, .pq-remarks-textarea {
   width: 100%;
   height: 100px;
   padding: 10px;
@@ -137,13 +137,13 @@
   box-sizing: border-box;
 }
 
-.sow-parts-search-bar {
+.pq-parts-search-bar {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.sow-parts-search-bar input {
+.pq-parts-search-bar input {
   width: 100%;
   padding: 10px;
   border: 1px solid #dddddd;
@@ -151,7 +151,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-add-customer-btn {
+.pq-add-customer-btn {
   background-color: #F8CE00; 
   color: #333;
   border: none;
@@ -166,7 +166,7 @@
   right: 20px;  
 }
 
-.sow-add-customer-btn, .sow-add-employee-btn {
+.pq-add-customer-btn, .pq-add-employee-btn {
   background-color: #F8CE00;
   color: #333;
   border: none;
@@ -182,22 +182,22 @@
   transition: background-color 0.3s ease-in-out;
 }
 
-.sow-add-customer-btn.cancel, .sow-add-employee-btn.cancel {
+.pq-add-customer-btn.cancel, .pq-add-employee-btn.cancel {
   background-color: #cccccc; 
   color: #333; 
 }
 
-.sow-add-customer-btn.cancel:hover,
-.sow-add-employee-btn.cancel:hover {
+.pq-add-customer-btn.cancel:hover,
+.pq-add-employee-btn.cancel:hover {
   background-color: #b3b3b3;
 }
 
-.sow-add-employee-btn:hover,
-.sow-add-customer-btn:hover {
+.pq-add-employee-btn:hover,
+.pq-add-customer-btn:hover {
   background-color: #FFC107;
 }
 
-.sow-save-button {
+.pq-save-button {
   background-color: #F8CE00;
   border: none;
   padding: 12px 20px;
@@ -212,11 +212,11 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-save-button:hover {
+.pq-save-button:hover {
   background-color: #FFC107;
 }
 
-.sow-info-icon {
+.pq-info-icon {
   margin-left: 12px; 
   font-size: 20px;
   color: #666;
@@ -224,7 +224,7 @@
   cursor: pointer;
 }
 
-.sow-info-icon::after {
+.pq-info-icon::after {
   content: attr(data-tooltip);
   position: absolute;
   background-color: #333;
@@ -243,12 +243,12 @@
   transition: opacity 0.3s ease;
 }
 
-.sow-info-icon:hover::after {
+.pq-info-icon:hover::after {
   display: block;
   opacity: 1;
 }
 
-.sow-parts-section {
+.pq-parts-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -256,7 +256,7 @@
   margin-top: 20px;
 }
 
-.sow-dropdown {
+.pq-dropdown {
   position: relative;
   background-color: #fff;
   border: 1px solid #ddd;
@@ -269,7 +269,7 @@
   max-height: 200px;
 }
 
-.sow-dropdown-option {
+.pq-dropdown-option {
   display: flex;
   justify-content: space-between;
   padding: 10px;
@@ -278,30 +278,30 @@
   align-items: center; /* Ensure vertical alignment */
 }
 
-.sow-dropdown-option:hover {
+.pq-dropdown-option:hover {
   background-color: #f0f0f0;
 }
 
-.sow-dropdown-text {
+.pq-dropdown-text {
   font-size: 14px;
   color: #333;
 }
 
-.sow-dropdown-actions {
+.pq-dropdown-actions {
   font-size: 14px;
   color: #999;
   text-align: right;
 }
 
-.sow-customer-details,
-.sow-employee-details,
-.sow-inventory-details {
+.pq-customer-details,
+.pq-employee-details,
+.pq-inventory-details {
   margin-left: 20px;
   color: #666;
   font-family: 'Poppins', sans-serif;
 }
 
-.sow-selected-items {
+.pq-selected-items {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -309,7 +309,7 @@
   margin-left: 10px;
 }
 
-.sow-selected-item {
+.pq-selected-item {
   border: 1px solid #dddddd;
   border-radius: 10px;
   padding: 8px 10px;
@@ -333,7 +333,7 @@
   color: darkred;
 }
 
-.sow-submit-btn {
+.pq-submit-btn {
   background-color: #F8CE00;
   color: #333;
   border: none;
@@ -347,7 +347,7 @@
   float: right;
 }
 
-.sow-submit-btn:hover {
+.pq-submit-btn:hover {
   background-color: #FFC107;
 }
 
@@ -372,4 +372,35 @@ input[type="tel"],
 input[type="password"],
 input[type="number"] {
   font-size: 14px;
+}
+
+.pq-inventory-table table {
+  width: 100%;
+  border-collapse: collapse;
+  padding: 10px;
+  margin-top: 20px;
+  margin-left: 30px;
+  color: #666666;
+}
+
+.pq-inventory-table th, .pq-inventory-table td {
+  text-align: left;
+}
+
+.pq-inventory-table th {
+  font-weight: bold;
+}
+
+.pq-inventory-table td input.purchase-quantity-input {
+  width: 50px;
+  padding: 5px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.remove-item-btn {
+  color: red;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
