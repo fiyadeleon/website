@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from datetime import timedelta
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://stanghero.vercel.app"])
 
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'default_secret_key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
