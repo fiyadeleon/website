@@ -2,7 +2,7 @@ resource "aws_api_gateway_rest_api" "stanghero_api" {
   name = "${var.prefix_name}-api"
 }
 
-# users resource
+##### users resource
 resource "aws_api_gateway_resource" "users" {
   rest_api_id = aws_api_gateway_rest_api.stanghero_api.id
   parent_id   = aws_api_gateway_rest_api.stanghero_api.root_resource_id
@@ -18,7 +18,17 @@ resource "aws_api_gateway_method" "get_users_method" {
   api_key_required = true
 }
 
-# inventory resource
+# Integration for GET /v1/users
+resource "aws_api_gateway_integration" "get_users_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.stanghero_api.id
+  resource_id             = aws_api_gateway_resource.users.id
+  http_method             = aws_api_gateway_method.get_users_method.http_method
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = var.get_users_invoke_arn
+}
+
+##### inventory resource
 resource "aws_api_gateway_resource" "inventory" {
   rest_api_id = aws_api_gateway_rest_api.stanghero_api.id
   parent_id   = aws_api_gateway_rest_api.stanghero_api.root_resource_id
@@ -163,6 +173,7 @@ resource "aws_api_gateway_method_settings" "stanghero_method_settings" {
 # CloudWatch permissions for API Gateway Logs
 resource "aws_api_gateway_deployment" "stanghero_deployment" {
   depends_on = [
+    aws_api_gateway_integration.get_users_integration,
     aws_api_gateway_integration.get_inventory_integration,
     aws_api_gateway_integration.post_inventory_integration,
     aws_api_gateway_integration.put_inventory_integration,

@@ -38,6 +38,7 @@ module "lambda_inventory" {
 module "api_gateway" {
   source                      = "git::https://github.com/fiyadeleon/website.git//aws/api_gateway?ref=main"
   prefix_name                 = var.prefix_name
+  get_users_invoke_arn        = module.lambda_inventory.get_users_invoke_arn
   get_inventory_invoke_arn    = module.lambda_inventory.get_inventory_invoke_arn
   post_inventory_invoke_arn   = module.lambda_inventory.post_inventory_invoke_arn
   put_inventory_invoke_arn    = module.lambda_inventory.put_inventory_invoke_arn
