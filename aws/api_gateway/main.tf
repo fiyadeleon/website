@@ -2,6 +2,23 @@ resource "aws_api_gateway_rest_api" "stanghero_api" {
   name = "${var.prefix_name}-api"
 }
 
+# users resource
+resource "aws_api_gateway_resource" "users" {
+  rest_api_id = aws_api_gateway_rest_api.stanghero_api.id
+  parent_id   = aws_api_gateway_rest_api.stanghero_api.root_resource_id
+  path_part   = "users"
+}
+
+# Create GET method for /v1/users
+resource "aws_api_gateway_method" "get_users_method" {
+  rest_api_id      = aws_api_gateway_rest_api.stanghero_api.id
+  resource_id      = aws_api_gateway_resource.users.id
+  http_method      = "GET"
+  authorization    = "NONE"
+  api_key_required = true
+}
+
+# inventory resource
 resource "aws_api_gateway_resource" "inventory" {
   rest_api_id = aws_api_gateway_rest_api.stanghero_api.id
   parent_id   = aws_api_gateway_rest_api.stanghero_api.root_resource_id
