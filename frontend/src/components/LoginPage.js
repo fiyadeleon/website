@@ -16,7 +16,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('https://stanghero-backend.vercep.app:5000/login', {
+      const response = await axios.post('https://stanghero-backend.vercel.app:5000/login', {
         username,
         password
       });
