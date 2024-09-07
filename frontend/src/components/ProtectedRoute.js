@@ -1,12 +1,27 @@
-// src/components/ProtectedRoute.js
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ element }) => {
-  const { isAuthenticated } = useAuth();
+const isAuthenticated = () => {
+  const token = localStorage.getItem('token');
+  return token ? true : false;
+};
 
-  return isAuthenticated ? element : <Navigate to="/login" />;
+const getUserRole = () => {
+  return localStorage.getItem('role');
+};
+
+const ProtectedRoute = ({ element, adminElement }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" />;
+  }
+
+  const role = getUserRole();
+
+  if (role === 'admin') {
+    return adminElement;
+  }
+
+  return element;
 };
 
 export default ProtectedRoute;

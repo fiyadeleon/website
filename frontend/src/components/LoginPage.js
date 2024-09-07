@@ -1,51 +1,72 @@
-// src/components/LoginPage.js
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; 
 
 import '../styles/LoginPage.css'; 
 import logo8 from '../images/logo8-cropped.png';
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [error, setError] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
 
-    // Simulate login process
     try {
-      await simulateLogin(); 
-      login(); 
-      // alert('Login successful!');
-      navigate("/userHomepage");
+      const response = await axios.post('http://127.0.0.1:5000/login', {
+        username,
+        password
+      });
+      
+      const { token, role } = response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
+
+      if (role === 'admin') {
+        navigate('/reports');
+      } else {
+        navigate('/userHomepage');
+      }
     } catch (error) {
-      alert('Login failed!');
+      setError('Login failed!');
     } finally {
       setLoading(false);
     }
-  };
-
-  const simulateLogin = () => {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(), 2000); // Simulate network delay
-    });
   };
 
   return (
     <div className="login-page">
       <div className="container">
         <div className="logo">
-          <img src={logo8} alt="Stanghero Logo" />
+          <img src={logo8} alt="Logo" />
         </div>
         <form id="loginForm" onSubmit={handleSubmit}>
           <div className="input-group">
-            <input type="text" id="username" className="input-field" placeholder="Username" required />
+            <input
+              type="text"
+              id="username"
+              className="input-field"
+              placeholder="Username"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
           <div className="input-group">
-            <input type="password" id="password" className="input-field" placeholder="Password" required />
+            <input
+              type="password"
+              id="password"
+              className="input-field"
+              placeholder="Password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <a href="google.com" className="forgot-password">Forgot Password?</a>
           <button 
@@ -55,6 +76,7 @@ const LoginPage = () => {
           >
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
+          {error && <div className="error-message">{error}</div>}
         </form>
         {loading && <div className="loading-indicator">Loading...</div>}
       </div>

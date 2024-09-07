@@ -5,14 +5,13 @@
 }
 
 .content-wrapper {
-    margin-left: 70px; /* This ensures the sidebar doesn’t overlap with the content */
+    margin-left: 35px;
     padding: 20px;
     flex-grow: 1;
     background-color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-y: auto; /* Handle overflowing content */
     flex-wrap: wrap; /* Ensure items wrap to the next line if there's not enough space */
 }
 

@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios'; // Import axios for making the request
 import '../styles/UserPanel.css';
 import logo from '../images/logo8-cropped.png';
 
 const UserPanel = ({ children, onCircleSelect }) => {
   const [selectedCircle, setSelectedCircle] = useState(null);
   const [hoveredCircle, setHoveredCircle] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true); // To handle loading state
   const navigate = useNavigate();
   const location = useLocation();
 
+  // UseEffect to fetch protected data when the component mounts
   useEffect(() => {
-    // Set the selectedCircle based on the current path
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login'); // Redirect if no token is found
+      return;
+    }
+  
+    setLoading(false); // Token is present, stop loading
+  }, [navigate]);
+
+  // Set selected circle based on the current path
+  useEffect(() => {
     switch (location.pathname) {
       case '/inventory':
         setSelectedCircle(1);
@@ -28,8 +43,8 @@ const UserPanel = ({ children, onCircleSelect }) => {
         setSelectedCircle(5);
         break;
       case '/transactions':
-          setSelectedCircle(6);
-          break;
+        setSelectedCircle(6);
+        break;
       default:
         setSelectedCircle(null);
         break;
@@ -71,6 +86,8 @@ const UserPanel = ({ children, onCircleSelect }) => {
   };
 
   const handleLogoutClick = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
     navigate('/login');
   };
 
@@ -90,6 +107,10 @@ const UserPanel = ({ children, onCircleSelect }) => {
   const handleMouseLeave = () => {
     setHoveredCircle(null);
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loading spinner or text while verifying authentication
+  }
 
   return (
     <div className="layout">
@@ -121,7 +142,7 @@ const UserPanel = ({ children, onCircleSelect }) => {
         </div>
       </div>
       <div className="content-wrapper">
-        {children} {/* This will render the content of the page */}
+        {children} 
       </div>
     </div>
   );

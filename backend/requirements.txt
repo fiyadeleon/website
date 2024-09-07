@@ -1,0 +1,4 @@
+flask
+Flask 
+Flask-JWT-Extended 
+Flask-CORS

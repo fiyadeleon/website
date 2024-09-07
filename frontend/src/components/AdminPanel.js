@@ -65,6 +65,8 @@ const AdminPanel = ({ children, onCircleSelect }) => {
   };
 
   const handleLogoutClick = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
     navigate('/login');
   };
 
@@ -114,7 +116,7 @@ const AdminPanel = ({ children, onCircleSelect }) => {
         </div>
       </div>
       <div className="content-wrapper">
-        {children} {/* This will render the content of the page */}
+        {children}
       </div>
     </div>
   );
