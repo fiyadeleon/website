@@ -16,7 +16,7 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_ENDPOINT}/login?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
+            const response = await fetch(`${API_ENDPOINT}/users?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
                 method: 'GET',
                 headers: {
                     'x-api-key': `${API_KEY}`,

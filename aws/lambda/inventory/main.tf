@@ -33,20 +33,20 @@ resource "aws_iam_role_policy" "stanghero_lambda_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:dynamodb:ap-southeast-1:746669220038:table/stanghero_customer",
-          "arn:aws:dynamodb:ap-southeast-1:746669220038:table/stanghero_employee",
-          "arn:aws:dynamodb:ap-southeast-1:746669220038:table/stanghero_inventory",
-          "arn:aws:dynamodb:ap-southeast-1:746669220038:table/stanghero_transaction"
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_customer",
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_employee",
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_inventory",
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_transaction"
         ]
       },
       {
         Action = "logs:*"
         Effect = "Allow"
         Resource = [
-          "arn:aws:logs:ap-southeast-1:746669220038:log-group:/aws/lambda/stanghero_customer:*",
-          "arn:aws:logs:ap-southeast-1:746669220038:log-group:/aws/lambda/stanghero_employee:*",
-          "arn:aws:logs:ap-southeast-1:746669220038:log-group:/aws/lambda/stanghero_inventory:*",
-          "arn:aws:logs:ap-southeast-1:746669220038:log-group:/aws/lambda/stanghero_transaction:*"
+          "arn:aws:logs:ap-southeast-1:654654411031:log-group:/aws/lambda/get_inventory:*",
+          "arn:aws:logs:ap-southeast-1:654654411031:log-group:/aws/lambda/post_inventory:*",
+          "arn:aws:logs:ap-southeast-1:654654411031:log-group:/aws/lambda/put_inventory:*",
+          "arn:aws:logs:ap-southeast-1:654654411031:log-group:/aws/lambda/delete_inventory:*"
         ]
       }
     ]

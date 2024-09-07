@@ -33,14 +33,14 @@ resource "aws_iam_role_policy" "stanghero_lambda_users_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:dynamodb:ap-southeast-1:746669220038:table/stanghero_users"
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_user"
         ]
       },
       {
         Action = "logs:*"
         Effect = "Allow"
         Resource = [
-          "arn:aws:logs:ap-southeast-1:746669220038:log-group:/aws/lambda/stanghero_users:*"
+          "arn:aws:logs:ap-southeast-1:654654411031:log-group:/aws/lambda/get_users:*"
         ]
       }
     ]
