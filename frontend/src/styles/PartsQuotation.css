@@ -1,7 +1,7 @@
 .pq-parts-quotation {
   padding: 20px;
   font-family: 'Poppins', sans-serif;
-  width: 100%; /* Full width */
+  width: 100%; 
   box-sizing: border-box;
 }
 
@@ -72,18 +72,18 @@
 
 .pq-search-icon {
   position: absolute;
-  left: 12px; /* Adjusted for better alignment */
-  top: 50%; /* Vertically center the icon */
+  left: 12px; 
+  top: 50%; 
   transform: translateY(-50%);
-  color: #666666; /* Icon color */
-  font-size: 20px; /* Adjust the icon size if necessary */
-  pointer-events: none; /* Make sure the icon doesn't block input interaction */
+  color: #666666; 
+  font-size: 20px; 
+  pointer-events: none; 
 }
 
 .pq-search-input {
   border: 1px solid #dddddd;
   border-radius: 4px;
-  padding: 8px 12px 8px 36px; /* Adjust padding to leave space for the icon */
+  padding: 8px 12px 8px 36px; 
   width: 300px;
   font-size: 14px;
   color: #666666;
@@ -275,7 +275,7 @@
   padding: 10px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  align-items: center; /* Ensure vertical alignment */
+  align-items: center; 
 }
 
 .pq-dropdown-option:hover {
