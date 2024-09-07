@@ -7,7 +7,6 @@ import logo8 from '../images/logo8-cropped.png';
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -33,7 +32,7 @@ const LoginPage = () => {
         navigate('/userHomepage');
       }
     } catch (error) {
-      setError('Login failed!');
+      alert('Login failed!');
     } finally {
       setLoading(false);
     }
@@ -76,7 +75,6 @@ const LoginPage = () => {
           >
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
-          {error && <div className="error-message">{error}</div>}
         </form>
         {loading && <div className="loading-indicator">Loading...</div>}
       </div>
