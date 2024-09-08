@@ -280,9 +280,7 @@
     margin-top: 10px;
     position: relative;
     display: flex;
-    justify-content: space-between; /* Aligns Clear All to the left and Pagination to the right */
-    align-items: center; /* Vertically center both elements */
-    padding: 10px 0;
+    justify-content: flex-end;
 }
 
 .page-number {
@@ -623,40 +621,53 @@ input[type="number"] {
 }
 
 .inventory-select {
-    width: 100%; /* Full width */
-    padding: 10px 15px; /* Adjust padding */
-    border-radius: 4px; /* Rounded corners */
-    border: 1px solid #dddddd; /* Light grey border */
-    font-family: 'Poppins', sans-serif; /* Consistent font */
-    font-size: 14px; /* Adjust font size */
-    background-color: #fff; /* White background */
-    color: #333; /* Text color */
+    width: 100%; 
+    padding: 10px 15px; 
+    border-radius: 4px; 
+    border: 1px solid #dddddd;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    background-color: #fff; 
+    color: #333;
     cursor: pointer;
-    appearance: none; /* Remove default browser styling */
-    background-image: url('data:image/svg+xml;base64,...'); /* Custom dropdown icon */
-    background-position: right 10px center; /* Position of the dropdown arrow */
-    background-repeat: no-repeat; /* Ensure no repeat */
-    background-size: 14px; /* Size of the arrow icon */
-    transition: border-color 0.3s ease; /* Smooth border change */
+    appearance: none; 
+    background-image: url('data:image/svg+xml;base64,...');
+    background-position: right 10px center; 
+    background-repeat: no-repeat; 
+    background-size: 14px; 
+    transition: border-color 0.3s ease; 
 }
 
 .inventory-select:focus {
-    border-color: #F8CE00; /* Highlight color on focus */
-    outline: none; /* Remove default outline */
+    border-color: #F8CE00; 
+    outline: none; 
 }
 
 .inventory-select:hover {
-    border-color: #FFC107; /* Border color on hover */
+    border-color: #FFC107; 
 }
 
-/* Optional: Disable the arrow in Firefox */
 .inventory-select:-moz-focusring {
     color: transparent;
     text-shadow: 0 0 0 #333;
 }
 
-/* Style for the dropdown options */
 .inventory-select option {
     font-family: 'Poppins', sans-serif;
     color: #333;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

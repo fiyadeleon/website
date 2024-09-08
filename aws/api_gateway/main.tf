@@ -28,87 +28,87 @@ resource "aws_api_gateway_integration" "get_users_integration" {
   uri                     = var.get_users_invoke_arn
 }
 
-##### inventory resource
-resource "aws_api_gateway_resource" "inventory" {
+##### item resource
+resource "aws_api_gateway_resource" "item" {
   rest_api_id = aws_api_gateway_rest_api.stanghero_api.id
   parent_id   = aws_api_gateway_rest_api.stanghero_api.root_resource_id
-  path_part   = "inventory"
+  path_part   = "item"
 }
 
-# Create GET method for /v1/inventory
-resource "aws_api_gateway_method" "get_inventory_method" {
+# Create GET method for /v1/item
+resource "aws_api_gateway_method" "get_item_method" {
   rest_api_id      = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id      = aws_api_gateway_resource.inventory.id
+  resource_id      = aws_api_gateway_resource.item.id
   http_method      = "GET"
   authorization    = "NONE"
   api_key_required = true
 }
 
-# Create POST method for /v1/inventory
-resource "aws_api_gateway_method" "post_inventory_method" {
+# Create POST method for /v1/item
+resource "aws_api_gateway_method" "post_item_method" {
   rest_api_id      = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id      = aws_api_gateway_resource.inventory.id
+  resource_id      = aws_api_gateway_resource.item.id
   http_method      = "POST"
   authorization    = "NONE"
   api_key_required = true
 }
 
-# Create PUT method for /v1/inventory
-resource "aws_api_gateway_method" "put_inventory_method" {
+# Create PUT method for /v1/item
+resource "aws_api_gateway_method" "put_item_method" {
   rest_api_id      = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id      = aws_api_gateway_resource.inventory.id
+  resource_id      = aws_api_gateway_resource.item.id
   http_method      = "PUT"
   authorization    = "NONE"
   api_key_required = true
 }
 
-# Create DELETE method for /v1/inventory
-resource "aws_api_gateway_method" "delete_inventory_method" {
+# Create DELETE method for /v1/item
+resource "aws_api_gateway_method" "delete_item_method" {
   rest_api_id      = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id      = aws_api_gateway_resource.inventory.id
+  resource_id      = aws_api_gateway_resource.item.id
   http_method      = "DELETE"
   authorization    = "NONE"
   api_key_required = true
 }
 
-# Integration for GET /v1/inventory
-resource "aws_api_gateway_integration" "get_inventory_integration" {
+# Integration for GET /v1/item
+resource "aws_api_gateway_integration" "get_item_integration" {
   rest_api_id             = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id             = aws_api_gateway_resource.inventory.id
-  http_method             = aws_api_gateway_method.get_inventory_method.http_method
+  resource_id             = aws_api_gateway_resource.item.id
+  http_method             = aws_api_gateway_method.get_item_method.http_method
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = var.get_inventory_invoke_arn
+  uri                     = var.get_item_invoke_arn
 }
 
-# Integration for POST /v1/inventory
-resource "aws_api_gateway_integration" "post_inventory_integration" {
+# Integration for POST /v1/item
+resource "aws_api_gateway_integration" "post_item_integration" {
   rest_api_id             = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id             = aws_api_gateway_resource.inventory.id
-  http_method             = aws_api_gateway_method.post_inventory_method.http_method
+  resource_id             = aws_api_gateway_resource.item.id
+  http_method             = aws_api_gateway_method.post_item_method.http_method
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = var.post_inventory_invoke_arn
+  uri                     = var.post_item_invoke_arn
 }
 
-# Integration for PUT /v1/inventory
-resource "aws_api_gateway_integration" "put_inventory_integration" {
+# Integration for PUT /v1/item
+resource "aws_api_gateway_integration" "put_item_integration" {
   rest_api_id             = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id             = aws_api_gateway_resource.inventory.id
-  http_method             = aws_api_gateway_method.put_inventory_method.http_method
+  resource_id             = aws_api_gateway_resource.item.id
+  http_method             = aws_api_gateway_method.put_item_method.http_method
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = var.put_inventory_invoke_arn
+  uri                     = var.put_item_invoke_arn
 }
 
-# Integration for DELETE /v1/inventory
-resource "aws_api_gateway_integration" "delete_inventory_integration" {
+# Integration for DELETE /v1/item
+resource "aws_api_gateway_integration" "delete_item_integration" {
   rest_api_id             = aws_api_gateway_rest_api.stanghero_api.id
-  resource_id             = aws_api_gateway_resource.inventory.id
-  http_method             = aws_api_gateway_method.delete_inventory_method.http_method
+  resource_id             = aws_api_gateway_resource.item.id
+  http_method             = aws_api_gateway_method.delete_item_method.http_method
   type                    = "AWS_PROXY"
   integration_http_method = "POST"
-  uri                     = var.delete_inventory_invoke_arn
+  uri                     = var.delete_item_invoke_arn
 }
 
 resource "aws_api_gateway_api_key" "stanghero_api_key" {
@@ -174,10 +174,10 @@ resource "aws_api_gateway_method_settings" "stanghero_method_settings" {
 resource "aws_api_gateway_deployment" "stanghero_deployment" {
   depends_on = [
     aws_api_gateway_integration.get_users_integration,
-    aws_api_gateway_integration.get_inventory_integration,
-    aws_api_gateway_integration.post_inventory_integration,
-    aws_api_gateway_integration.put_inventory_integration,
-    aws_api_gateway_integration.delete_inventory_integration
+    aws_api_gateway_integration.get_item_integration,
+    aws_api_gateway_integration.post_item_integration,
+    aws_api_gateway_integration.put_item_integration,
+    aws_api_gateway_integration.delete_item_integration
   ]
   rest_api_id = aws_api_gateway_rest_api.stanghero_api.id
   stage_name  = "v1"

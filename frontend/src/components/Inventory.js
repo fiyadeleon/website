@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import '../styles/Inventory.css';
 
 function generateProductId() {
-    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase(); // Random string
-    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD format
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase(); 
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, ''); 
     return `PROD-${randomString}-${dateString}`;
 }
 
 function Inventory() {
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -19,59 +21,47 @@ function Inventory() {
     const [productDetails, setProductDetails] = useState({ id: '', product_name: '', category: '', stock: '', price: '', unit: '' });
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('onHand');
-    const [products, setProducts] = useState([
-        {"id": "PROD-CA1234-20240101", "product_name": "Engine Oil", "category": "Lubricants", "stock": 120, "unit": "liter", "price": 450.00},
-        {"id": "PROD-BR5678-20240101", "product_name": "Brake Pads", "category": "Brakes", "stock": 75, "unit": "set", "price": 1500.50},
-        {"id": "PROD-TY9101-20240101", "product_name": "All-Season Tires", "category": "Tires", "stock": 40, "unit": "piece", "price": 5500.00},
-        {"id": "PROD-BT2345-20240101", "product_name": "Car Battery", "category": "Batteries", "stock": 65, "unit": "piece", "price": 3200.00},
-        {"id": "PROD-FL6789-20240101", "product_name": "Fuel Filter", "category": "Filters", "stock": 200, "unit": "piece", "price": 300.00},
-        {"id": "PROD-WP2345-20240102", "product_name": "Windshield Wiper", "category": "Accessories", "stock": 150, "unit": "pair", "price": 600.00},
-        {"id": "PROD-OF5678-20240102", "product_name": "Oil Filter", "category": "Filters", "stock": 95, "unit": "piece", "price": 350.00},
-        {"id": "PROD-RB6789-20240103", "product_name": "Radiator Belt", "category": "Belts", "stock": 50, "unit": "piece", "price": 1200.00},
-        {"id": "PROD-EX7890-20240103", "product_name": "Exhaust Pipe", "category": "Exhaust", "stock": 30, "unit": "piece", "price": 8000.00},
-        {"id": "PROD-BR2345-20240104", "product_name": "Brake Fluid", "category": "Fluids", "stock": 250, "unit": "liter", "price": 400.00},
-        {"id": "PROD-LB1234-20240105", "product_name": "LED Headlights", "category": "Lighting", "stock": 80, "unit": "pair", "price": 7000.00},
-        {"id": "PROD-AC5678-20240105", "product_name": "Air Conditioning Filter", "category": "Filters", "stock": 100, "unit": "piece", "price": 1200.00},
-        {"id": "PROD-TR6789-20240106", "product_name": "Transmission Fluid", "category": "Fluids", "stock": 60, "unit": "liter", "price": 1600.00},
-        {"id": "PROD-SP8901-20240106", "product_name": "Spark Plug", "category": "Engine Parts", "stock": 220, "unit": "piece", "price": 300.00},
-        {"id": "PROD-TB9012-20240107", "product_name": "Timing Belt", "category": "Belts", "stock": 35, "unit": "piece", "price": 2500.00}
-    ]);
+    const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5;
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // useEffect(() => {
-    //     const fetchProducts = async () => {
-    //         try {
-    //             const response = await fetch('https://out3aiyu9d.execute-api.ap-southeast-1.amazonaws.com/v1/inventory', {
-    //                 headers: {
-    //                     'x-api-key': '7JdX88oUgP23Yurbs9ABF75S9R4JxcqS9FqZbt1B'
-    //                 }
-    //             });
-    //             if (!response.ok) {
-    //                 console.log(response)
-    //                 throw new Error('Network response was not ok');
-    //             }
-    //             const data = await response.json();
-    //             setProducts(data);
-    //         } catch (error) {
-    //             console.error('Error fetching products:', error);
-    //         }
-    //     };
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/inventory`, {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': `${API_KEY}`,
+                    },
+                });
 
-    //     fetchProducts();
-    // }, []);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                setProducts(data);
+            } catch (error) {
+                alert('Error fetching products!');
+                console.error('Error fetching products:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     useEffect(() => {
         const handleEsc = (event) => {
             if (event.key === 'Escape' && isModalOpen) {
-                toggleModal(); // Close the modal when 'Escape' is pressed
+                toggleModal();
             }
         };
 
         window.addEventListener('keydown', handleEsc);
 
-        // Clean up the event listener when the component is unmounted or modal state changes
         return () => {
             window.removeEventListener('keydown', handleEsc);
         };
@@ -110,13 +100,12 @@ function Inventory() {
     const handleCheckboxChange = (index, product_name) => {
         const isAlreadySelected = selectedCheckboxes.includes(index);
 
-        if (isAlreadySelected) {
-            console.log(`Deselected product: ${product_name}`);
-        } else {
+        if (!isAlreadySelected) {
             console.log(`Selected product: ${product_name}`);
         }
+
         setSelectedCheckboxes((prevSelected) => {
-            if (prevSelected.includes(index)) {
+            if (isAlreadySelected) {
                 return prevSelected.filter((item) => item !== index);
             } else {
                 return [...prevSelected, index];
@@ -132,10 +121,10 @@ function Inventory() {
                     return { id: product.id };
                 });
     
-                const response = await fetch('https://api.com', {
+                const response = await fetch(`${API_ENDPOINT}/inventory`, {
                     method: 'DELETE',
                     headers: {
-                        'x-api-key': 'test'
+                        'x-api-key': `${API_KEY}`,
                     },
                     body: JSON.stringify(selectedProducts)
                 });
@@ -153,6 +142,7 @@ function Inventory() {
                 setSelectedCheckboxes([]);
     
             } catch (error) {
+                alert('Error deleting product(s)!');
                 console.error('Error deleting products:', error);
             }
         } else {
@@ -185,6 +175,7 @@ function Inventory() {
             stock: product.stock.toString(),
             price: product.price.toString(),
         });
+        console.log(`To update: ${product.id}`)
         setIsEditMode(true);
         setEditProductIndex(index);
         setIsModalOpen(true);
@@ -238,18 +229,18 @@ function Inventory() {
                 let response;
 
                 if (isEditMode && editProductIndex !== null) {
-                    const response = await fetch('https://api.com', {
+                    response = await fetch(`${API_ENDPOINT}/inventory`, {
                         method: 'PUT',
                         headers: {
-                            'x-api-key': 'test'
+                            'x-api-key': `${API_KEY}`,
                         },
                         body: JSON.stringify(newProduct)
                     });
                 } else {
-                    const response = await fetch('https://api.com', {
-                        method: '{POST}',
+                    response = await fetch(`${API_ENDPOINT}/inventory`, {
+                        method: 'POST',
                         headers: {
-                            'x-api-key': 'test'
+                            'x-api-key': `${API_KEY}`,
                         },
                         body: JSON.stringify(newProduct)
                     });
@@ -277,6 +268,7 @@ function Inventory() {
                 toggleModal();
     
             } catch (error) {
+                alert('Error submitting product!');
                 console.error('Error submitting product:', error);
             } finally {
                 setIsLoading(false);
@@ -294,7 +286,6 @@ function Inventory() {
 
     const productsToDisplay = products
     .filter((product) => {
-        // First apply the tab-specific filter
         if (activeTab === 'onHand') {
             return product.stock > 0;
         } else if (activeTab === 'outOfStock') {
@@ -304,7 +295,6 @@ function Inventory() {
         }
     })
     .filter((product) => {
-        // Then apply the search query filter
         return (
             (product.id && product.id.toLowerCase().includes(searchQuery)) ||
             (product.product_name && product.product_name.toLowerCase().includes(searchQuery)) ||
@@ -395,48 +385,53 @@ function Inventory() {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedProducts.map((product, index) => {
-                            // Calculate the correct absolute index in the products array
-                            const absoluteIndex = (currentPage - 1) * pageSize + index;
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center' }}>
+                                    <div className="loading-spinner"></div>
+                                </td>
+                            </tr>
+                        ) : (
+                            paginatedProducts.map((product, index) => {
+                                const absoluteIndex = (currentPage - 1) * pageSize + index;
 
-                            return (
-                                <tr key={absoluteIndex}>
-                                    <td onClick={() => handleCheckboxChange(absoluteIndex, product.product_name)} style={{ cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            onChange={() => handleCheckboxChange(absoluteIndex)}
-                                            checked={selectedCheckboxes.includes(absoluteIndex)}
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                    </td>
-                                    <td>{product.id}</td>
-                                    <td>{product.product_name}</td>
-                                    <td>{product.category}</td>
-                                    <td>{product.stock}</td>
-                                    <td>{product.unit}</td>
-                                    <td>₱{parseFloat(product.price).toFixed(2)}</td>
-                                    <td>
-                                        <span
-                                            className="material-symbols-outlined edit-icon"
-                                            onClick={() => handleEdit(index)} // Use absoluteIndex here
-                                            title="Edit Product"
-                                        >
-                                            edit_note
-                                        </span>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                return (
+                                    <tr key={absoluteIndex}>
+                                        <td onClick={() => handleCheckboxChange(absoluteIndex, product.product_name)} style={{ cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                onChange={() => handleCheckboxChange(absoluteIndex, product.product_name)}
+                                                checked={selectedCheckboxes.includes(absoluteIndex)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </td>
+                                        <td>{product.id}</td>
+                                        <td>{product.product_name}</td>
+                                        <td>{product.category}</td>
+                                        <td>{product.stock}</td>
+                                        <td>{product.unit}</td>
+                                        <td>₱{parseFloat(product.price).toFixed(2)}</td>
+                                        <td>
+                                            <span
+                                                className="material-symbols-outlined edit-icon"
+                                                onClick={() => handleEdit(index)}
+                                                title="Edit Product"
+                                            >
+                                                edit_note
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
             </div>
             
             <div className="lower-table">
-                <div className="clear-all-container">
-                    {selectedCheckboxes.length > 0 && (
-                        <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
-                    )}
-                </div>
+                {selectedCheckboxes.length > 0 && (
+                    <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
+                )}
                 <div className="pagination">
                     {Array.from({ length: totalPages }, (_, i) => (
                         <span
@@ -462,6 +457,7 @@ function Inventory() {
                                     <input
                                         type="text"
                                         name="product_name"
+                                        placeholder="Enter product name"
                                         value={productDetails.product_name}
                                         onChange={handleInputChange}
                                         required
@@ -472,6 +468,7 @@ function Inventory() {
                                     <input
                                         type="text"
                                         name="category"
+                                        placeholder="Enter product category"
                                         value={productDetails.category}
                                         onChange={handleInputChange}
                                         required
@@ -482,6 +479,7 @@ function Inventory() {
                                     <input
                                         type="number"
                                         name="stock"
+                                        placeholder="Enter stock count"
                                         value={productDetails.stock}
                                         onChange={handleInputChange}
                                         required
@@ -494,6 +492,7 @@ function Inventory() {
                                     <select 
                                         className="inventory-select"
                                         name="unit"
+                                        placeholder="Enter the stock's unit of measurement"
                                         value={productDetails.unit}
                                         onChange={handleInputChange}
                                         required
@@ -508,6 +507,7 @@ function Inventory() {
                                     <input
                                         type="number"
                                         name="price"
+                                        placeholder="Enter the stock's price"
                                         value={productDetails.price}
                                         onChange={handleInputChange}
                                         required
@@ -530,7 +530,6 @@ function Inventory() {
                 </>
             )}
         </div>
-        
     );
 }
 

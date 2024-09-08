@@ -6,18 +6,18 @@ variable "get_users_invoke_arn" {
   type = string
 }
 
-variable "get_inventory_invoke_arn" {
+variable "get_item_invoke_arn" {
   type = string
 }
 
-variable "post_inventory_invoke_arn" {
+variable "post_item_invoke_arn" {
   type = string
 }
 
-variable "put_inventory_invoke_arn" {
+variable "put_item_invoke_arn" {
   type = string
 }
 
-variable "delete_inventory_invoke_arn" {
+variable "delete_item_invoke_arn" {
   type = string
 }
