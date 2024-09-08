@@ -2,15 +2,19 @@ import json
 import boto3
 import os
 import logging
-import random
-import string
-from datetime import datetime
 from decimal import Decimal
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 dynamodb = boto3.resource('dynamodb')
+
+resource_attributes = {
+    'customer': ['id', 'name', 'contact', 'email', 'address', 'plateNo', 'carModel'],
+    'employee': ['id', 'name', 'contact', 'email', 'jobTitle', 'salary'],
+    'inventory': ['id', 'product_name', 'category', 'stock', 'unit', 'price'],
+    'transaction': ['id', 'customerName', 'plateNo', 'type', 'amount', 'dateTime']
+}
 
 def lambda_handler(event, context):
     logger.info(event)
@@ -21,30 +25,29 @@ def lambda_handler(event, context):
         logger.error('Resource is required')
         return generate_response(400, {'error': 'Resource is required'})
         
-    if resource == 'customer':
-        table = dynamodb.Table(os.environ['CUSTOMER_TABLE_NAME'])
-    elif resource == 'employee':
-        table = dynamodb.Table(os.environ['EMPLOYEE_TABLE_NAME'])
-    elif resource == 'inventory':
-        table = dynamodb.Table(os.environ['INVENTORY_TABLE_NAME'])
-    elif resource == 'transaction':
-        table = dynamodb.Table(os.environ['TRANSACTION_TABLE_NAME'])
-    else:
+    if resource not in resource_attributes:
         logger.error(f'Unknown resource: {resource}')
-        raise ValueError(f"Unknown resource: {resource}")
-    
-    data = json.loads(event['body'])
-    logger.info(f"Payload data: {data}")
+        return generate_response(400, {'error': f'Unknown resource: {resource}'})
 
     try:
-        item = {
-            'id': data['id'],
-            'product_name': data['product_name'].strip(),
-            'category': data['category'].strip(),
-            'stock': data['stock'],
-            'unit': data['unit'],
-            'price': Decimal(str(data['price']))
-        }
+        table = dynamodb.Table(os.environ[f'{resource.upper()}_TABLE_NAME'])
+        logger.info(f"Selected table: {resource.upper()}_TABLE_NAME")
+        
+        data = json.loads(event['body'])
+        logger.info(f"Payload data: {data}")
+
+        item = {}
+        for attribute in resource_attributes[resource]:
+            if attribute in data:
+                item[attribute] = data[attribute].strip() if isinstance(data[attribute], str) else data[attribute]
+            else:
+                logger.error(f"Missing required attribute: {attribute}")
+                return generate_response(400, {'error': f"Missing required attribute: {attribute}"})
+
+        if 'price' in item:
+            item['price'] = Decimal(str(item['price']))
+        if 'amount' in item:
+            item['amount'] = Decimal(str(item['amount']))
 
         response = table.put_item(Item=item)
         logger.info(f"PutItem response: {response}")
@@ -54,11 +57,6 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"Error adding item: {str(e)}")
         return generate_response(500, {'message': 'Failed to add item', 'error': str(e)})
-
-def generate_item_id():
-    random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    current_date = datetime.now().strftime('%Y%m%d')
-    return f"PROD-{random_string}-{current_date}"
 
 def generate_response(status_code, body):
     return {

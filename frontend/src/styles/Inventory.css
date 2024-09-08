@@ -631,7 +631,6 @@ input[type="number"] {
     color: #333;
     cursor: pointer;
     appearance: none; 
-    background-image: url('data:image/svg+xml;base64,...');
     background-position: right 10px center; 
     background-repeat: no-repeat; 
     background-size: 14px; 

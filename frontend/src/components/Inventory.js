@@ -492,12 +492,12 @@ function Inventory() {
                                     <select 
                                         className="inventory-select"
                                         name="unit"
-                                        placeholder="Enter the stock's unit of measurement"
+                                        placeholder="Select the stock's unit of measurement"
                                         value={productDetails.unit}
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        <option value="">Select Unit</option>
+                                        <option value="">Select Unit of Measurement</option>
                                         <option value="piece">Piece</option>
                                         <option value="box">Box</option>
                                     </select>

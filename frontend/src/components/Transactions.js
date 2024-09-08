@@ -1,31 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Transactions.css';
 
+function generateTransactionId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return `TRAN-${randomString}-${dateString}`;
+}
+
 function Transactions() {
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editTransactionIndex, setEditTransactionIndex] = useState(null);
-    const [transactionDetails, setTransactionDetails] = useState({
-        transactionNo: '',
-        type: '',
-        dateTime: '',
-        customerName: '',
-        plateNo: '',
-        amount: ''
-    });
+    const [transactionDetails, setTransactionDetails] = useState({ id: '', type: '', dateTime: '', customerName: '', plateNo: '', amount: '' });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [transactions, setTransactions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 5;
 
-    const [searchQuery, setSearchQuery] = useState(''); // State for search query
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                    method: 'GET',
+                    headers: {
+                        'x-api-key': API_KEY,
+                    },
+                });
 
-    const [transactions, setTransactions] = useState([
-        { transactionNo: 'TXN001', type: 'Scope of Work', dateTime: '2024-08-01 14:00', customerName: 'John Doe', plateNo: 'ABC123', amount: 150.00 },
-        { transactionNo: 'TXN002', type: 'Job Order', dateTime: '2024-08-02 15:30', customerName: 'Jane Smith', plateNo: 'XYZ456', amount: -50.00 },
-        { transactionNo: 'TXN003', type: 'Scope of Work', dateTime: '2024-08-03 11:45', customerName: 'Michael Brown', plateNo: 'LMN789', amount: 200.00 },
-        { transactionNo: 'TXN004', type: 'Parts Quotation', dateTime: '2024-08-04 10:15', customerName: 'Alice Johnson', plateNo: 'QRS234', amount: 175.00 },
-        { transactionNo: 'TXN005', type: 'Receipt', dateTime: '2024-08-05 16:20', customerName: 'Bob Williams', plateNo: 'TUV678', amount: -30.00 }
-    ]);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                setTransactions(data);
+            } catch (error) {
+                alert('Error fetching transactions!');
+                console.error('Error fetching transactions:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTransactions();
+    }, []);
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -34,7 +57,7 @@ function Transactions() {
     const handleSortSelection = (sortOption) => {
         setSelectedSort(sortOption);
         setDropdownOpen(false);
-        
+
         const sortedTransactions = [...transactions];
     
         switch (sortOption) {
@@ -45,30 +68,22 @@ function Transactions() {
                 sortedTransactions.sort((a, b) => b.customerName.localeCompare(a.customerName));
                 break;
             case 'Plate No: A to Z':
-                sortedTransactions.sort((a, b) => {
-                    const plateA = a.plateNo.toUpperCase();
-                    const plateB = b.plateNo.toUpperCase();
-                    return plateA.localeCompare(plateB, undefined, { numeric: true, sensitivity: 'base' });
-                });
+                sortedTransactions.sort((a, b) => a.plateNo.localeCompare(b.plateNo, undefined, { numeric: true, sensitivity: 'base' }));
                 break;
             case 'Plate No: Z to A':
-                sortedTransactions.sort((a, b) => {
-                    const plateA = a.plateNo.toUpperCase();
-                    const plateB = b.plateNo.toUpperCase();
-                    return plateB.localeCompare(plateA, undefined, { numeric: true, sensitivity: 'base' });
-                });
+                sortedTransactions.sort((a, b) => b.plateNo.localeCompare(a.plateNo, undefined, { numeric: true, sensitivity: 'base' }));
                 break;
             case 'Transaction No: High to Low':
                 sortedTransactions.sort((a, b) => {
-                    const numA = parseInt(a.transactionNo.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.transactionNo.replace(/[^0-9]/g, ''), 10);
+                    const numA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
+                    const numB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
                     return numB - numA;
                 });
                 break;
             case 'Transaction No: Low to High':
                 sortedTransactions.sort((a, b) => {
-                    const numA = parseInt(a.transactionNo.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.transactionNo.replace(/[^0-9]/g, ''), 10);
+                    const numA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
+                    const numB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
                     return numA - numB;
                 });
                 break;
@@ -79,9 +94,15 @@ function Transactions() {
         setTransactions(sortedTransactions);
     };
 
-    const handleCheckboxChange = (index) => {
+    const handleCheckboxChange = (index, id) => {
+        const isAlreadySelected = selectedCheckboxes.includes(index);
+
+        if (!isAlreadySelected) {
+            console.log(`Selected transaction: ${id}`);
+        }
+
         setSelectedCheckboxes((prevSelected) => {
-            if (prevSelected.includes(index)) {
+            if (isAlreadySelected) {
                 return prevSelected.filter((item) => item !== index);
             } else {
                 return [...prevSelected, index];
@@ -89,12 +110,38 @@ function Transactions() {
         });
     };
 
-    const handleDeleteConfirmation = (confirm) => {
+    const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
-            setTransactions((prevTransactions) =>
-                prevTransactions.filter((_, index) => !selectedCheckboxes.includes(index))
-            );
-            setSelectedCheckboxes([]);
+            try {
+                const selectedTransactions = selectedCheckboxes.map(index => {
+                    const transaction = transactions[index];
+                    return { id: transaction.id };
+                });
+
+                const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-api-key': API_KEY,
+                    },
+                    body: JSON.stringify(selectedTransactions)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete selected transactions');
+                }
+
+                const result = await response.json();
+                console.log('Deletion result:', result);
+
+                setTransactions((prevTransactions) =>
+                    prevTransactions.filter((_, index) => !selectedCheckboxes.includes(index))
+                );
+                setSelectedCheckboxes([]);
+
+            } catch (error) {
+                alert('Error deleting transaction(s)!');
+                console.error('Error deleting transactions:', error);
+            }
         } else {
             setSelectedCheckboxes([]);
         }
@@ -109,14 +156,14 @@ function Transactions() {
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditTransactionIndex(null);
-            setTransactionDetails({ transactionNo: '', type: '', dateTime: '', customerName: '', plateNo: '', amount: '' });
+            setTransactionDetails({ id: '', type: '', dateTime: '', customerName: '', plateNo: '', amount: '' });
         }
     };
 
     const handleEdit = (index) => {
         const transaction = transactions[index];
         setTransactionDetails({
-            transactionNo: transaction.transactionNo,
+            id: transaction.id,
             type: transaction.type,
             dateTime: transaction.dateTime,
             customerName: transaction.customerName,
@@ -128,10 +175,6 @@ function Transactions() {
         setIsModalOpen(true);
     };
 
-    const handleSavePdf = () => {
-        console.log('test');
-    };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setTransactionDetails({
@@ -140,15 +183,12 @@ function Transactions() {
         });
     };
 
-    const handleSearchInputChange = (e) => {
-        setSearchQuery(e.target.value);
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const newTransactionId = isEditMode ? transactionDetails.id : generateTransactionId();
         const newTransaction = {
-            transactionNo: transactionDetails.transactionNo,
+            id: newTransactionId,
             type: transactionDetails.type,
             dateTime: transactionDetails.dateTime,
             customerName: transactionDetails.customerName,
@@ -156,27 +196,66 @@ function Transactions() {
             amount: parseFloat(transactionDetails.amount),
         };
 
-        if (isEditMode && editTransactionIndex !== null) {
-            setTransactions((prevTransactions) =>
-                prevTransactions.map((transaction, index) =>
-                    index === editTransactionIndex ? newTransaction : transaction
-                )
-            );
-            console.log('Transaction updated:', newTransaction);
-        } else {
-            setTransactions((prevTransactions) => [...prevTransactions, newTransaction]);
-            console.log('Transaction added:', newTransaction);
-        }
+        try {
+            let response;
 
-        toggleModal();
+            if (isEditMode && editTransactionIndex !== null) {
+                response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-api-key': API_KEY,
+                    },
+                    body: JSON.stringify(newTransaction)
+                });
+            } else {
+                response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': API_KEY,
+                    },
+                    body: JSON.stringify(newTransaction)
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(isEditMode ? 'Failed to update transaction' : 'Failed to add transaction');
+            }
+
+            const result = await response.json();
+            console.log(isEditMode ? 'Transaction successfully updated:' : 'Transaction successfully added:', result);
+
+            if (isEditMode && editTransactionIndex !== null) {
+                const transactionIndex = transactions.findIndex((transaction) => transaction.id === transactionDetails.id);
+
+                setTransactions((prevTransactions) =>
+                    prevTransactions.map((transaction, index) =>
+                        index === transactionIndex ? newTransaction : transaction
+                    )
+                );
+            } else {
+                setTransactions((prevTransactions) => [...prevTransactions, newTransaction]);
+            }
+
+            toggleModal();
+
+        } catch (error) {
+            alert('Error submitting transaction!');
+            console.error('Error submitting transaction:', error);
+        }
     };
 
-    // Filtered transactions based on search query
     const filteredTransactions = transactions.filter((transaction) =>
-        transaction.transactionNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         transaction.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         transaction.plateNo.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const paginatedTransactions = filteredTransactions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const totalPages = Math.ceil(filteredTransactions.length / pageSize);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     return (
         <div className="transactions">
@@ -209,7 +288,7 @@ function Transactions() {
                     </span>
                 </button>
                 <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
-                <div onClick={() => handleSortSelection('Customer Name: A to Z')}>Customer Name: A to Z</div>
+                    <div onClick={() => handleSortSelection('Customer Name: A to Z')}>Customer Name: A to Z</div>
                     <div onClick={() => handleSortSelection('Customer Name: Z to A')}>Customer Name: Z to A</div>
                     <div onClick={() => handleSortSelection('Plate No: A to Z')}>Plate No: A to Z</div>
                     <div onClick={() => handleSortSelection('Plate No: Z to A')}>Plate No: Z to A</div>
@@ -223,13 +302,13 @@ function Transactions() {
                         placeholder="Search transactions"
                         className="search-input"
                         value={searchQuery}
-                        onChange={handleSearchInputChange}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     <span className="material-symbols-outlined info-icon" data-tooltip="Only Transaction No., Customer Name, and Plate No. are searchable.">info</span>
                 </div>
-                <div className="transactions-actions">
+                {/* <div className="transactions-actions">
                     <button className="add-transaction-button" onClick={toggleModal}>+ Add New Transaction</button>
-                </div>
+                </div> */}
             </div>
             <div className="transactions-table">
                 <table>
@@ -246,56 +325,64 @@ function Transactions() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredTransactions.map((transaction, index) => (
-                            <tr key={index}>
-                                <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
-                                    <input
-                                        type="checkbox"
-                                        onChange={() => handleCheckboxChange(index)}
-                                        checked={selectedCheckboxes.includes(index)}
-                                        onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
-                                    />
-                                </td>
-                                <td>{transaction.transactionNo}</td>
-                                <td>{transaction.type}</td>
-                                <td>{transaction.dateTime}</td>
-                                <td>{transaction.customerName}</td>
-                                <td>{transaction.plateNo}</td>
-                                <td>₱{transaction.amount.toFixed(2)}</td>
-                                <td>
-                                    <span
-                                        className="material-symbols-outlined edit-icon"
-                                        onClick={() => handleEdit(index)}
-                                        title="Edit Transaction"
-                                    >
-                                        edit_note
-                                    </span>
-                                    <span 
-                                        className="material-symbols-outlined save-pdf-icon"
-                                        onClick={() => handleSavePdf()}
-                                    >
-                                        picture_as_pdf
-                                    </span>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center' }}>
+                                    <div className="loading-spinner"></div>
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            paginatedTransactions.map((transaction, index) => {
+                                const absoluteIndex = (currentPage - 1) * pageSize + index;
+                                return (
+                                    <tr key={absoluteIndex}>
+                                        <td onClick={() => handleCheckboxChange(absoluteIndex, transaction.id)} style={{ cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                onChange={() => handleCheckboxChange(absoluteIndex, transaction.id)}
+                                                checked={selectedCheckboxes.includes(absoluteIndex)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </td>
+                                        <td>{transaction.id}</td>
+                                        <td>{transaction.type}</td>
+                                        <td>{transaction.dateTime}</td>
+                                        <td>{transaction.customerName}</td>
+                                        <td>{transaction.plateNo}</td>
+                                        <td>₱{transaction.amount.toFixed(2)}</td>
+                                        <td>
+                                            <span
+                                                className="material-symbols-outlined edit-icon"
+                                                onClick={() => handleEdit(absoluteIndex)}
+                                                title="Edit Transaction"
+                                            >
+                                                edit_note
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
             </div>
             <div className="lower-table">
                 {selectedCheckboxes.length > 0 && (
-                    <button className="clear-all-button" onClick={handleClearAll}>
-                        Clear All
-                    </button>
+                    <button onClick={handleClearAll} className="clear-all-button">Clear All</button>
                 )}
-                <span className="page-number active">1</span>
-                <span className="page-number">2</span>
-                <span className="page-number">3</span>
-                <span className="page-number">4</span>
-                <span className="page-number">5</span>
+                <div className="pagination">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <span
+                            key={i}
+                            className={`page-number ${currentPage === i + 1 ? 'active' : ''}`}
+                            onClick={() => handlePageChange(i + 1)}
+                        >
+                            {i + 1}
+                        </span>
+                    ))}
+                </div>
             </div>
 
-            {/* Modal for Adding/Editing Transaction */}
             {isModalOpen && (
                 <>
                     <div className="modal-overlay" onClick={toggleModal}></div>
@@ -303,16 +390,25 @@ function Transactions() {
                         <div className="modal-content">
                             <h2>{isEditMode ? 'Edit Transaction' : 'Add New Transaction'}</h2>
                             <form onSubmit={handleSubmit}>
-                                <div className="form-group">
-                                    <label>Type</label>
-                                    <input
-                                        type="text"
-                                        name="type"
-                                        value={transactionDetails.type}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
+                                {!isEditMode && (
+                                    <div className="form-group">
+                                        <label>Type</label>
+                                        <select 
+                                            className="transactions-select"
+                                            name="type"
+                                            placeholder="Select transaction type"
+                                            value={transactionDetails.type}
+                                            onChange={handleInputChange}
+                                            required
+                                        >
+                                            <option value="">Select transaction type</option>
+                                            <option value="Scope of Work">Scope of Work</option>
+                                            <option value="Job Order">Job Order</option>
+                                            <option value="Invoice">Invoice</option>
+                                            <option value="Parts Quotation">Parts Quotation</option>
+                                        </select>
+                                    </div>
+                                )}
                                 <div className="form-group">
                                     <label>Date & Time</label>
                                     <input
@@ -328,6 +424,7 @@ function Transactions() {
                                     <input
                                         type="text"
                                         name="customerName"
+                                        placeholder="Select transaction type"
                                         value={transactionDetails.customerName}
                                         onChange={handleInputChange}
                                         required
