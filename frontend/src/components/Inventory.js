@@ -29,7 +29,7 @@ function Inventory() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch(`${API_ENDPOINT}/inventory`, {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                     method: 'GET',
                     headers: {
                         'x-api-key': `${API_KEY}`,
@@ -121,7 +121,7 @@ function Inventory() {
                     return { id: product.id };
                 });
     
-                const response = await fetch(`${API_ENDPOINT}/inventory`, {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                     method: 'DELETE',
                     headers: {
                         'x-api-key': `${API_KEY}`,
@@ -229,7 +229,7 @@ function Inventory() {
                 let response;
 
                 if (isEditMode && editProductIndex !== null) {
-                    response = await fetch(`${API_ENDPOINT}/inventory`, {
+                    response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                         method: 'PUT',
                         headers: {
                             'x-api-key': `${API_KEY}`,
@@ -237,7 +237,7 @@ function Inventory() {
                         body: JSON.stringify(newProduct)
                     });
                 } else {
-                    response = await fetch(`${API_ENDPOINT}/inventory`, {
+                    response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                         method: 'POST',
                         headers: {
                             'x-api-key': `${API_KEY}`,
