@@ -6,8 +6,6 @@ import editIcon from '../images/edit.png';
 const Settings = () => {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
     const API_KEY = process.env.REACT_APP_API_KEY;
-    console.log(API_ENDPOINT);
-    console.log(API_ENDPOINT);
 
     const [isEditing, setIsEditing] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
@@ -69,7 +67,7 @@ const Settings = () => {
         }
 
         if (isPasswordRequired) {
-            const passwordCheckResponse = await fetch(`${API_ENDPOINT}/item?resource=employee&id=${id}`, {
+            const passwordCheckResponse = await fetch(`${API_ENDPOINT}/item?resource=employee&id=${localStorage.getItem('id')}`, {
                 method: 'GET',
                 headers: {
                     'x-api-key': API_KEY
