@@ -29,7 +29,8 @@ resource "aws_iam_role_policy" "stanghero_lambda_users_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_user"
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_user",
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_user/index/username-index"
         ]
       },
       {
