@@ -30,7 +30,8 @@ resource "aws_iam_role_policy" "stanghero_lambda_policy" {
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem",
           "dynamodb:Scan",
-          "dynamodb:BatchWriteItem"
+          "dynamodb:BatchWriteItem",
+          "dynamodb:Query"
         ]
         Effect = "Allow"
         Resource = [
