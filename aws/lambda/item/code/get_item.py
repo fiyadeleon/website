@@ -11,6 +11,7 @@ dynamodb = boto3.resource('dynamodb')
 
 def lambda_handler(event, context):
     logger.info(event)
+    
     try:
         resource = event['queryStringParameters']['resource']
     except KeyError:
@@ -31,31 +32,74 @@ def lambda_handler(event, context):
 
     try:
         item_id = event['queryStringParameters'].get('id', None)
-    except KeyError:
-        item_id = None
+        email = event['queryStringParameters'].get('email', None)
+        password = event['queryStringParameters'].get('password', None)
 
-    if item_id:
-        try:
-            response = table.get_item(Key={'id': item_id})
-            logger.info(f"GetItem response: {response}")
-            
-            item = response.get('Item', None)
-            if not item:
-                return generate_response(404, {'error': f"Item with id {item_id} not found"})
-            
-            return generate_response(200, item)
-        except Exception as e:
-            logger.error(f"Error fetching item with id {item_id}: {e}")
-            return generate_response(500, {'error': 'Internal Server Error'})
-    else:
-        try:
-            response = table.scan()
-            logger.info(f"ScanTable response: {response}")
-            items = response.get('Items', [])
-            return generate_response(200, items)
-        except Exception as e:
-            logger.error(f"Error scanning table: {e}")
-            return generate_response(500, {'error': 'Internal Server Error'})
+        if email and password:
+            return validate_login(table, email, password)
+        
+        elif item_id:
+            return get_employee_by_id(table, item_id)
+
+        else:
+            return get_all(table)
+
+    except Exception as e:
+        logger.error(f"Error processing request: {e}")
+        return generate_response(500, {'error': 'Internal Server Error'})
+
+def validate_login(table, email, password):
+    try:
+        response = table.query(
+            IndexName='email-index',
+            KeyConditionExpression=boto3.dynamodb.conditions.Key('email').eq(email)
+        )
+        logger.info(f"Query response: {response}")
+
+        items = response.get('Items', [])
+        if not items:
+            return generate_response(404, {'error': f"Employee with email {email} not found"})
+
+        employee = items[0]
+        stored_password = employee.get('password')
+
+        if stored_password is None:
+            return generate_response(500, {'error': 'Password not set for this employee'})
+
+        if password == stored_password:
+            return generate_response(200, {'message': 'Login successful'})
+        else:
+            return generate_response(401, {'error': 'Invalid credentials'})
+
+    except Exception as e:
+        logger.error(f"Error fetching employee with email {email}: {e}")
+        return generate_response(500, {'error': 'Internal Server Error'})
+
+def get_employee_by_id(table, item_id):
+    try:
+        response = table.get_item(Key={'id': item_id})
+        logger.info(f"GetItem response: {response}")
+        
+        employee = response.get('Item', None)
+        if not employee:
+            return generate_response(404, {'error': f"Employee with id {item_id} not found"})
+        
+        return generate_response(200, employee)
+    
+    except Exception as e:
+        logger.error(f"Error fetching employee with id {item_id}: {e}")
+        return generate_response(500, {'error': 'Internal Server Error'})
+
+def get_all(table):
+    try:
+        response = table.scan()
+        logger.info(f"ScanTable response: {response}")
+        items = response.get('Items', [])
+        return generate_response(200, items)
+    
+    except Exception as e:
+        logger.error(f"Error scanning table: {e}")
+        return generate_response(500, {'error': 'Internal Server Error'})
 
 def decimal_default(obj):
     if isinstance(obj, Decimal):

@@ -37,7 +37,8 @@ resource "aws_iam_role_policy" "stanghero_lambda_policy" {
           "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_customer",
           "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_employee",
           "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_inventory",
-          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_transaction"
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_transaction",
+          "arn:aws:dynamodb:ap-southeast-1:654654411031:table/stanghero_employee/index/*"
         ]
       },
       {
