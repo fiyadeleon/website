@@ -42,7 +42,7 @@ const LoginPage = () => {
                 const groups = decodedToken['cognito:groups'] || [];
                 console.log(groups)
     
-                localStorage.setItem('email', decodedToken.sub);
+                localStorage.setItem('email', username);
                 localStorage.setItem('token', idToken);
     
                 if (groups.includes('stanghero-admin-group')) {
