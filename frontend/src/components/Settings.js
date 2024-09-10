@@ -60,6 +60,7 @@ const Settings = () => {
 
     const handleSubmitClick = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
 
         if (isPasswordRequired && password !== confirmPassword) {
             setError('Passwords do not match.');
@@ -99,7 +100,6 @@ const Settings = () => {
         };
 
         try {
-            setIsLoading(true);
             const response = await fetch(`${API_ENDPOINT}/item/?resource=employee&id=${encodeURIComponent(localStorage.getItem('id'))}`, {
                 method: 'PUT', 
                 headers: {
