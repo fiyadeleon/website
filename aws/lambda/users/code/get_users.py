@@ -5,6 +5,7 @@ import os
 import logging
 import uuid
 import base64
+from boto3.dynamodb.conditions import Key
 
 logger = logging.getLogger()
 logger.setLevel("INFO")
@@ -13,6 +14,8 @@ dynamodb = boto3.resource('dynamodb')
 
 table_name = os.environ['TABLE_NAME']
 table = dynamodb.Table(table_name)
+
+username_index = 'username-index'
 
 def lambda_handler(event, context):
     logger.info(event)
@@ -26,20 +29,23 @@ def lambda_handler(event, context):
     # hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     try:
-        response = table.get_item(Key={'username': username})
+        response = table.query(
+            IndexName=username_index,
+            KeyConditionExpression=Key('username').eq(username)
+        )
     except Exception as e:
         logger.error(f'Error querying DynamoDB: {str(e)}')
         return generate_response(500, {'error': 'Error querying DynamoDB', 'message': str(e)})
 
-    if 'Item' in response:
-        user = response['Item']
+    if 'Items' in response and len(response['Items']) > 0:
+        user = response['Items'][0]
         if user['password'] == password:
-            session_token = generate_session_token()
+            token = generate_session_token()
 
             return generate_response(200, {
                 'message': 'Authentication successful',
                 'role': user['role'],
-                'session_token': session_token
+                'token': token
             })
         else:
             logger.error('Invalid password')
