@@ -34,6 +34,11 @@ resource "aws_cognito_user_group" "cognito_user_group" {
   name         = "${var.prefix_name}-user-group"
 }
 
+resource "aws_cognito_user_group" "cognito_default_group" {
+  user_pool_id = aws_cognito_user_pool.cognito_user_pool.id
+  name         = "${var.prefix_name}-default-group"
+}
+
 resource "aws_cognito_user_pool_client" "cognito_app_client" {
   name         = "${var.prefix_name}-app-client"
   user_pool_id = aws_cognito_user_pool.cognito_user_pool.id

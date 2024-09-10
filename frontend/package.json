@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "amazon-cognito-identity-js": "^6.3.12",
     "aws-amplify": "^6.6.0",
+    "aws-sdk": "^2.1691.0",
     "axios": "^1.7.7",
     "browserify-zlib": "^0.2.0",
     "https-browserify": "^1.0.0",

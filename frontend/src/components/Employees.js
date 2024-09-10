@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Employees.css';
+import { CognitoUserPool } from 'amazon-cognito-identity-js'; 
+import AWS from 'aws-sdk'; 
+import awsconfig from '../aws-exports';
 
 function generateEmployeeId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -7,17 +10,59 @@ function generateEmployeeId() {
     return `EMP-${randomString}-${dateString}`;
 }
 
-function generatePassword() {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-    let password = '';
-    for (let i = 0; i < 10; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        password += characters[randomIndex];
-    }
-    return password;
-}
-
 function Employees() {
+    const AWS_REGION = process.env.REACT_APP_API_ENDPOINT || "ap-southeast-1";
+    AWS.config.update({
+        region: AWS_REGION,
+        accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+    });
+    
+    const cognito = new AWS.CognitoIdentityServiceProvider({
+        region: AWS_REGION
+    });
+    
+    const createUserInCognito = async (email, role) => {
+        const params = {
+            UserPoolId: awsconfig.aws_user_pools_id,
+            Username: email, 
+            TemporaryPassword: 'TEMPORARY_PASSWORD', 
+            UserAttributes: [
+                {
+                    Name: 'email',
+                    Value: email,
+                },
+                {
+                    Name: 'email_verified',
+                    Value: 'true',
+                }
+            ],
+            DesiredDeliveryMediums: ['EMAIL']
+        };
+    
+        try {
+            // Step 1: Create the user in Cognito
+            const result = await cognito.adminCreateUser(params).promise();
+            console.log('User created in Cognito:', result);
+    
+            // Step 2: Add the user to the group
+            if (groupName) {
+                const addUserToGroupParams = {
+                    UserPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+                    Username: email,
+                    GroupName: groupName,
+                };
+                await cognito.adminAddUserToGroup(addUserToGroupParams).promise();
+                console.log(`User added to group: ${groupName}`);
+            }
+    
+            return result;
+        } catch (err) {
+            console.error('Error creating user in Cognito or adding to group:', err);
+            throw err;
+        }
+    };
+
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
     const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
@@ -172,7 +217,7 @@ function Employees() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const newEmployee = {
             id: isEditMode ? employeeDetails.id : generateEmployeeId(),
             name: employeeDetails.name,
@@ -181,17 +226,24 @@ function Employees() {
             salary: employeeDetails.salary,
             email: employeeDetails.email,
             role: employeeDetails.role,
-            password: isEditMode ? employeeDetails.password : generatePassword(),
         };
-
+    
         try {
             setIsLoading(true);
+    
+            // Step 1: Add the employee to Cognito
+            if (!isEditMode) {
+                await createUserInCognito(employeeDetails.email, employeeDetails.role);
+                console.log('New user added to Cognito with email and temporary password sent');
+            }
+    
+            // Step 2: Add or update the employee in your API
             let response;
             if (isEditMode && editEmployeeIndex !== null) {
                 response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
                     method: 'PUT',
                     headers: {
-                        'x-api-key': API_KEY
+                        'x-api-key': API_KEY,
                     },
                     body: JSON.stringify(newEmployee),
                 });
@@ -199,14 +251,14 @@ function Employees() {
                 response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
                     method: 'POST',
                     headers: {
-                        'x-api-key': API_KEY
+                        'x-api-key': API_KEY,
                     },
                     body: JSON.stringify(newEmployee),
                 });
             }
-
+    
             if (!response.ok) throw new Error(isEditMode ? 'Failed to update employee' : 'Failed to add employee');
-
+    
             if (isEditMode && editEmployeeIndex !== null) {
                 setEmployees((prevEmployees) =>
                     prevEmployees.map((employee, index) =>
@@ -216,7 +268,7 @@ function Employees() {
             } else {
                 setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
             }
-
+    
             toggleModal();
         } catch (error) {
             console.error('Error submitting employee:', error);

@@ -20,34 +20,42 @@ const LoginPage = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         setLoading(true);
-
+    
         const authenticationDetails = new AuthenticationDetails({
             Username: username,
             Password: password,
         });
-
+    
         const userData = {
             Username: username,
             Pool: userPool,
         };
-
+    
         const cognitoUser = new CognitoUser(userData);
-
+    
         cognitoUser.authenticateUser(authenticationDetails, {
             onSuccess: (result) => {
                 const idToken = result.getIdToken().getJwtToken();
-                const role = result.idToken.payload['custom:role'];
-
-                localStorage.setItem('id', result.idToken.payload.sub);
-                localStorage.setItem('role', role);
+                const accessToken = result.getAccessToken().getJwtToken();
+                const decodedToken = result.getIdToken().decodePayload();
+    
+                const groups = decodedToken['cognito:groups'] || [];
+                console.log(groups)
+    
+                localStorage.setItem('id', decodedToken.sub);
                 localStorage.setItem('token', idToken);
-
-                if (role === 'admin') {
-                    navigate('/reports');
+    
+                if (groups.includes('stanghero-admin-group')) {
+                    localStorage.setItem('role', 'admin');
+                    navigate('/reports'); 
+                } else if (groups.includes('stanghero-user-group')) {
+                    localStorage.setItem('role', 'user');
+                    navigate('/userHomepage'); 
                 } else {
-                    navigate('/userHomepage');
+                    localStorage.setItem('role', 'none');
+                    alert('No valid group assigned to this user.');
                 }
-
+    
                 setLoading(false);
             },
             onFailure: (err) => {
@@ -61,7 +69,7 @@ const LoginPage = () => {
                 delete userAttributes.phone_number_verified;
             },
         });
-    };
+    };    
 
     const handleNewPasswordSubmit = (event) => {
         event.preventDefault();
@@ -83,6 +91,8 @@ const LoginPage = () => {
             onSuccess: (result) => {
                 const idToken = result.getIdToken().getJwtToken();
                 const role = result.idToken.payload['custom:role'];
+                console.log(result)
+                console.log(role)
 
                 localStorage.setItem('id', result.idToken.payload.sub);
                 localStorage.setItem('role', role);
@@ -105,6 +115,8 @@ const LoginPage = () => {
                     onSuccess: (result) => {
                         const idToken = result.getIdToken().getJwtToken();
                         const role = result.idToken.payload['custom:role'];
+                        console.log(result)
+                        console.log(role)
 
                         localStorage.setItem('id', result.idToken.payload.sub);
                         localStorage.setItem('role', role);
