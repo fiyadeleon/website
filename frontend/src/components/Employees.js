@@ -11,11 +11,11 @@ function generateEmployeeId() {
 }
 
 function Employees() {
-    const AWS_REGION = process.env.REGION;
+    const AWS_REGION = process.env.REACT_APP_REGION;
     AWS.config.update({
         region: AWS_REGION,
-        accessKeyId: process.env.ACCESS_KEY,
-        secretAccessKey: process.env.SECRET_KEY,
+        accessKeyId: process.env.REACT_APP_ACCESS_KEY,
+        secretAccessKey: process.env.REACT_APP_SECRET_KEY,
     });
     
     const cognito = new AWS.CognitoIdentityServiceProvider({
@@ -73,8 +73,8 @@ function Employees() {
         }
     };
 
-    const API_ENDPOINT = process.env.API_ENDPOINT;
-    const API_KEY = process.env.API_KEY;
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+    const API_KEY = process.env.REACT_APP_API_KEY;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
