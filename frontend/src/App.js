@@ -14,8 +14,7 @@ import Employees from './components/Employees';
 import Settings from './components/Settings'; 
 import ProtectedRoute from './components/ProtectedRoute'; 
 import AdminPanel from './components/AdminPanel';  
-import UserPanel from './components/UserPanel';    
-import ForgotPassword from './components/ForgotPassword';
+import UserPanel from './components/UserPanel';
 
 function App() {
   return (
@@ -24,7 +23,6 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* User-only routes */}
           <Route 
