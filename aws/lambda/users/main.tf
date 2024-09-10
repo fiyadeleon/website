@@ -25,11 +25,7 @@ resource "aws_iam_role_policy" "stanghero_lambda_users_policy" {
     Statement = [
       {
         Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:Scan"
+          "dynamodb:Query"
         ]
         Effect = "Allow"
         Resource = [
