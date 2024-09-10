@@ -2,10 +2,10 @@ resource "aws_dynamodb_table" "stanghero_user" {
   name         = "${var.prefix_name}_user"
   billing_mode = "PAY_PER_REQUEST"
 
-  hash_key  = "username"
+  hash_key  = "id"
   
   attribute {
-    name = "username"
+    name = "id"
     type = "S"
   }
 
