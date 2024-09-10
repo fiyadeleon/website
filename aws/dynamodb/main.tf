@@ -1,30 +1,3 @@
-resource "aws_dynamodb_table" "stanghero_user" {
-  name         = "${var.prefix_name}_user"
-  billing_mode = "PAY_PER_REQUEST"
-
-  hash_key  = "id"
-  
-  attribute {
-    name = "id"
-    type = "S"
-  }
-
-  attribute {
-    name = "username"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "username-index"
-    hash_key        = "username"
-    projection_type = "ALL"
-  }
-
-  tags = {
-    Name = var.prefix_name
-  }
-}
-
 resource "aws_dynamodb_table" "stanghero_inventory" {
   name         = "${var.prefix_name}_inventory"
   billing_mode = "PAY_PER_REQUEST"
@@ -82,6 +55,17 @@ resource "aws_dynamodb_table" "stanghero_employee" {
   attribute {
     name = "id"
     type = "S"
+  }
+
+  attribute {
+    name = "email"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "email-index"
+    hash_key        = "email"
+    projection_type = "ALL"
   }
 
   tags = {

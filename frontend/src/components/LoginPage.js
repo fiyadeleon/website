@@ -16,7 +16,7 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_ENDPOINT}/users?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=employee&email=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
                 method: 'GET',
                 headers: {
                     'x-api-key': `${API_KEY}`,
@@ -28,10 +28,11 @@ const LoginPage = () => {
             }
 
             const data = await response.json();
-            const { token, role } = data;
+            const { id, role, token } = data;
 
-            localStorage.setItem('token', token);
+            localStorage.setItem('id', id);
             localStorage.setItem('role', role);
+            localStorage.setItem('token', token);
 
             if (role === 'admin') {
                 navigate('/reports');

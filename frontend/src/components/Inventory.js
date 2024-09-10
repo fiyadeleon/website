@@ -392,7 +392,9 @@ function Inventory() {
                         {isLoading ? (
                             <tr>
                                 <td colSpan="8" style={{ textAlign: 'center' }}>
-                                    <div className="loading-spinner"></div>
+                                    <div className="loading-icon">
+                                        <i className="fas fa-spinner fa-spin fa-3x"></i>
+                                    </div>
                                 </td>
                             </tr>
                         ) : (

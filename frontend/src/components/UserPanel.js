@@ -86,8 +86,9 @@ const UserPanel = ({ children, onCircleSelect }) => {
     };
 
     const handleLogoutClick = () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('id');
         localStorage.removeItem('role');
+        localStorage.removeItem('token');
         navigate('/login');
     };
 

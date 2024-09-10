@@ -45,7 +45,8 @@ def lambda_handler(event, context):
             return generate_response(200, {
                 'message': 'Authentication successful',
                 'role': user['role'],
-                'token': token
+                'token': token,
+                'id': user['id']
             })
         else:
             logger.error('Invalid password')
