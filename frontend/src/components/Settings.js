@@ -4,8 +4,8 @@ import user from '../images/user.png';
 import editIcon from '../images/edit.png';
 
 const Settings = () => {
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
-    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+    const API_KEY = process.env.REACT_APP_API_KEY;
     const [isEditing, setIsEditing] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
     const [contact, setContact] = useState(''); 
