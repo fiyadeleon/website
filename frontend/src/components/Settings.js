@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/Settings.css';
 import user from '../images/user.png';
 import editIcon from '../images/edit.png';
+import { Auth } from 'aws-amplify'; // Import AWS Amplify's Auth module
 
 const Settings = () => {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
@@ -50,6 +51,7 @@ const Settings = () => {
         setPassword('');
         setConfirmPassword('');
         setCurrentPassword('');
+        setError('');
     };
 
     const handleEditClick = () => {
@@ -60,24 +62,31 @@ const Settings = () => {
         e.preventDefault();
 
         if (isPasswordRequired && password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError('Passwords do not match.');
             return;
         } else {
             setError('');
         }
 
         if (isPasswordRequired) {
-            const passwordCheckResponse = await fetch(`${API_ENDPOINT}/item?resource=employee&id=${localStorage.getItem('id')}`, {
-                method: 'GET',
-                headers: {
-                    'x-api-key': API_KEY
+            try {
+                const user = await Auth.currentAuthenticatedUser();
+                
+                if (!currentPassword || !password) {
+                    setError('Please provide both the current and new password.');
+                    return;
                 }
-            });
-
-            const passwordCheckData = await passwordCheckResponse.json();
-            
-            if (passwordCheckData['password'] !== currentPassword) {
-                setError('Current password is incorrect');
+        
+                await Auth.changePassword(user, currentPassword, password);
+                setSuccessMessage('Password changed successfully.');
+            } catch (error) {
+                if (error.code === 'NotAuthorizedException') {
+                    setError('Current password is incorrect.');
+                } else if (error.code === 'LimitExceededException') {
+                    setError('Attempt limit exceeded, please try again later.');
+                } else {
+                    setError('Failed to change the password. Please try again later.');
+                }
                 return;
             }
         }
@@ -86,7 +95,7 @@ const Settings = () => {
             id: localStorage.getItem('id'),
             contact,
             email,
-            ...(isPasswordRequired && { password })
+            ...(isPasswordRequired && { password }) 
         };
 
         try {
@@ -102,16 +111,20 @@ const Settings = () => {
             if (response.ok) {
                 const result = await response.json();
 
-                alert('Profile successfully updated!');
-                setIsEditing(false);
-                setIsPasswordRequired(false);
-                setPassword('');
-                setConfirmPassword('');
-                setCurrentPassword('');
+                let updatedFields = [];
+                if (email !== employeeData.email) updatedFields.push('Email');
+                if (contact !== employeeData.contact) updatedFields.push('Contact');
+                if (isPasswordRequired) updatedFields.push('Password');
+
+                alert(`${updatedFields.join(', ')} successfully updated!`);
+
+                setEmployeeData({ ...employeeData, contact, email });
+                handleBackClick();
             } else {
-                console.error('Error updating employee data');
+                setError('Error updating employee data');
             }
         } catch (error) {
+            setError('Error updating employee data');
             console.error('Error updating employee data:', error);
         } finally {
             setIsLoading(false);
