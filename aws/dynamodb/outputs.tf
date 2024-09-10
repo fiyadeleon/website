@@ -1,7 +1,3 @@
-output "stanghero_user_table_name" {
-  value = aws_dynamodb_table.stanghero_user.name
-}
-
 output "stanghero_employee_table_name" {
   value = aws_dynamodb_table.stanghero_employee.name
 }
