@@ -11,11 +11,11 @@ function generateEmployeeId() {
 }
 
 function Employees() {
-    const AWS_REGION = process.env.REACT_APP_API_ENDPOINT;
+    const AWS_REGION = process.env.AWS_REGION;
     AWS.config.update({
         region: AWS_REGION,
-        accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY,
     });
     
     const cognito = new AWS.CognitoIdentityServiceProvider({
@@ -58,7 +58,7 @@ function Employees() {
             // Step 2: Add the user to the group
             if (groupName) {
                 const addUserToGroupParams = {
-                    UserPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+                    UserPoolId: process.env.COGNITO_USER_POOL_ID,
                     Username: email,
                     GroupName: groupName,
                 };
@@ -73,8 +73,8 @@ function Employees() {
         }
     };
 
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-    const API_KEY = process.env.REACT_APP_API_KEY;
+    const API_ENDPOINT = process.env.API_ENDPOINT;
+    const API_KEY = process.env.API_KEY;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');

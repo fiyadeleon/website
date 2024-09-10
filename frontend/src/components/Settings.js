@@ -4,8 +4,8 @@ import user from '../images/user.png';
 import editIcon from '../images/edit.png';
 
 const Settings = () => {
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-    const API_KEY = process.env.REACT_APP_API_KEY;
+    const API_ENDPOINT = process.env.API_ENDPOINT;
+    const API_KEY = process.env.API_KEY;
     const [isEditing, setIsEditing] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
     const [contact, setContact] = useState(''); 

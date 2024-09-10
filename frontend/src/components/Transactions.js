@@ -8,8 +8,8 @@ function generateTransactionId() {
 }
 
 function Transactions() {
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-    const API_KEY = process.env.REACT_APP_API_KEY;
+    const API_ENDPOINT = process.env.API_ENDPOINT;
+    const API_KEY = process.env.API_KEY;
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
