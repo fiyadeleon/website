@@ -13,6 +13,7 @@
     top: 0;
     z-index: 100;
     position: relative;
+    z-index: 2;
 }
 
 .employees-header h1 {
@@ -457,7 +458,7 @@
 
 .modal {
     position: fixed;
-    top: 60px;
+    top: 100px; /* Adjust based on where you want the modal to appear vertically */
     left: 50%;
     transform: translateX(-50%);
     width: 40%; /* Adjust based on the size of the modal (reduce width if necessary) */

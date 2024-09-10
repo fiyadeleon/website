@@ -10,6 +10,7 @@ function generateProductId() {
 function Inventory() {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
     const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -27,31 +28,31 @@ function Inventory() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': `${API_KEY}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const data = await response.json();
-                setProducts(data);
-            } catch (error) {
-                alert('Error fetching products!');
-                console.error('Error fetching products:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchProducts();
     }, []);
+
+    const fetchProducts = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': API_KEY
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+            setProducts(data);
+        } catch (error) {
+            alert('Error fetching products!');
+            console.error('Error fetching products:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         const handleEsc = (event) => {
@@ -124,7 +125,7 @@ function Inventory() {
                 const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                     method: 'DELETE',
                     headers: {
-                        'x-api-key': `${API_KEY}`,
+                        'x-api-key': API_KEY,
                     },
                     body: JSON.stringify(selectedProducts)
                 });
@@ -144,6 +145,8 @@ function Inventory() {
             } catch (error) {
                 alert('Error deleting product(s)!');
                 console.error('Error deleting products:', error);
+            } finally {
+                setCurrentPage(1);
             }
         } else {
             setSelectedCheckboxes([]);
@@ -232,7 +235,7 @@ function Inventory() {
                     response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                         method: 'PUT',
                         headers: {
-                            'x-api-key': `${API_KEY}`,
+                            'x-api-key': API_KEY,
                         },
                         body: JSON.stringify(newProduct)
                     });
@@ -240,7 +243,7 @@ function Inventory() {
                     response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
                         method: 'POST',
                         headers: {
-                            'x-api-key': `${API_KEY}`,
+                            'x-api-key': API_KEY,
                         },
                         body: JSON.stringify(newProduct)
                     });
@@ -272,6 +275,7 @@ function Inventory() {
                 console.error('Error submitting product:', error);
             } finally {
                 setIsLoading(false);
+                fetchProducts();
             }
         }
     };    

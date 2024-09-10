@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Customers.css';
 
+function generateCustomerId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase(); 
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, ''); 
+    return `CUST-${randomString}-${dateString}`;
+}
+
 function Customers() {
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+    
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -9,24 +18,40 @@ function Customers() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editCustomerIndex, setEditCustomerIndex] = useState(null);
     const [customerDetails, setCustomerDetails] = useState({
-        id: '',
-        name: '',
-        contact: '',
-        email: '',
-        address: '',
-        plateNo: '',
-        carModel: ''
+        id: '', name: '', contact: '', email: '', address: '', plateNo: '', carModel: ''
     });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [customers, setCustomers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 5;
 
-    const [searchQuery, setSearchQuery] = useState(''); // State for search query
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
 
-    const [customers, setCustomers] = useState([
-        { id: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
-        { id: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
-        { id: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
-        { id: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234', carModel: 'Ford Mustang Mach 1' },
-        { id: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678', carModel: 'Ford Mustang GT Convertible' }
-    ]);    
+    const fetchCustomers = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': API_KEY
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch customers');
+            }
+
+            const data = await response.json();
+            setCustomers(data);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+            alert('Error fetching customers!');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -35,9 +60,9 @@ function Customers() {
     const handleSortSelection = (sortOption) => {
         setSelectedSort(sortOption);
         setDropdownOpen(false);
-        
+
         const sortedCustomers = [...customers];
-    
+
         switch (sortOption) {
             case 'Name: A to Z':
                 sortedCustomers.sort((a, b) => a.name.localeCompare(b.name));
@@ -46,42 +71,66 @@ function Customers() {
                 sortedCustomers.sort((a, b) => b.name.localeCompare(a.name));
                 break;
             case 'Plate No: A to Z':
-                sortedCustomers.sort((a, b) => {
-                    const plateA = a.plateNo.toUpperCase();
-                    const plateB = b.plateNo.toUpperCase();
-                    return plateA.localeCompare(plateB, undefined, { numeric: true, sensitivity: 'base' });
-                });
+                sortedCustomers.sort((a, b) => a.plateNo.localeCompare(b.plateNo));
                 break;
             case 'Plate No: Z to A':
-                sortedCustomers.sort((a, b) => {
-                    const plateA = a.plateNo.toUpperCase();
-                    const plateB = b.plateNo.toUpperCase();
-                    return plateB.localeCompare(plateA, undefined, { numeric: true, sensitivity: 'base' });
-                });
+                sortedCustomers.sort((a, b) => b.plateNo.localeCompare(a.plateNo));
                 break;
             default:
                 break;
         }
-    
+
         setCustomers(sortedCustomers);
     };
 
-    const handleCheckboxChange = (index) => {
-        setSelectedCheckboxes((prevSelected) => {
-            if (prevSelected.includes(index)) {
-                return prevSelected.filter((item) => item !== index);
-            } else {
-                return [...prevSelected, index];
-            }
-        });
+    const handleCheckboxChange = (index, name) => {
+        const isAlreadySelected = selectedCheckboxes.includes(index);
+
+        if (!isAlreadySelected) {
+            console.log(`Selected customer: ${name}`);
+        }
+
+        setSelectedCheckboxes((prevSelected) =>
+            prevSelected.includes(index)
+                ? prevSelected.filter((item) => item !== index)
+                : [...prevSelected, index]
+        );
     };
 
-    const handleDeleteConfirmation = (confirm) => {
+    const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
-            setCustomers((prevCustomers) =>
-                prevCustomers.filter((_, index) => !selectedCheckboxes.includes(index))
-            );
-            setSelectedCheckboxes([]);
+            try {
+                const selectedCustomers = selectedCheckboxes.map(index => {
+                    const customer = customers[index];
+                    return { id: customer.id };
+                });
+
+                const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(selectedCustomers),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete customers');
+                }
+
+                const result = await response.json();
+                console.log('Deletion result:', result);
+
+                setCustomers((prevCustomers) =>
+                    prevCustomers.filter((_, index) => !selectedCheckboxes.includes(index))
+                );
+                setSelectedCheckboxes([]);
+                
+            } catch (error) {
+                console.error('Error deleting customers:', error);
+                alert('Error deleting customers!');
+            } finally {
+                setCurrentPage(1);
+            }
         } else {
             setSelectedCheckboxes([]);
         }
@@ -96,7 +145,7 @@ function Customers() {
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditCustomerIndex(null);
-            setCustomerDetails({ id: '', name: '', contact: '', email: '', address: '', plateNo: '' });
+            setCustomerDetails({ id: '', name: '', contact: '', email: '', address: '', plateNo: '', carModel: '' });
         }
     };
 
@@ -109,33 +158,28 @@ function Customers() {
             email: customer.email,
             address: customer.address,
             plateNo: customer.plateNo,
+            carModel: customer.carModel,
         });
+        console.log(`To update: ${customer.id}`)
         setIsEditMode(true);
         setEditCustomerIndex(index);
         setIsModalOpen(true);
     };
 
-    const handleSavePdf = () => {
-        console.log('test');
-    };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setCustomerDetails({
-            ...customerDetails,
-            [name]: value,
-        });
+        setCustomerDetails({ ...customerDetails, [name]: value });
     };
 
     const handleSearchInputChange = (e) => {
         setSearchQuery(e.target.value);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const newCustomer = {
-            id: customerDetails.id,
+            id: isEditMode ? customerDetails.id : generateCustomerId(),
             name: customerDetails.name,
             contact: customerDetails.contact,
             email: customerDetails.email,
@@ -144,27 +188,70 @@ function Customers() {
             carModel: customerDetails.carModel
         };
 
-        if (isEditMode && editCustomerIndex !== null) {
-            setCustomers((prevCustomers) =>
-                prevCustomers.map((customer, index) =>
-                    index === editCustomerIndex ? newCustomer : customer
-                )
-            );
-            console.log('Customer updated:', newCustomer);
-        } else {
-            setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
-            console.log('Customer added:', newCustomer);
-        }
+        try {
+            setIsLoading(true);
+            let response;
+            if (isEditMode && editCustomerIndex !== null) {
+                response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(newCustomer),
+                });
+            } else {
+                response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(newCustomer),
+                });
+            }
 
-        toggleModal();
+            if (!response.ok) {
+                throw new Error(isEditMode ? 'Failed to update customer' : 'Failed to add customer');
+            }
+
+            const result = await response.json();
+            console.log(isEditMode ? 'Transaction successfully updated:' : 'Transaction successfully added:', result);
+
+            if (isEditMode && editCustomerIndex !== null) {
+                setCustomers((prevCustomers) =>
+                    prevCustomers.map((customer, index) =>
+                        index === editCustomerIndex ? newCustomer : customer
+                    )
+                );
+            } else {
+                setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
+            }
+
+            toggleModal();
+        } catch (error) {
+            console.error('Error submitting customer:', error);
+            alert('Error submitting customer!');
+        } finally {
+            setIsLoading(false);
+            fetchCustomers();
+        }
     };
 
-    // Filtered customers based on search query
-    const filteredCustomers = customers.filter((customer) =>
-        customer.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.plateNo.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredCustomers = customers.filter((customer) => {
+        const id = customer.id ? customer.id.toLowerCase() : '';
+        const name = customer.name ? customer.name.toLowerCase() : '';
+        const plateNo = customer.plateNo ? customer.plateNo.toLowerCase() : '';
+        
+        return id.includes(searchQuery.toLowerCase()) ||
+               name.includes(searchQuery.toLowerCase()) ||
+               plateNo.includes(searchQuery.toLowerCase());
+    });
+
+    const paginatedCustomers = filteredCustomers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const totalPages = Math.ceil(filteredCustomers.length / pageSize);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     return (
         <div className="customers">
@@ -232,39 +319,44 @@ function Customers() {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredCustomers.map((customer, index) => (
-                            <tr key={index}>
-                                <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
-                                    <input
-                                        type="checkbox"
-                                        onChange={() => handleCheckboxChange(index)}
-                                        checked={selectedCheckboxes.includes(index)}
-                                        onClick={(e) => e.stopPropagation()} // Prevents the checkbox click from triggering the td click event
-                                    />
-                                </td>
-                                <td>{customer.name}</td>
-                                <td>{customer.carModel}</td>
-                                <td>{customer.plateNo}</td>
-                                <td>{customer.contact}</td>
-                                <td>{customer.email}</td>
-                                <td>{customer.address}</td>
-                                <td>
-                                    <span
-                                        className="material-symbols-outlined edit-icon"
-                                        onClick={() => handleEdit(index)}
-                                        title="Edit Customer"
-                                    >
-                                        edit_note
-                                    </span>
-                                    <span 
-                                        className="material-symbols-outlined save-pdf-icon"
-                                        onClick={() => handleSavePdf()}
-                                    >
-                                        picture_as_pdf
-                                    </span>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="8" style={{ textAlign: 'center' }}>
+                                    <div className="loading-spinner"></div>
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            paginatedCustomers.map((customer, index) => {
+                                const absoluteIndex = (currentPage - 1) * pageSize + index;
+                                return (
+                                    <tr key={absoluteIndex}>
+                                        <td onClick={() => handleCheckboxChange(absoluteIndex, customer.name)} style={{ cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                onChange={() => handleCheckboxChange(absoluteIndex, customer.name)}
+                                                checked={selectedCheckboxes.includes(absoluteIndex)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </td>
+                                        <td>{customer.name}</td>
+                                        <td>{customer.carModel}</td>
+                                        <td>{customer.plateNo}</td>
+                                        <td>{customer.contact}</td>
+                                        <td>{customer.email}</td>
+                                        <td>{customer.address}</td>
+                                        <td>
+                                            <span
+                                                className="material-symbols-outlined edit-icon"
+                                                onClick={() => handleEdit(absoluteIndex)}
+                                                title="Edit Customer"
+                                            >
+                                                edit_note
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -274,14 +366,19 @@ function Customers() {
                         Clear All
                     </button>
                 )}
-                <span className="page-number active">1</span>
-                <span className="page-number">2</span>
-                <span className="page-number">3</span>
-                <span className="page-number">4</span>
-                <span className="page-number">5</span>
+                <div className="pagination">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <span
+                            key={i}
+                            className={`page-number ${currentPage === i + 1 ? 'active' : ''}`}
+                            onClick={() => handlePageChange(i + 1)}
+                        >
+                            {i + 1}
+                        </span>
+                    ))}
+                </div>
             </div>
 
-            {/* Modal for Adding/Editing Customer */}
             {isModalOpen && (
                 <>
                     <div className="modal-overlay" onClick={toggleModal}></div>
@@ -294,6 +391,7 @@ function Customers() {
                                     <input
                                         type="text"
                                         name="name"
+                                        placeholder="Enter customer name"
                                         value={customerDetails.name}
                                         onChange={handleInputChange}
                                         required
@@ -304,6 +402,7 @@ function Customers() {
                                     <input
                                         type="text"
                                         name="plateNo"
+                                        placeholder="Enter customer's plate number"
                                         value={customerDetails.plateNo}
                                         onChange={handleInputChange}
                                         required
@@ -314,6 +413,7 @@ function Customers() {
                                     <input
                                         type="text"
                                         name="carModel"
+                                        placeholder="Enter customer's car model"
                                         value={customerDetails.carModel}
                                         onChange={handleInputChange}
                                         required
@@ -326,6 +426,7 @@ function Customers() {
                                         pattern="[0-9]{11}" 
                                         maxLength="11"
                                         name="contact"
+                                        placeholder="Enter customer's contact number"
                                         value={customerDetails.contact}
                                         onChange={handleInputChange}
                                         required
@@ -336,6 +437,7 @@ function Customers() {
                                     <input
                                         type="email"
                                         name="email"
+                                        placeholder="Enter customer's email address"
                                         value={customerDetails.email}
                                         onChange={handleInputChange}
                                         required
@@ -346,6 +448,7 @@ function Customers() {
                                     <input
                                         type="text"
                                         name="address"
+                                        placeholder="Enter customer's address"
                                         value={customerDetails.address}
                                         onChange={handleInputChange}
                                         required
@@ -353,7 +456,11 @@ function Customers() {
                                 </div>
                                 <div className="modal-actions">
                                     <button type="button" onClick={toggleModal}>Cancel</button>
-                                    <button type="submit">{isEditMode ? 'Update Customer' : 'Add Customer'}</button>
+                                    <button type="submit" disabled={isLoading}>
+                                        {isLoading 
+                                            ? (isEditMode ? 'Updating Customer...' : 'Adding Customer...') 
+                                            : (isEditMode ? 'Update Customer' : 'Add Customer')}
+                                        </button>
                                 </div>
                             </form>
                         </div>

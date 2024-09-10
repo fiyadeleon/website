@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Employees.css';
 
+function generateEmployeeId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return `EMP-${randomString}-${dateString}`;
+}
+
 function Employees() {
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -9,35 +18,44 @@ function Employees() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editEmployeeIndex, setEditEmployeeIndex] = useState(null);
     const [employeeDetails, setEmployeeDetails] = useState({
-        id: '',
-        name: '',
-        contact: '',
-        email: '',
-        jobTitle: '',
-        salary: ''
+        id: '', name: '', jobTitle: '', salary: '', contact: '', email: ''
     });
-
     const [searchQuery, setSearchQuery] = useState('');
+    const [employees, setEmployees] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 5;
 
-    const [employees, setEmployees] = useState([
-        { id: 'EMP001', jobTitle: 'Senior Mechanic', name: 'John Doe', contact: '1234567890', email: 'john@example.com', salary: 55000 },
-        { id: 'EMP002', jobTitle: 'Engine Specialist', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', salary: 60000 },
-        { id: 'EMP003', jobTitle: 'Transmission Technician', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', salary: 58000 },
-        { id: 'EMP004', jobTitle: 'Brake and Suspension Specialist', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', salary: 57000 },
-        { id: 'EMP005', jobTitle: 'Diagnostic Technician', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', salary: 62000 }
-      ]);
-      
+    useEffect(() => {
+        fetchEmployees();
+    }, []);
 
-    const toggleDropdown = () => {
-        setDropdownOpen(!dropdownOpen);
+    const fetchEmployees = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': API_KEY
+                },
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch employees');
+            const data = await response.json();
+            setEmployees(data);
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+            alert('Error fetching employees!');
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
     const handleSortSelection = (sortOption) => {
         setSelectedSort(sortOption);
         setDropdownOpen(false);
-        
         const sortedEmployees = [...employees];
-    
         switch (sortOption) {
             case 'Name: A to Z':
                 sortedEmployees.sort((a, b) => a.name.localeCompare(b.name));
@@ -45,58 +63,76 @@ function Employees() {
             case 'Name: Z to A':
                 sortedEmployees.sort((a, b) => b.name.localeCompare(a.name));
                 break;
-            case 'Employee No: High to Low':
-                sortedEmployees.sort((a, b) => {
-                    const numA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
-                    return numB - numA;
-                });
+            case 'Job Title: A to Z':
+                sortedEmployees.sort((a, b) => a.jobTitle.localeCompare(b.jobTitle));
                 break;
-            case 'Employee No: Low to High':
-                sortedEmployees.sort((a, b) => {
-                    const numA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
-                    const numB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
-                    return numA - numB;
-                });
+            case 'Job Title: Z to A':
+                sortedEmployees.sort((a, b) => a.jobTitle.localeCompare(b.jobTitle));
                 break;
             default:
                 break;
         }
-    
         setEmployees(sortedEmployees);
     };
 
-    const handleCheckboxChange = (index) => {
-        setSelectedCheckboxes((prevSelected) => {
-            if (prevSelected.includes(index)) {
-                return prevSelected.filter((item) => item !== index);
-            } else {
-                return [...prevSelected, index];
-            }
-        });
+    const handleCheckboxChange = (index, name) => {
+        const isAlreadySelected = selectedCheckboxes.includes(index);
+
+        if (!isAlreadySelected) {
+            console.log(`Selected employee: ${name}`);
+        }
+
+        setSelectedCheckboxes((prevSelected) =>
+            prevSelected.includes(index)
+                ? prevSelected.filter((item) => item !== index)
+                : [...prevSelected, index]
+        );
     };
 
-    const handleDeleteConfirmation = (confirm) => {
+    const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
-            setEmployees((prevEmployees) =>
-                prevEmployees.filter((_, index) => !selectedCheckboxes.includes(index))
-            );
-            setSelectedCheckboxes([]);
+            try {
+                const selectedEmployees = selectedCheckboxes.map(index => {
+                    const employee = employees[index];
+                    return { id: employee.id };
+                });
+
+                const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(selectedEmployees),
+                });
+
+                if (!response.ok) throw new Error('Failed to delete employees');
+
+                const result = await response.json();
+                console.log('Deletion result:', result);
+
+                setEmployees((prevEmployees) =>
+                    prevEmployees.filter((_, index) => !selectedCheckboxes.includes(index))
+                );
+                setSelectedCheckboxes([]);
+            } catch (error) {
+                console.error('Error deleting employees:', error);
+                alert('Error deleting employees!');
+            } finally {
+                setCurrentPage(1);
+            }
         } else {
             setSelectedCheckboxes([]);
         }
     };
 
-    const handleClearAll = () => {
-        setSelectedCheckboxes([]);
-    };
+    const handleClearAll = () => setSelectedCheckboxes([]);
 
     const toggleModal = () => {
         setIsModalOpen(!isModalOpen);
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditEmployeeIndex(null);
-            setEmployeeDetails({ id: '', name: '', contact: '', email: '', jobTitle: '', salary: '' });
+            setEmployeeDetails({ id: '', name: '', contact: '', jobTitle: '', salary: '', email: '' });
         }
     };
 
@@ -106,10 +142,11 @@ function Employees() {
             id: employee.id,
             name: employee.name,
             contact: employee.contact,
-            email: employee.email,
             jobTitle: employee.jobTitle,
-            salary: employee.salary
+            salary: employee.salary,
+            email: employee.email,
         });
+        console.log(`To update: ${employee.id}`)
         setIsEditMode(true);
         setEditEmployeeIndex(index);
         setIsModalOpen(true);
@@ -117,48 +154,77 @@ function Employees() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setEmployeeDetails({
-            ...employeeDetails,
-            [name]: value,
-        });
+        setEmployeeDetails({ ...employeeDetails, [name]: value });
     };
 
-    const handleSearchInputChange = (e) => {
-        setSearchQuery(e.target.value);
-    };
+    const handleSearchInputChange = (e) => setSearchQuery(e.target.value);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const newEmployee = {
-            id: employeeDetails.id,
+            id: isEditMode ? employeeDetails.id : generateEmployeeId(),
             name: employeeDetails.name,
             contact: employeeDetails.contact,
-            email: employeeDetails.email,
             jobTitle: employeeDetails.jobTitle,
-            salary: parseFloat(employeeDetails.salary)
+            salary: employeeDetails.salary,
+            email: employeeDetails.email,
         };
 
-        if (isEditMode && editEmployeeIndex !== null) {
-            setEmployees((prevEmployees) =>
-                prevEmployees.map((employee, index) =>
-                    index === editEmployeeIndex ? newEmployee : employee
-                )
-            );
-            console.log('Employee updated:', newEmployee);
-        } else {
-            setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
-            console.log('Employee added:', newEmployee);
-        }
+        try {
+            setIsLoading(true);
+            let response;
+            if (isEditMode && editEmployeeIndex !== null) {
+                response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(newEmployee),
+                });
+            } else {
+                response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': API_KEY
+                    },
+                    body: JSON.stringify(newEmployee),
+                });
+            }
 
-        toggleModal();
+            if (!response.ok) throw new Error(isEditMode ? 'Failed to update employee' : 'Failed to add employee');
+
+            if (isEditMode && editEmployeeIndex !== null) {
+                setEmployees((prevEmployees) =>
+                    prevEmployees.map((employee, index) =>
+                        index === editEmployeeIndex ? newEmployee : employee
+                    )
+                );
+            } else {
+                setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
+            }
+
+            toggleModal();
+        } catch (error) {
+            console.error('Error submitting employee:', error);
+            alert('Error submitting employee!');
+        } finally {
+            setIsLoading(false);
+            fetchEmployees();
+        }
     };
 
-    const filteredEmployees = employees.filter((employee) =>
-        employee.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.jobTitle.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredEmployees = employees.filter((employee) => {
+        const id = employee.id ? employee.id.toLowerCase() : '';
+        const name = employee.name ? employee.name.toLowerCase() : '';
+        const jobTitle = employee.jobTitle ? employee.jobTitle.toLowerCase() : '';
+        return id.includes(searchQuery.toLowerCase()) || name.includes(searchQuery.toLowerCase()) || jobTitle.includes(searchQuery.toLowerCase());
+    });
+
+    const paginatedEmployees = filteredEmployees.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const totalPages = Math.ceil(filteredEmployees.length / pageSize);
+
+    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
         <div className="employees">
@@ -193,8 +259,8 @@ function Employees() {
                 <div className={`dropdown-menu ${dropdownOpen ? 'open' : 'closed'}`}>
                     <div onClick={() => handleSortSelection('Name: A to Z')}>Name: A to Z</div>
                     <div onClick={() => handleSortSelection('Name: Z to A')}>Name: Z to A</div>
-                    <div onClick={() => handleSortSelection('Employee No: High to Low')}>Employee No: High to Low</div>
-                    <div onClick={() => handleSortSelection('Employee No: Low to High')}>Employee No: Low to High</div>
+                    <div onClick={() => handleSortSelection('Job Title: A to Z')}>Job Title: A to Z</div>
+                    <div onClick={() => handleSortSelection('Job Title: Z to A')}>Job Title: Z to A</div>
                 </div>
                 <div className="search-container">
                     <span className="material-symbols-outlined search-icon">search</span>
@@ -205,7 +271,7 @@ function Employees() {
                         value={searchQuery}
                         onChange={handleSearchInputChange}
                     />
-                    <span className="material-symbols-outlined info-icon" data-tooltip="Only Employee No., Name, and Job Title are searchable.">info</span>
+                    <span className="material-symbols-outlined info-icon" data-tooltip="Only Name, and Job Title are searchable.">info</span>
                 </div>
                 <div className="employees-actions">
                     <button className="add-employee-button" onClick={toggleModal}>+ Add New Employee</button>
@@ -216,43 +282,52 @@ function Employees() {
                     <thead>
                         <tr>
                             <th></th>
-                            <th>EMPLOYEE NO.</th>
                             <th>NAME</th>
                             <th>CONTACT NO.</th>
-                            <th>EMAIL</th>
                             <th>JOB TITLE</th>
                             <th>SALARY</th>
+                            <th>EMAIL</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredEmployees.map((employee, index) => (
-                            <tr key={index}>
-                                <td onClick={() => handleCheckboxChange(index)} style={{ cursor: 'pointer' }}>
-                                    <input
-                                        type="checkbox"
-                                        onChange={() => handleCheckboxChange(index)}
-                                        checked={selectedCheckboxes.includes(index)}
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
-                                </td>
-                                <td>{employee.id}</td>
-                                <td>{employee.name}</td>
-                                <td>{employee.contact}</td>
-                                <td>{employee.email}</td>
-                                <td>{employee.jobTitle}</td>
-                                <td>₱{employee.salary.toFixed(2)}</td>
-                                <td>
-                                    <span
-                                        className="material-symbols-outlined edit-icon"
-                                        onClick={() => handleEdit(index)}
-                                        title="Edit Employee"
-                                    >
-                                        edit_note
-                                    </span>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="7" style={{ textAlign: 'center' }}>
+                                    <div className="loading-spinner"></div>
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            paginatedEmployees.map((employee, index) => {
+                                const absoluteIndex = (currentPage - 1) * pageSize + index;
+                                return (
+                                    <tr key={absoluteIndex}>
+                                        <td onClick={() => handleCheckboxChange(absoluteIndex, employee.name)} style={{ cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                onChange={() => handleCheckboxChange(absoluteIndex, employee.name)}
+                                                checked={selectedCheckboxes.includes(absoluteIndex)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </td>
+                                        <td>{employee.name}</td>
+                                        <td>{employee.contact}</td>
+                                        <td>{employee.jobTitle}</td>
+                                        <td>{employee.salary}</td>
+                                        <td>{employee.email}</td>
+                                        <td>
+                                            <span
+                                                className="material-symbols-outlined edit-icon"
+                                                onClick={() => handleEdit(absoluteIndex)}
+                                                title="Edit Employee"
+                                            >
+                                                edit_note
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -262,11 +337,17 @@ function Employees() {
                         Clear All
                     </button>
                 )}
-                <span className="page-number active">1</span>
-                <span className="page-number">2</span>
-                <span className="page-number">3</span>
-                <span className="page-number">4</span>
-                <span className="page-number">5</span>
+                <div className="pagination">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <span
+                            key={i}
+                            className={`page-number ${currentPage === i + 1 ? 'active' : ''}`}
+                            onClick={() => handlePageChange(i + 1)}
+                        >
+                            {i + 1}
+                        </span>
+                    ))}
+                </div>
             </div>
 
             {isModalOpen && (
@@ -281,6 +362,7 @@ function Employees() {
                                     <input
                                         type="text"
                                         name="name"
+                                        placeholder="Enter employee name"
                                         value={employeeDetails.name}
                                         onChange={handleInputChange}
                                         required
@@ -289,21 +371,12 @@ function Employees() {
                                 <div className="form-group">
                                     <label>Contact No.</label>
                                     <input
-                                        type="tel" 
+                                        type="text"
                                         pattern="[0-9]{11}" 
                                         maxLength="11"
                                         name="contact"
+                                        placeholder="Enter employee contact"
                                         value={employeeDetails.contact}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Email</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={employeeDetails.email}
                                         onChange={handleInputChange}
                                         required
                                     />
@@ -313,6 +386,7 @@ function Employees() {
                                     <input
                                         type="text"
                                         name="jobTitle"
+                                        placeholder="Enter employee job title"
                                         value={employeeDetails.jobTitle}
                                         onChange={handleInputChange}
                                         required
@@ -321,17 +395,32 @@ function Employees() {
                                 <div className="form-group">
                                     <label>Salary</label>
                                     <input
-                                        type="number"
+                                        type="text"
                                         name="salary"
+                                        placeholder="Enter employee salary"
                                         value={employeeDetails.salary}
                                         onChange={handleInputChange}
                                         required
-                                        step="0.01"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Enter employee email"
+                                        value={employeeDetails.email}
+                                        onChange={handleInputChange}
+                                        required
                                     />
                                 </div>
                                 <div className="modal-actions">
                                     <button type="button" onClick={toggleModal}>Cancel</button>
-                                    <button type="submit">{isEditMode ? 'Update Employee' : 'Add Employee'}</button>
+                                    <button type="submit" disabled={isLoading}>
+                                        {isLoading
+                                            ? (isEditMode ? 'Updating Employee...' : 'Adding Employee...')
+                                            : (isEditMode ? 'Update Employee' : 'Add Employee')}
+                                    </button>
                                 </div>
                             </form>
                         </div>

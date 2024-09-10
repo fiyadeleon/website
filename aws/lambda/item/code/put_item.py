@@ -9,6 +9,15 @@ logger.setLevel(logging.INFO)
 
 dynamodb = boto3.resource('dynamodb')
 
+ALLOWED_FIELDS = {
+    'customer': {'name', 'contact', 'email', 'address', 'plateNo', 'carModel'},
+    'employee': {'name', 'jobTitle', 'salary', 'contact', 'email    '},
+    'inventory': {'product_name', 'category', 'stock', 'price', 'unit'},
+    'transaction': {'type', 'dateTime', 'customerName', 'plateNo', 'amount'}
+}
+
+RESERVED_KEYWORDS = {'type', 'dateTime', 'unit', 'name'}
+
 def lambda_handler(event, context):
     logger.info(event)
 
@@ -39,30 +48,36 @@ def lambda_handler(event, context):
     
     body.pop('id', None)
     
+    allowed_fields = ALLOWED_FIELDS.get(resource, set())
     update_expression = "SET "
     expression_attribute_values = {}
     expression_attribute_names = {}
     
     for key, value in body.items():
-        if key.lower() in ["unit"]: 
-            expression_attribute_names[f"#{key}"] = key
-            update_expression += f"#{key} = :{key}, "
-        else:
-            update_expression += f"{key} = :{key}, "
-
-        expression_attribute_values[f":{key}"] = value
+        if key in allowed_fields:
+            if key in RESERVED_KEYWORDS:
+                expression_attribute_names[f"#{key}"] = key
+                update_expression += f"#{key} = :{key}, "
+            else:
+                update_expression += f"{key} = :{key}, "
+            expression_attribute_values[f":{key}"] = value
 
     update_expression = update_expression.rstrip(", ")
 
     try:
-        response = table.update_item(
-            Key={'id': item_id},
-            UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute_values,
-            ExpressionAttributeNames=expression_attribute_names,
-            ConditionExpression="attribute_exists(id)",
-            ReturnValues="UPDATED_NEW"
-        )
+        update_item_params = {
+            'Key': {'id': item_id},
+            'UpdateExpression': update_expression,
+            'ExpressionAttributeValues': expression_attribute_values,
+            'ConditionExpression': "attribute_exists(id)",
+            'ReturnValues': "UPDATED_NEW"
+        }
+
+        if expression_attribute_names:
+            update_item_params['ExpressionAttributeNames'] = expression_attribute_names
+
+        response = table.update_item(**update_item_params)
+        
         logger.info(f"UpdateItem response: {response}")
 
         return generate_response(200, {'message': f'Item with ID {item_id} updated successfully!', 'updatedAttributes': response['Attributes']})

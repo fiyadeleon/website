@@ -10,6 +10,7 @@ function generateTransactionId() {
 function Transactions() {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
     const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -24,31 +25,31 @@ function Transactions() {
     const pageSize = 5;
 
     useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': API_KEY,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const data = await response.json();
-                setTransactions(data);
-            } catch (error) {
-                alert('Error fetching transactions!');
-                console.error('Error fetching transactions:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchTransactions();
     }, []);
+
+    const fetchTransactions = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': API_KEY
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+            setTransactions(data);
+        } catch (error) {
+            alert('Error fetching transactions!');
+            console.error('Error fetching transactions:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
@@ -121,7 +122,7 @@ function Transactions() {
                 const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
                     method: 'DELETE',
                     headers: {
-                        'x-api-key': API_KEY,
+                        'x-api-key': API_KEY
                     },
                     body: JSON.stringify(selectedTransactions)
                 });
@@ -141,6 +142,8 @@ function Transactions() {
             } catch (error) {
                 alert('Error deleting transaction(s)!');
                 console.error('Error deleting transactions:', error);
+            } finally {
+                setCurrentPage(1);
             }
         } else {
             setSelectedCheckboxes([]);
@@ -162,14 +165,16 @@ function Transactions() {
 
     const handleEdit = (index) => {
         const transaction = transactions[index];
+        const formattedDateTime = transaction.dateTime.replace('T', ' ');
         setTransactionDetails({
             id: transaction.id,
             type: transaction.type,
-            dateTime: transaction.dateTime,
+            dateTime: formattedDateTime,
             customerName: transaction.customerName,
             plateNo: transaction.plateNo,
             amount: transaction.amount.toString(),
         });
+        console.log(`To update: ${transaction.id}`)
         setIsEditMode(true);
         setEditTransactionIndex(index);
         setIsModalOpen(true);
@@ -187,23 +192,25 @@ function Transactions() {
         e.preventDefault();
 
         const newTransactionId = isEditMode ? transactionDetails.id : generateTransactionId();
+        const formattedDateTime = transactionDetails.dateTime.replace('T', ' ');
         const newTransaction = {
             id: newTransactionId,
             type: transactionDetails.type,
-            dateTime: transactionDetails.dateTime,
+            dateTime: formattedDateTime,
             customerName: transactionDetails.customerName,
             plateNo: transactionDetails.plateNo,
             amount: parseFloat(transactionDetails.amount),
         };
 
         try {
+            setIsLoading(true);
             let response;
 
             if (isEditMode && editTransactionIndex !== null) {
                 response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
                     method: 'PUT',
                     headers: {
-                        'x-api-key': API_KEY,
+                        'x-api-key': API_KEY
                     },
                     body: JSON.stringify(newTransaction)
                 });
@@ -211,7 +218,7 @@ function Transactions() {
                 response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
                     method: 'POST',
                     headers: {
-                        'x-api-key': API_KEY,
+                        'x-api-key': API_KEY
                     },
                     body: JSON.stringify(newTransaction)
                 });
@@ -229,7 +236,7 @@ function Transactions() {
 
                 setTransactions((prevTransactions) =>
                     prevTransactions.map((transaction, index) =>
-                        index === transactionIndex ? newTransaction : transaction
+                        index === editTransactionIndex ? newTransaction : transaction
                     )
                 );
             } else {
@@ -241,6 +248,9 @@ function Transactions() {
         } catch (error) {
             alert('Error submitting transaction!');
             console.error('Error submitting transaction:', error);
+        } finally {
+            setIsLoading(false);
+            fetchTransactions();
         }
     };
 
@@ -317,10 +327,10 @@ function Transactions() {
                             <th></th>
                             <th>TRANSACTION NO.</th>
                             <th>TYPE</th>
-                            <th>DATE & TIME</th>
                             <th>CUSTOMER NAME</th>
                             <th>PLATE NO.</th>
                             <th>AMOUNT</th>
+                            <th>DATE & TIME</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
@@ -346,10 +356,10 @@ function Transactions() {
                                         </td>
                                         <td>{transaction.id}</td>
                                         <td>{transaction.type}</td>
-                                        <td>{transaction.dateTime}</td>
                                         <td>{transaction.customerName}</td>
                                         <td>{transaction.plateNo}</td>
                                         <td>₱{transaction.amount.toFixed(2)}</td>
+                                        <td>{transaction.dateTime}</td>
                                         <td>
                                             <span
                                                 className="material-symbols-outlined edit-icon"
@@ -410,16 +420,6 @@ function Transactions() {
                                     </div>
                                 )}
                                 <div className="form-group">
-                                    <label>Date & Time</label>
-                                    <input
-                                        type="datetime-local"
-                                        name="dateTime"
-                                        value={transactionDetails.dateTime}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
                                     <label>Customer Name</label>
                                     <input
                                         type="text"
@@ -451,9 +451,23 @@ function Transactions() {
                                         step="0.01"
                                     />
                                 </div>
+                                <div className="form-group">
+                                    <label>Date & Time</label>
+                                    <input
+                                        type="datetime-local"
+                                        name="dateTime"
+                                        value={transactionDetails.dateTime}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
                                 <div className="modal-actions">
                                     <button type="button" onClick={toggleModal}>Cancel</button>
-                                    <button type="submit">{isEditMode ? 'Update Transaction' : 'Add Transaction'}</button>
+                                    <button type="submit" disabled={isLoading}>
+                                        {isLoading 
+                                            ? (isEditMode ? 'Updating Transaction...' : 'Adding Transaction...') 
+                                            : (isEditMode ? 'Update Transaction' : 'Add Transaction')}
+                                    </button>
                                 </div>
                             </form>
                         </div>
