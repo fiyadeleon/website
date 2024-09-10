@@ -9,6 +9,17 @@ resource "aws_dynamodb_table" "stanghero_user" {
     type = "S"
   }
 
+  attribute {
+    name = "username"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "username-index"
+    hash_key        = "username"
+    projection_type = "ALL"
+  }
+
   tags = {
     Name = var.prefix_name
   }
