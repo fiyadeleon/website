@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Employees.css';
-import { CognitoUserPool } from 'amazon-cognito-identity-js'; 
 import AWS from 'aws-sdk'; 
 import awsconfig from '../aws-exports';
 

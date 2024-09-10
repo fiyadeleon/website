@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import AWS from 'aws-sdk';
 import '../styles/Settings.css';
 import user from '../images/user.png';
 import editIcon from '../images/edit.png';
-import { Auth } from 'aws-amplify'; // Import AWS Amplify's Auth module
 
 const Settings = () => {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
@@ -20,6 +20,14 @@ const Settings = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const localEmail = localStorage.getItem('email');
+
+    const cognito = new AWS.CognitoIdentityServiceProvider({
+        region: process.env.REACT_APP_REGION,
+        credentials: {
+            accessKeyId: process.env.REACT_APP_ACCESS_KEY,
+            secretAccessKey: process.env.REACT_APP_SECRET_KEY,
+        }
+    });
 
     useEffect(() => {
         const fetchEmployeeData = async () => {
@@ -64,22 +72,26 @@ const Settings = () => {
 
         if (isPasswordRequired && password !== confirmPassword) {
             setError('Passwords do not match.');
+            setIsLoading(false);
             return;
-        } else {
-            setError('');
         }
 
         if (isPasswordRequired) {
             try {
-                const user = await Auth.currentAuthenticatedUser();
-                
-                if (!currentPassword || !password) {
-                    setError('Please provide both the current and new password.');
-                    return;
+                const userSession = localStorage.getItem('userSession'); 
+                if (!userSession) {
+                    throw new Error('User not authenticated');
                 }
-        
-                await Auth.changePassword(user, currentPassword, password);
-                setSuccessMessage('Password changed successfully.');
+                const userSub = JSON.parse(userSession).sub; 
+
+                const params = {
+                    AccessToken: userSession, 
+                    PreviousPassword: currentPassword,
+                    ProposedPassword: password,
+                };
+
+                await cognito.changePassword(params).promise();
+                alert('Password changed successfully.');
             } catch (error) {
                 if (error.code === 'NotAuthorizedException') {
                     setError('Current password is incorrect.');
@@ -88,6 +100,7 @@ const Settings = () => {
                 } else {
                     setError('Failed to change the password. Please try again later.');
                 }
+                setIsLoading(false);
                 return;
             }
         }
@@ -103,14 +116,14 @@ const Settings = () => {
             const response = await fetch(`${API_ENDPOINT}/item/?resource=employee&id=${encodeURIComponent(localStorage.getItem('id'))}`, {
                 method: 'PUT', 
                 headers: {
-                    'x-api-key': API_KEY
+                    'x-api-key': API_KEY,
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updatedData)
             });
 
             if (response.ok) {
                 const result = await response.json();
-
                 let updatedFields = [];
                 if (email !== employeeData.email) updatedFields.push('Email');
                 if (contact !== employeeData.contact) updatedFields.push('Contact');
@@ -196,7 +209,6 @@ const Settings = () => {
                             </label>
                         </div>
 
-                        {/* Password fields, displayed only when password change is toggled */}
                         {isPasswordRequired && (
                             <div id="passwordFields" className="form-group-half">
                                 <div className="form-group form-group-full">
