@@ -11,11 +11,11 @@ function generateEmployeeId() {
 }
 
 function Employees() {
-    const AWS_REGION = process.env.AWS_REGION;
+    const AWS_REGION = process.env.REGION;
     AWS.config.update({
         region: AWS_REGION,
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_KEY,
+        accessKeyId: process.env.ACCESS_KEY,
+        secretAccessKey: process.env.SECRET_KEY,
     });
     
     const cognito = new AWS.CognitoIdentityServiceProvider({
