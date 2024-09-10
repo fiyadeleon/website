@@ -23,6 +23,11 @@ resource "aws_cognito_user_pool" "user_pool" {
   }
 }
 
+resource "aws_cognito_user_pool_domain" "cognito_domain" {
+  domain = "${var.prefix_name}-domain" 
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+}
+
 resource "aws_cognito_user_group" "admin_group" {
   user_pool_id = aws_cognito_user_pool.user_pool.id
   name         = "admin"
@@ -37,7 +42,7 @@ resource "aws_cognito_user_pool_client" "app_client" {
   name         = "${var.prefix_name}-app-client"
   user_pool_id = aws_cognito_user_pool.user_pool.id
 
-  allowed_oauth_flows        = ["code"]
+  allowed_oauth_flows        = ["code"] 
   allowed_oauth_scopes       = ["email", "openid", "profile"]
   allowed_oauth_flows_user_pool_client = true
 
@@ -51,8 +56,9 @@ resource "aws_cognito_user_pool_client" "app_client" {
 
   callback_urls = [
     "https://main.d9a4qs4tsciaz.amplifyapp.com/userHomepage",
-    "https://main.d9a4qs4tsciaz.amplifyapp.com/reports"
+    "https://main.d9a4qs4tsciaz.amplifyapp.com/reports" 
   ]
+  
   logout_urls   = ["https://main.d9a4qs4tsciaz.amplifyapp.com/login"]
 
   prevent_user_existence_errors = "ENABLED"
