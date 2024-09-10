@@ -17,10 +17,6 @@ resource "aws_cognito_user_pool" "user_pool" {
     required                 = true
     mutable                  = false
   }
-
-  tags = {
-    Environment = "dev"
-  }
 }
 
 resource "aws_cognito_user_pool_domain" "cognito_domain" {
