@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import AWS from 'aws-sdk';
+import { CognitoUserPool, AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
 import '../styles/Settings.css';
 import user from '../images/user.png';
 import editIcon from '../images/edit.png';
+import awsconfig from '../aws-exports';
 
 const Settings = () => {
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-    const API_KEY = process.env.REACT_APP_API_KEY;
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
     const [isEditing, setIsEditing] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
-    const [contact, setContact] = useState(''); 
-    const [email, setEmail] = useState(''); 
+    const [contact, setContact] = useState('');
+    const [email, setEmail] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,12 +22,9 @@ const Settings = () => {
 
     const localEmail = localStorage.getItem('email');
 
-    const cognito = new AWS.CognitoIdentityServiceProvider({
-        region: process.env.REACT_APP_REGION,
-        credentials: {
-            accessKeyId: process.env.REACT_APP_ACCESS_KEY,
-            secretAccessKey: process.env.REACT_APP_SECRET_KEY,
-        }
+    const userPool = new CognitoUserPool({
+        UserPoolId: awsconfig.aws_user_pools_id,
+        ClientId: awsconfig.aws_user_pools_web_client_id,
     });
 
     useEffect(() => {
@@ -39,7 +37,8 @@ const Settings = () => {
                     },
                 });
                 const data = await response.json();
-                
+                localStorage.setItem('id', data['id'])
+
                 setEmployeeData(data);
                 setContact(data.contact);
                 setEmail(data.email);
@@ -66,9 +65,37 @@ const Settings = () => {
         setIsEditing(true);
     };
 
+    const authenticateUser = () => {
+        return new Promise((resolve, reject) => {
+            const authenticationDetails = new AuthenticationDetails({
+                Username: localEmail,
+                Password: currentPassword,
+            });
+
+            const cognitoUser = new CognitoUser({
+                Username: localEmail,
+                Pool: userPool,
+            });
+
+            cognitoUser.authenticateUser(authenticationDetails, {
+                onSuccess: (result) => {
+                    resolve(result);
+                },
+                onFailure: (err) => {
+                    reject(err);
+                },
+            });
+        });
+    };
+
+    const getCurrentUser = () => {
+        return userPool.getCurrentUser();
+    };
+
     const handleSubmitClick = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
         if (isPasswordRequired && password !== confirmPassword) {
             setError('Passwords do not match.');
@@ -76,50 +103,39 @@ const Settings = () => {
             return;
         }
 
-        if (isPasswordRequired) {
-            try {
-                const userSession = localStorage.getItem('userSession'); 
-                if (!userSession) {
-                    throw new Error('User not authenticated');
-                }
-                const userSub = JSON.parse(userSession).sub; 
-
-                const params = {
-                    AccessToken: userSession, 
-                    PreviousPassword: currentPassword,
-                    ProposedPassword: password,
-                };
-
-                await cognito.changePassword(params).promise();
-                alert('Password changed successfully.');
-            } catch (error) {
-                if (error.code === 'NotAuthorizedException') {
-                    setError('Current password is incorrect.');
-                } else if (error.code === 'LimitExceededException') {
-                    setError('Attempt limit exceeded, please try again later.');
-                } else {
-                    setError('Failed to change the password. Please try again later.');
-                }
-                setIsLoading(false);
-                return;
-            }
-        }
-
-        const updatedData = {
-            id: localStorage.getItem('id'),
-            contact,
-            email,
-            ...(isPasswordRequired && { password }) 
-        };
-
         try {
+            if (isPasswordRequired) {
+                const cognitoUser = getCurrentUser();
+                if (!cognitoUser) {
+                    throw new Error("No current user available");
+                }
+
+                const response = await authenticateUser(cognitoUser);
+                console.log(response)
+
+                cognitoUser.changePassword(currentPassword, password, (err, result) => {
+                    if (err) {
+                        setError(err.message);
+                        setIsLoading(false);
+                        return;
+                    }
+                    alert("Password changed successfully.");
+                });
+            }
+
+            const updatedData = {
+                id: localStorage.getItem('id'),
+                contact,
+                email,
+            };
+
             const response = await fetch(`${API_ENDPOINT}/item/?resource=employee&id=${encodeURIComponent(localStorage.getItem('id'))}`, {
-                method: 'PUT', 
+                method: 'PUT',
                 headers: {
                     'x-api-key': API_KEY,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedData)
+                body: JSON.stringify(updatedData),
             });
 
             if (response.ok) {
@@ -130,15 +146,13 @@ const Settings = () => {
                 if (isPasswordRequired) updatedFields.push('Password');
 
                 alert(`${updatedFields.join(', ')} successfully updated!`);
-
                 setEmployeeData({ ...employeeData, contact, email });
                 handleBackClick();
             } else {
-                setError('Error updating employee data');
+                throw new Error('Error updating employee data.');
             }
         } catch (error) {
-            setError('Error updating employee data');
-            console.error('Error updating employee data:', error);
+            setError(error.message);
         } finally {
             setIsLoading(false);
         }
