@@ -42,7 +42,7 @@ const LoginPage = () => {
                 const groups = decodedToken['cognito:groups'] || [];
                 console.log(groups)
     
-                localStorage.setItem('id', decodedToken.sub);
+                localStorage.setItem('email', decodedToken.sub);
                 localStorage.setItem('token', idToken);
     
                 if (groups.includes('stanghero-admin-group')) {
@@ -94,7 +94,7 @@ const LoginPage = () => {
                 console.log(result)
                 console.log(role)
 
-                localStorage.setItem('id', result.idToken.payload.sub);
+                localStorage.setItem('email', result.idToken.payload.sub);
                 localStorage.setItem('role', role);
                 localStorage.setItem('token', idToken);
 
@@ -118,7 +118,7 @@ const LoginPage = () => {
                         console.log(result)
                         console.log(role)
 
-                        localStorage.setItem('id', result.idToken.payload.sub);
+                        localStorage.setItem('email', result.idToken.payload.sub);
                         localStorage.setItem('role', role);
                         localStorage.setItem('token', idToken);
 

@@ -6,6 +6,9 @@ import editIcon from '../images/edit.png';
 const Settings = () => {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
     const API_KEY = process.env.REACT_APP_API_KEY;
+    console.log(API_ENDPOINT);
+    console.log(API_ENDPOINT);
+
     const [isEditing, setIsEditing] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
     const [contact, setContact] = useState(''); 
@@ -17,12 +20,12 @@ const Settings = () => {
     const [isPasswordRequired, setIsPasswordRequired] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const id = localStorage.getItem('id');
+    const localEmail = localStorage.getItem('email');
 
     useEffect(() => {
         const fetchEmployeeData = async () => {
             try {
-                const response = await fetch(`${API_ENDPOINT}/item?resource=employee&id=${id}`, {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=employee&email=${localEmail}`, {
                     method: 'GET',
                     headers: {
                         'x-api-key': API_KEY
@@ -38,10 +41,10 @@ const Settings = () => {
             }
         };
 
-        if (id) {
+        if (localEmail) {
             fetchEmployeeData();
         }
-    }, [id]);
+    }, [localEmail]);
 
     const handleBackClick = () => {
         setIsEditing(false);
