@@ -44,7 +44,17 @@ function Employees() {
             // Step 1: Create the user in Cognito
             const result = await cognito.adminCreateUser(params).promise();
             console.log('User created in Cognito:', result);
-    
+
+            let groupName = null;
+
+            if (role === "user") {
+                groupName = "stanghero-user-group";
+            } else if (role === "admin") {
+                groupName = "stanghero-admin-group";
+            } else {
+                groupName = "stanghero-default-group";
+            }
+
             // Step 2: Add the user to the group
             if (groupName) {
                 const addUserToGroupParams = {

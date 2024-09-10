@@ -16,6 +16,11 @@ resource "aws_cognito_user_pool" "cognito_user_pool" {
     name                     = "email"
     required                 = true
     mutable                  = false
+
+    string_attribute_constraints {
+      max_length = "2048"
+      min_length = "0"
+    }
   }
 }
 
