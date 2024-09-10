@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "user_pool" {
-  name = "${var.prefix_name}-user-pool"
+  name = "${var.prefix_name}-cognito-user-pool"
 
   password_policy {
     minimum_length    = 8
@@ -24,12 +24,22 @@ resource "aws_cognito_user_pool" "user_pool" {
 }
 
 resource "aws_cognito_user_pool_domain" "cognito_domain" {
-  domain = "${var.prefix_name}-domain" 
+  domain = "${var.prefix_name}-cognito-domain" 
   user_pool_id = aws_cognito_user_pool.user_pool.id
 }
 
+resource "aws_cognito_user_group" "admin_group" {
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+  name         = "${var.prefix_name}-admin-group"
+}
+
+resource "aws_cognito_user_group" "standard_group" {
+  user_pool_id = aws_cognito_user_pool.user_pool.id
+  name         = "${var.prefix_name}-user-group"
+}
+
 resource "aws_cognito_user_pool_client" "app_client" {
-  name         = "${var.prefix_name}-app-client"
+  name         = "${var.prefix_name}-cognito-app-client"
   user_pool_id = aws_cognito_user_pool.user_pool.id
 
   allowed_oauth_flows        = ["code"] 
