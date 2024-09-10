@@ -7,6 +7,16 @@ function generateEmployeeId() {
     return `EMP-${randomString}-${dateString}`;
 }
 
+function generatePassword() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+    let password = '';
+    for (let i = 0; i < 10; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        password += characters[randomIndex];
+    }
+    return password;
+}
+
 function Employees() {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
     const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
@@ -18,7 +28,7 @@ function Employees() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editEmployeeIndex, setEditEmployeeIndex] = useState(null);
     const [employeeDetails, setEmployeeDetails] = useState({
-        id: '', name: '', jobTitle: '', salary: '', contact: '', email: ''
+        id: '', name: '', jobTitle: '', salary: '', contact: '', email: '', role: ''
     });
     const [searchQuery, setSearchQuery] = useState('');
     const [employees, setEmployees] = useState([]);
@@ -132,7 +142,7 @@ function Employees() {
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditEmployeeIndex(null);
-            setEmployeeDetails({ id: '', name: '', contact: '', jobTitle: '', salary: '', email: '' });
+            setEmployeeDetails({ id: '', name: '', contact: '', jobTitle: '', salary: '', email: '', role: '' });
         }
     };
 
@@ -145,6 +155,7 @@ function Employees() {
             jobTitle: employee.jobTitle,
             salary: employee.salary,
             email: employee.email,
+            role: employee.role,
         });
         console.log(`To update: ${employee.id}`)
         setIsEditMode(true);
@@ -169,6 +180,8 @@ function Employees() {
             jobTitle: employeeDetails.jobTitle,
             salary: employeeDetails.salary,
             email: employeeDetails.email,
+            role: employeeDetails.role,
+            password: isEditMode ? employeeDetails.password : generatePassword(),
         };
 
         try {
@@ -287,6 +300,7 @@ function Employees() {
                             <th>JOB TITLE</th>
                             <th>SALARY</th>
                             <th>EMAIL</th>
+                            <th>ROLE</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
@@ -317,6 +331,7 @@ function Employees() {
                                         <td>{employee.jobTitle}</td>
                                         <td>{employee.salary}</td>
                                         <td>{employee.email}</td>
+                                        <td>{employee.role}</td>
                                         <td>
                                             <span
                                                 className="material-symbols-outlined edit-icon"
@@ -415,6 +430,22 @@ function Employees() {
                                         onChange={handleInputChange}
                                         required
                                     />
+                                </div>
+                                <div className="form-group">
+                                    <label>Role</label>
+                                    <select
+                                        className="employees-select"
+                                        name="role"
+                                        placeholder="Select a user's role"
+                                        value={employeeDetails.role}
+                                        onChange={handleInputChange}
+                                        required
+                                    >
+                                        <option value="" disabled>Select a user's role</option>
+                                        <option value="none">Not Applicable</option>
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
                                 </div>
                                 <div className="modal-actions">
                                     <button type="button" onClick={toggleModal}>Cancel</button>

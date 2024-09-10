@@ -28,7 +28,6 @@ const LoginPage = () => {
             }
 
             const data = await response.json();
-            console.log(data);
             const { id, role, token } = data;
 
             localStorage.setItem('id', id);

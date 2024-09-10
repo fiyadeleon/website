@@ -413,7 +413,7 @@ function Transactions() {
                                             onChange={handleInputChange}
                                             required
                                         >
-                                            <option value="">Select transaction type</option>
+                                            <option value="" disabled>Select transaction type</option>
                                             <option value="Scope of Work">Scope of Work</option>
                                             <option value="Job Order">Job Order</option>
                                             <option value="Invoice">Invoice</option>

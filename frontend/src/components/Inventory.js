@@ -503,7 +503,7 @@ function Inventory() {
                                         onChange={handleInputChange}
                                         required
                                     >
-                                        <option value="">Select Unit of Measurement</option>
+                                        <option value="" disabled>Select Unit of Measurement</option>
                                         <option value="piece">Piece</option>
                                         <option value="box">Box</option>
                                     </select>

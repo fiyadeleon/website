@@ -11,12 +11,12 @@ dynamodb = boto3.resource('dynamodb')
 
 ALLOWED_FIELDS = {
     'customer': {'name', 'contact', 'email', 'address', 'plateNo', 'carModel'},
-    'employee': {'name', 'jobTitle', 'salary', 'contact', 'email    '},
+    'employee': {'name', 'jobTitle', 'salary', 'contact', 'email', 'role', 'password'},
     'inventory': {'product_name', 'category', 'stock', 'price', 'unit'},
     'transaction': {'type', 'dateTime', 'customerName', 'plateNo', 'amount'}
 }
 
-RESERVED_KEYWORDS = {'type', 'dateTime', 'unit', 'name'}
+RESERVED_KEYWORDS = {'type', 'dateTime', 'unit', 'name', 'role'}
 
 def lambda_handler(event, context):
     logger.info(event)

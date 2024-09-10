@@ -11,7 +11,7 @@ dynamodb = boto3.resource('dynamodb')
 
 resource_attributes = {
     'customer': ['id', 'name', 'contact', 'email', 'address', 'plateNo', 'carModel'],
-    'employee': ['id', 'name', 'contact', 'email', 'jobTitle', 'salary'],
+    'employee': ['id', 'name', 'contact', 'email', 'jobTitle', 'salary', 'role', 'password'],
     'inventory': ['id', 'product_name', 'category', 'stock', 'unit', 'price'],
     'transaction': ['id', 'customerName', 'plateNo', 'type', 'amount', 'dateTime']
 }
