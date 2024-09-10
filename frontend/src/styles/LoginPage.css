@@ -69,6 +69,7 @@ body, html {
   font-family: 'Poppins', sans-serif;
   width: 50%;
   margin: 0 auto 10px;
+  cursor: pointer;
 }
 
 .login-page .login-button {

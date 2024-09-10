@@ -46,6 +46,10 @@ const LoginPage = () => {
         }
     };
 
+    const handleForgotPassword = () => {
+        navigate('/forgot-password');
+    };
+
     return (
         <div className="login-page">
         <div className="container">
@@ -75,7 +79,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
-            <a href="google.com" className="forgot-password">Forgot Password?</a>
+            <a className="forgot-password" onClick={handleForgotPassword}>Forgot Password?</a>
             <button 
                 type="submit" 
                 className="login-button" 

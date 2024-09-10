@@ -36,3 +36,8 @@ module "api_gateway" {
   put_item_invoke_arn    = module.lambda_item.put_item_invoke_arn
   delete_item_invoke_arn = module.lambda_item.delete_item_invoke_arn
 }
+
+module "cognito" {
+  source      = "git::https://github.com/fiyadeleon/website.git//aws/cognito?ref=main"
+  prefix_name = var.prefix_name
+}

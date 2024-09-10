@@ -10,10 +10,12 @@ const Settings = () => {
     const [employeeData, setEmployeeData] = useState(null);
     const [contact, setContact] = useState(''); 
     const [email, setEmail] = useState(''); 
+    const [currentPassword, setCurrentPassword] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isPasswordRequired, setIsPasswordRequired] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const id = localStorage.getItem('id');
 
@@ -43,6 +45,10 @@ const Settings = () => {
 
     const handleBackClick = () => {
         setIsEditing(false);
+        setIsPasswordRequired(false);
+        setPassword('');
+        setConfirmPassword('');
+        setCurrentPassword('');
     };
 
     const handleEditClick = () => {
@@ -54,39 +60,68 @@ const Settings = () => {
 
         if (isPasswordRequired && password !== confirmPassword) {
             setError('Passwords do not match');
+            return;
         } else {
             setError('');
+        }
 
-            const updatedData = {
-                contact,
-                email,
-                ...(isPasswordRequired && { password }) 
-            };
-
-            try {
-                const response = await fetch(`${API_ENDPOINT}/item/?resource=employee&id=${encodeURIComponent(localStorage.getItem('id'))}`, {
-                    method: 'GET',
-                    headers: {
-                        'x-api-key': API_KEY
-                    },
-                });
-
-                if (response.ok) {
-                    const updatedEmployee = await response.json();
-                    setEmployeeData(updatedEmployee);
-                    setIsEditing(false);
-                } else {
-                    console.error('Error updating employee data');
+        if (isPasswordRequired) {
+            const passwordCheckResponse = await fetch(`${API_ENDPOINT}/item?resource=employee&id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': API_KEY
                 }
-            } catch (error) {
-                console.error('Error updating employee data:', error);
+            });
+
+            const passwordCheckData = await passwordCheckResponse.json();
+            
+            if (passwordCheckData['password'] !== currentPassword) {
+                setError('Current password is incorrect');
+                return;
             }
+        }
+
+        const updatedData = {
+            id: localStorage.getItem('id'),
+            contact,
+            email,
+            ...(isPasswordRequired && { password })
+        };
+
+        try {
+            setIsLoading(true);
+            const response = await fetch(`${API_ENDPOINT}/item/?resource=employee&id=${encodeURIComponent(localStorage.getItem('id'))}`, {
+                method: 'PUT', 
+                headers: {
+                    'x-api-key': API_KEY
+                },
+                body: JSON.stringify(updatedData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                alert('Profile successfully updated!');
+                setIsEditing(false);
+                setIsPasswordRequired(false);
+                setPassword('');
+                setConfirmPassword('');
+                setCurrentPassword('');
+            } else {
+                console.error('Error updating employee data');
+            }
+        } catch (error) {
+            console.error('Error updating employee data:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handlePasswordToggle = () => {
         setIsPasswordRequired(!isPasswordRequired);
-        document.getElementById('passwordFields').classList.toggle('hidden');
+        setPassword('');
+        setConfirmPassword('');
+        setCurrentPassword('');
     };
 
     if (!employeeData) {
@@ -146,34 +181,52 @@ const Settings = () => {
                                 <span className="slider round"></span>
                             </label>
                         </div>
-                        <div id="passwordFields" className="form-group-half hidden">
-                            <div className="form-group form-group-full">
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    placeholder="Password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required={isPasswordRequired}
-                                />
+
+                        {/* Password fields, displayed only when password change is toggled */}
+                        {isPasswordRequired && (
+                            <div id="passwordFields" className="form-group-half">
+                                <div className="form-group form-group-full">
+                                    <input
+                                        type="password"
+                                        id="currentPassword"
+                                        name="currentPassword"
+                                        placeholder="Current Password"
+                                        value={currentPassword}
+                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group form-group-full">
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        placeholder="New Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required={isPasswordRequired}
+                                    />
+                                </div>
+                                <div className="form-group form-group-full confirmPassword">
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        placeholder="Confirm New Password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required={isPasswordRequired}
+                                    />
+                                </div>
+                                {error && <p className="error-message">{error}</p>}
                             </div>
-                            <div className="form-group form-group-full confirmPassword">
-                                <input
-                                    type="password"
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    placeholder="Confirm Password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required={isPasswordRequired}
-                                />
-                            </div>
-                            {error && <p className="error-message">{error}</p>}
-                        </div>
+                        )}
+
                         <div className="settings-button-container">
                             <button type="button" onClick={handleBackClick} className="back-button">Back</button>
-                            <button type="submit" className="submit-button">Submit</button>
+                            <button type="submit" className="submit-button" disabled={isLoading}>
+                                {isLoading ? 'Updating profile...' : 'Submit'}
+                            </button>
                         </div>
                     </form>
                 ) : (
