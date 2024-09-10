@@ -28,16 +28,6 @@ resource "aws_cognito_user_pool_domain" "cognito_domain" {
   user_pool_id = aws_cognito_user_pool.user_pool.id
 }
 
-resource "aws_cognito_user_group" "admin_group" {
-  user_pool_id = aws_cognito_user_pool.user_pool.id
-  name         = "admin"
-}
-
-resource "aws_cognito_user_group" "standard_group" {
-  user_pool_id = aws_cognito_user_pool.user_pool.id
-  name         = "standard"
-}
-
 resource "aws_cognito_user_pool_client" "app_client" {
   name         = "${var.prefix_name}-app-client"
   user_pool_id = aws_cognito_user_pool.user_pool.id
