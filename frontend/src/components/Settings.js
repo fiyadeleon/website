@@ -10,8 +10,8 @@ const USER_POOL_ID = process.env.REACT_APP_COGNITO_USER_POOL_ID || awsconfig.aws
 const CLIENT_ID = process.env.REACT_APP_COGNITO_CLIENT_ID || awsconfig.aws_user_pools_web_client_id;
 
 const Settings = () => {
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
-    const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+    const API_KEY = process.env.REACT_APP_API_KEY;
 
     const [isEditing, setIsEditing] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
