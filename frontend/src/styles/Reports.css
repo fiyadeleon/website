@@ -33,11 +33,12 @@ h1 {
   background: #fff;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px #0000001a;
   flex: 2;
   display: flex;
   flex-direction: column;
   position: relative;
+  border: .5px solid #0000001a;
 }
 
 .reports-pie-chart {
@@ -52,6 +53,7 @@ h1 {
   width: 300px;
   height: 300px;
   align-items: center;
+  border: .5px solid #0000001a;
 }
 
 .reports-low-stock-section {
@@ -63,6 +65,7 @@ h1 {
   display: flex;
   flex-direction: column;
   position: relative;
+  border: .5px solid #0000001a;
 }
 
 .reports-view-button {
@@ -98,14 +101,10 @@ h1 {
 }
 
 .info-icon {
-  color: #666; 
+  color: #333; 
   font-size: 1.2em;
   display: inline-flex;
   align-items: center;
-}
-
-.material-icons {
-  font-size: 1em;
 }
 
 .reports-summary-header {
@@ -123,23 +122,39 @@ h1 {
 .reports-summary-time-buttons {
   display: flex;
   justify-content: flex-end; 
-  gap: 10px;
   margin-left: auto;
+  background-color: #e0e0e0;
+  border-radius: 10px; 
+  padding: 2px 5px;
 }
 
 .reports-time-button {
   background-color: #333;
   color: #fff;
-  padding: 10px 20px;
+  padding: 10px 10px;
   border-radius: 5px;
   margin-left: 10px;
+  margin: 5px;
   border: none;
   cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.reports-time-button.active {
+  background-color: #333;
+  color: #fff;
 }
 
 .reports-time-button.inactive {
-  background-color: #e0e0e0;
-  color: #666;
+  background-color: #e0e0e0; 
+  color: #666; 
+}
+
+.reports-time-button:hover {
+  background-color: #333;
+  color: #fff;
 }
 
 .reports-graph-section {
@@ -202,7 +217,6 @@ h1 {
 .reports-low-stock-list p {
   padding: 10px;
   background-color: #f8f8f8;
-  border-radius: 10px;
 }
 
 .reports-transaction-header,
@@ -212,11 +226,61 @@ h1 {
 }
 
 .reports-transaction-header h2,
-.reports-low-stock-header h3 {
+.reports-low-stock-header h2 {
   margin: 0;
 }
 
 .reports-transaction-section .reports-view-button,
 .reports-low-stock-section .reports-view-button {
   margin-left: auto;
+}
+
+.stocked-up {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 20px; 
+}
+
+.stocked-up-icon {
+  width: 150px; 
+  height: 150px;
+  margin-bottom: 10px;
+}
+
+.stocked-up-text {
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+  margin: 0;
+}
+
+.low-stock-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: -10px; 
+  font-size: 16px; 
+}
+
+.product-info {
+  flex-grow: 1;
+  text-align: left;
+  padding: 0px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px; 
+  border-top-right-radius: 0px; 
+  border-bottom-right-radius: 0px;
+}
+
+.product-stock {
+  text-align: right;
+  padding: 10px;
+  min-width: 50px; 
+  border-top-right-radius: 10px; 
+  border-bottom-right-radius: 10px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px; 
 }
