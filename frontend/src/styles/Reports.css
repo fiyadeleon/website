@@ -1,14 +1,222 @@
-.admin-homepage {
-    text-align: center;
-    padding: 20px;
-    font-family: 'Poppins', sans-serif;
-    overflow: auto; /* Allow scrolling if content overflows */
-    max-height: 100vh; /* Adjust this value based on your layout */
-    scrollbar-width: none; /* For Firefox */
-    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
-  }
-  
-  .admin-homepage h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-  }
+.reports-admin-homepage {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 0px;
+  margin-left: 10px;
+}
+
+.reports-summary-and-chart {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.reports-transaction-and-low-stock {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.reports-summary-section, .reports-transaction-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.reports-pie-chart {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 300px;
+  height: 300px;
+  align-items: center;
+}
+
+.reports-low-stock-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.reports-view-button {
+  background-color: #F8CE00;
+  color: #333;
+  border: none;
+  border-radius: 8px; 
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  align-items: center;
+}
+
+.reports-view-button span {
+  font-size: 19px;
+  font-size: bold;
+  vertical-align: middle; 
+}
+
+.reports-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600; 
+}
+
+.reports-summary-title h3 {
+  margin: 0;
+  font-size: 1.2em; 
+  font-weight: 600;
+}
+
+.info-icon {
+  color: #666; 
+  font-size: 1.2em;
+  display: inline-flex;
+  align-items: center;
+}
+
+.material-icons {
+  font-size: 1em;
+}
+
+.reports-summary-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.reports-summary-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.reports-summary-time-buttons {
+  display: flex;
+  justify-content: flex-end; 
+  gap: 10px;
+  margin-left: auto;
+}
+
+.reports-time-button {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-left: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.reports-time-button.inactive {
+  background-color: #e0e0e0;
+  color: #666;
+}
+
+.reports-graph-section {
+  height: 100%;
+}
+
+.reports-graph-placeholder {
+  background-color: #f8f8f8;
+  flex: 1;
+  border-radius: 8px;
+  border: 2px dashed #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  font-size: 1.5em;
+  height: 100%;
+}
+
+.reports-transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.reports-transaction-table thead {
+  background-color: #f8f8f8;
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.reports-transaction-table tbody {
+  display: block;
+  max-height: 220px;
+  overflow-y: auto;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.reports-transaction-table th, .reports-transaction-table td {
+  padding: 10px;
+  text-align: center;
+}
+
+.reports-transaction-table tbody tr {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.reports-low-stock-list {
+  margin-top: 10px;
+  overflow-y: auto;
+  max-height: 265px;
+}
+
+.reports-low-stock-list p {
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 10px;
+}
+
+.reports-transaction-header,
+.reports-low-stock-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.reports-transaction-header h2,
+.reports-low-stock-header h3 {
+  margin: 0;
+}
+
+.reports-transaction-section .reports-view-button,
+.reports-low-stock-section .reports-view-button {
+  margin-left: auto;
+}
