@@ -53,7 +53,7 @@ const LoginPage = () => {
                     navigate('/userHomepage'); 
                 } else {
                     localStorage.setItem('role', 'none');
-                    alert('No valid group assigned to this user.');
+                    alert('You do not have the permission to log in.');
                 }
     
                 setLoading(false);

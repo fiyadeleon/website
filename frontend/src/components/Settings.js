@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { CognitoUserPool, AuthenticationDetails, CognitoUser } from 'amazon-cognito-identity-js';
+import AWS from 'aws-sdk';
 import '../styles/Settings.css';
 import user from '../images/user.png';
 import editIcon from '../images/edit.png';
 import awsconfig from '../aws-exports';
+
+const cognito = new AWS.CognitoIdentityServiceProvider();
+const USER_POOL_ID = process.env.REACT_APP_COGNITO_USER_POOL_ID || awsconfig.aws_user_pools_id;
+const CLIENT_ID = process.env.REACT_APP_COGNITO_CLIENT_ID || awsconfig.aws_user_pools_web_client_id;
 
 const Settings = () => {
     const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
@@ -21,11 +25,6 @@ const Settings = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const localEmail = localStorage.getItem('email');
-
-    const userPool = new CognitoUserPool({
-        UserPoolId: awsconfig.aws_user_pools_id,
-        ClientId: awsconfig.aws_user_pools_web_client_id,
-    });
 
     useEffect(() => {
         const fetchEmployeeData = async () => {
@@ -55,9 +54,9 @@ const Settings = () => {
     const handleBackClick = () => {
         setIsEditing(false);
         setIsPasswordRequired(false);
+        setCurrentPassword('');
         setPassword('');
         setConfirmPassword('');
-        setCurrentPassword('');
         setError('');
     };
 
@@ -65,70 +64,26 @@ const Settings = () => {
         setIsEditing(true);
     };
 
-    const authenticateUser = () => {
-        return new Promise((resolve, reject) => {
-            const authenticationDetails = new AuthenticationDetails({
-                Username: localEmail,
-                Password: currentPassword,
-            });
-
-            const cognitoUser = new CognitoUser({
-                Username: localEmail,
-                Pool: userPool,
-            });
-
-            cognitoUser.authenticateUser(authenticationDetails, {
-                onSuccess: (result) => {
-                    resolve(result);
-                },
-                onFailure: (err) => {
-                    reject(err);
-                },
-            });
-        });
-    };
-
-    const getCurrentUser = () => {
-        return userPool.getCurrentUser();
-    };
-
     const handleSubmitClick = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-
-        if (isPasswordRequired && password !== confirmPassword) {
-            setError('Passwords do not match.');
+    
+        if (isPasswordRequired && (password !== confirmPassword || password.length < 6)) {
+            setError('Passwords do not match or password is too short.');
             setIsLoading(false);
             return;
         }
-
+    
         try {
-            if (isPasswordRequired) {
-                const cognitoUser = getCurrentUser();
-                if (!cognitoUser) {
-                    throw new Error("No current user available");
-                }
-
-                const response = await authenticateUser(cognitoUser);
-                console.log(response)
-
-                cognitoUser.changePassword(currentPassword, password, (err, result) => {
-                    if (err) {
-                        setError(err.message);
-                        setIsLoading(false);
-                        return;
-                    }
-                    alert("Password changed successfully.");
-                });
-            }
-
+            // Update other profile data
             const updatedData = {
                 id: localStorage.getItem('id'),
                 contact,
                 email,
+                password: isPasswordRequired ? password : undefined
             };
-
+    
             const response = await fetch(`${API_ENDPOINT}/item/?resource=employee&id=${encodeURIComponent(localStorage.getItem('id'))}`, {
                 method: 'PUT',
                 headers: {
@@ -137,14 +92,20 @@ const Settings = () => {
                 },
                 body: JSON.stringify(updatedData),
             });
-
+    
             if (response.ok) {
+                // Update Cognito password
+                if (isPasswordRequired) {
+                    console.log(email, currentPassword, password);
+                    await updateCognitoPassword(email, currentPassword, password);
+                }
+
                 const result = await response.json();
                 let updatedFields = [];
                 if (email !== employeeData.email) updatedFields.push('Email');
                 if (contact !== employeeData.contact) updatedFields.push('Contact');
                 if (isPasswordRequired) updatedFields.push('Password');
-
+    
                 alert(`${updatedFields.join(', ')} successfully updated!`);
                 setEmployeeData({ ...employeeData, contact, email });
                 handleBackClick();
@@ -158,11 +119,38 @@ const Settings = () => {
         }
     };
 
+    const updateCognitoPassword = async (email, currentPassword, newPassword) => {
+        try {
+            const authResult = await cognito.adminInitiateAuth({
+                AuthFlow: 'ADMIN_NO_SRP_AUTH',
+                UserPoolId: USER_POOL_ID,
+                ClientId: CLIENT_ID,
+                AuthParameters: {
+                    USERNAME: email,
+                    PASSWORD: currentPassword, 
+                },
+            }).promise();
+
+            let accessToken = authResult['AuthenticationResult']['AccessToken']
+
+            const changePasswordResult = await cognito.changePassword({
+                AccessToken: accessToken, 
+                PreviousPassword: currentPassword,
+                ProposedPassword: newPassword, 
+            }).promise();
+            console.log(changePasswordResult)
+
+        } catch (error) {
+            console.error('Incorrect current password:', error);
+            throw new Error('Incorrect current password.');
+        }
+    };
+
     const handlePasswordToggle = () => {
         setIsPasswordRequired(!isPasswordRequired);
+        setCurrentPassword('');
         setPassword('');
         setConfirmPassword('');
-        setCurrentPassword('');
     };
 
     if (!employeeData) {
@@ -173,7 +161,7 @@ const Settings = () => {
         );
     }
 
-    return (
+    return (        
         <div className="settings-container-wrapper">
             <div className="settings-container">
                 <div className="avatar-container">
@@ -244,7 +232,7 @@ const Settings = () => {
                                         placeholder="New Password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        required={isPasswordRequired}
+                                        required
                                     />
                                 </div>
                                 <div className="form-group form-group-full confirmPassword">
@@ -255,7 +243,7 @@ const Settings = () => {
                                         placeholder="Confirm New Password"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required={isPasswordRequired}
+                                        required
                                     />
                                 </div>
                                 {error && <p className="error-message">{error}</p>}
