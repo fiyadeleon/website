@@ -720,7 +720,7 @@ const ScopeOfWork = () => {
 
             <button className="sow-save-button" onClick={generatePDF}>Preview PDF</button>
             {showModal && (
-                <div className="modal">
+                <div className="sow-modal">
                     <span className="close" onClick={closeModal}>&times;</span>
                     <iframe
                         src={pdfUrl}
