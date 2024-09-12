@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/ScopeOfWork.css';
-import UserPanel from './UserPanel';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import logo from '../images/pdf-logo.png';
+
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
 const ScopeOfWork = () => {
     const [customerQuery, setCustomerQuery] = useState('');
     const [employeeQuery, setEmployeeQuery] = useState('');
     const [inventoryQuery, setInventoryQuery] = useState('');
+    const [pdfUrl, setPdfUrl] = useState(null); 
+    const [showModal, setShowModal] = useState(false);
 
     const [newCustomer, setNewCustomer] = useState({
         name: '',
@@ -42,49 +49,60 @@ const ScopeOfWork = () => {
     const employeeSearchRef = useRef();
     const inventorySearchRef = useRef();
     
-    const [customers, setCustomers] = useState([
-        { id: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
-        { id: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
-        { id: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
-        { id: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234', carModel: 'Ford Mustang Mach 1' },
-        { id: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678', carModel: 'Ford Mustang GT Convertible' },
-        { id: 'CUST006', name: 'David Martin', contact: '9998887777', email: 'david@example.com', address: '101 Maple Ave', plateNo: 'JKL012', carModel: 'Tesla Model 3' },
-        { id: 'CUST007', name: 'Sarah Lee', contact: '8887776666', email: 'sarah@example.com', address: '202 Birch Ave', plateNo: 'PQR789', carModel: 'Toyota Prius' },
-        { id: 'CUST008', name: 'Chris Evans', contact: '7776665555', email: 'chris@example.com', address: '303 Spruce St', plateNo: 'STU123', carModel: 'Chevrolet Corvette' },
-        { id: 'CUST009', name: 'Laura Green', contact: '6665554444', email: 'laura@example.com', address: '404 Oak St', plateNo: 'VWX987', carModel: 'BMW X5' },
-        { id: 'CUST010', name: 'Kevin White', contact: '5554443333', email: 'kevin@example.com', address: '505 Pine St', plateNo: 'ZAB456', carModel: 'Mercedes-Benz C-Class' }
-    ]);
-    
-    const [employees, setEmployee] = useState([
-        { id: 'EMP001', jobTitle: 'Senior Mechanic', name: 'Liam Jackson', contact: '1234567890', email: 'liam@example.com', salary: 55000 },
-        { id: 'EMP002', jobTitle: 'Engine Specialist', name: 'Olivia Parker', contact: '0987654321', email: 'olivia@example.com', salary: 60000 },
-        { id: 'EMP003', jobTitle: 'Transmission Technician', name: 'Noah Miller', contact: '5555555555', email: 'noah@example.com', salary: 58000 },
-        { id: 'EMP004', jobTitle: 'Brake and Suspension Specialist', name: 'Emma Davis', contact: '1112223333', email: 'emma@example.com', salary: 57000 },
-        { id: 'EMP005', jobTitle: 'Diagnostic Technician', name: 'James Wilson', contact: '4445556666', email: 'james@example.com', salary: 62000 },
-        { id: 'EMP006', jobTitle: 'Electric Vehicle Specialist', name: 'Sophia Carter', contact: '3332221111', email: 'sophia@example.com', salary: 63000 },
-        { id: 'EMP007', jobTitle: 'Body Shop Technician', name: 'William Taylor', contact: '2221110000', email: 'william@example.com', salary: 59000 },
-        { id: 'EMP008', jobTitle: 'Air Conditioning Technician', name: 'Isabella Moore', contact: '1110009999', email: 'isabella@example.com', salary: 61000 },
-        { id: 'EMP009', jobTitle: 'Painter', name: 'Benjamin Harris', contact: '9991118888', email: 'benjamin@example.com', salary: 56000 },
-        { id: 'EMP010', jobTitle: 'Tire Specialist', name: 'Charlotte Thompson', contact: '8887776666', email: 'charlotte@example.com', salary: 54000 }
-    ]);        
-    
-    const [inventoryItems, setInventoryItems] = useState([
-        { id: "PROD-CA1234-20240101", product_name: "Engine Oil", category: "Lubricants", stock: 120, unit: "box", price: 450.00},
-        { id: "PROD-BR5678-20240101", product_name: "Brake Pads", category: "Brakes", stock: 75, unit: "box", price: 1500.50},
-        { id: "PROD-TY9101-20240101", product_name: "All-Season Tires", category: "Tires", stock: 40, unit: "piece", price: 5500.00},
-        { id: "PROD-BT2345-20240101", product_name: "Car Battery", category: "Batteries", stock: 65, unit: "piece", price: 3200.00},
-        { id: "PROD-FL6789-20240101", product_name: "Fuel Filter", category: "Filters", stock: 200, unit: "piece", price: 300.00},
-        { id: "PROD-WP2345-20240102", product_name: "Windshield Wiper", category: "Accessories", stock: 150, unit: "box", price: 600.00},
-        { id: "PROD-OF5678-20240102", product_name: "Oil Filter", category: "Filters", stock: 95, unit: "piece", price: 350.00},
-        { id: "PROD-RB6789-20240103", product_name: "Radiator Belt", category: "Belts", stock: 50, unit: "piece", price: 1200.00},
-        { id: "PROD-EX7890-20240103", product_name: "Exhaust Pipe", category: "Exhaust", stock: 30, unit: "piece", price: 8000.00},
-        { id: "PROD-BR2345-20240104", product_name: "Brake Fluid", category: "Fluids", stock: 250, unit: "box", price: 400.00},
-        { id: "PROD-LB1234-20240105", product_name: "LED Headlights", category: "Lighting", stock: 80, unit: "box", price: 7000.00},
-        { id: "PROD-AC5678-20240105", product_name: "Air Conditioning Filter", category: "Filters", stock: 100, unit: "piece", price: 1200.00},
-        { id: "PROD-TR6789-20240106", product_name: "Transmission Fluid", category: "Fluids", stock: 60, unit: "box", price: 1600.00},
-        { id: "PROD-SP8901-20240106", product_name: "Spark Plug", category: "Engine Parts", stock: 220, unit: "piece", price: 300.00},
-        { id: "PROD-TB9012-20240107", product_name: "Timing Belt", category: "Belts", stock: 35, unit: "piece", price: 2500.00}
-    ]); 
+    const [customers, setCustomers] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [inventoryItems, setInventoryItems] = useState([]);
+
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                    method: 'GET',
+                    headers: { 'x-api-key': API_KEY },
+                });
+                if (!response.ok) throw new Error('Failed to fetch customers');
+                const data = await response.json();
+                setCustomers(data);
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+                alert('Error fetching customers!');
+            }
+        };
+
+        const fetchEmployees = async () => {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                    method: 'GET',
+                    headers: { 'x-api-key': API_KEY },
+                });
+                if (!response.ok) throw new Error('Failed to fetch employees');
+                const data = await response.json();
+                setEmployees(data);
+            } catch (error) {
+                console.error('Error fetching employees:', error);
+                alert('Error fetching employees!');
+            }
+        };
+
+        const fetchInventoryItems = async () => {
+            try {
+                const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
+                    method: 'GET',
+                    headers: { 'x-api-key': API_KEY },
+                });
+                if (!response.ok) throw new Error('Failed to fetch inventory items');
+                const data = await response.json();
+                setInventoryItems(data);
+            } catch (error) {
+                console.error('Error fetching inventory items:', error);
+                alert('Error fetching inventory items!');
+            }
+        };
+
+        fetchCustomers();
+        fetchEmployees();
+        fetchInventoryItems();
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -125,6 +143,16 @@ const ScopeOfWork = () => {
         setFilteredEmployees(employeeResults.slice(0, 5));
     };
 
+    const handleInventorySearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setInventoryQuery(query);
+        const inventoryResults = inventoryItems.filter(item =>
+            item.product_name.toLowerCase().includes(query) &&
+            !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id)
+        );
+        setFilteredInventory(inventoryResults.slice(0, 5));
+    };
+
     const handleCustomerSelect = (customer) => {
         setSelectedCustomer(customer);
         setFilteredCustomers([]);
@@ -135,16 +163,6 @@ const ScopeOfWork = () => {
         setSelectedEmployee(employee);
         setFilteredEmployees([]);
         setShowEmployeeDetails(false);
-    };
-
-    const handleInventorySearch = (event) => {
-        const query = event.target.value.toLowerCase();
-        setInventoryQuery(query);
-        const inventoryResults = inventoryItems.filter(item =>
-            item.product_name.toLowerCase().includes(query) &&
-            !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id)
-        );
-        setFilteredInventory(inventoryResults.slice(0, 5));
     };
 
     const handleInventorySelect = (item) => {
@@ -210,7 +228,6 @@ const ScopeOfWork = () => {
         e.preventDefault();
         if (validateCustomer()) {
             console.log('Customer validated and saved');
-            // Handle saving the customer
         }
     };
 
@@ -218,7 +235,6 @@ const ScopeOfWork = () => {
         e.preventDefault();
         if (validateEmployee()) {
             console.log('Employee validated and saved');
-            // Handle saving the employee
         }
     };
 
@@ -234,6 +250,168 @@ const ScopeOfWork = () => {
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
         setShowEmployeeDetails(false);
+        document.querySelector('.sow-services-textarea').value = "";
+        document.querySelector('.sow-remarks-textarea').value = "";
+    };
+
+    const generatePDF = () => {
+        let errors = [];
+        if (!selectedCustomer) {
+            errors.push('Customer details are missing.');
+        } else {
+            if (!selectedCustomer.name) errors.push('Customer name is required.');
+            if (!selectedCustomer.carModel) errors.push('Customer car model is required.');
+            if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
+            if (!selectedCustomer.contact) errors.push('Customer contact is required.');
+            if (!selectedCustomer.email) errors.push('Customer email is required.');
+        }
+        if (!selectedEmployee) {
+            errors.push('Employee details are missing.');
+        } else {
+            if (!selectedEmployee.name) errors.push('Employee name is required.');
+            if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
+            if (!selectedEmployee.contact) errors.push('Employee contact is required.');
+            if (!selectedEmployee.email) errors.push('Employee email is required.');
+        }
+        const serviceDetails = document.querySelector('.sow-services-textarea').value;
+        if (!serviceDetails) errors.push('Service details are required.');
+        const remarks = document.querySelector('.sow-remarks-textarea').value;
+        if (errors.length > 0) {
+            alert('Please fix the following issues before generating the PDF:\n' + errors.join('\n'));
+            return;
+        }
+
+        const doc = new jsPDF();
+        const imgWidth = 80;
+        const imgHeight = 30;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const xCenter = (pageWidth - imgWidth) / 2;
+        
+        doc.addImage(logo, 'PNG', xCenter, 10, imgWidth, imgHeight);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        
+        doc.text("Compound, 1 Pascual, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
+        doc.text("Contact no. 09978900746 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text("SCOPE OF WORK", pageWidth / 2, imgHeight + 26, { align: 'center' });
+        
+        const startY = imgHeight + 35;
+        const columnWidth = pageWidth / 2;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("CUSTOMER DETAILS", 25, startY);
+        const customerDetails = [
+            selectedCustomer?.name || "",
+            selectedCustomer?.carModel || "",
+            selectedCustomer?.plateNo || "",
+            selectedCustomer?.contact || "",
+            selectedCustomer?.email || ""
+        ];
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        customerDetails.forEach((detail, index) => {
+            doc.text(detail, 25, startY + 8 + (index * 5));
+        });
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY);
+        const employeeDetails = [
+            selectedEmployee?.name || "",
+            selectedEmployee?.jobTitle || "",
+            selectedEmployee?.contact || "",
+            selectedEmployee?.email || ""
+        ];
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        employeeDetails.forEach((detail, index) => {
+            doc.text(detail, columnWidth + 25, startY + 8 + (index * 5)); 
+        });
+
+        const serviceDetailsY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 40 : startY + 45; 
+        let currentY = serviceDetailsY + 10;
+
+        if (serviceDetails) {
+            const serviceDetailsArray = typeof serviceDetails === 'string' ? serviceDetails.split("\n") : [];
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text("SERVICE DETAILS", 25, serviceDetailsY);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+
+            serviceDetailsArray.forEach((line) => {
+                if (line.startsWith("•")) {
+                    doc.text(line, 30, currentY);
+                } else {
+                    doc.text(line, 25, currentY); 
+                }
+
+                currentY += 5;
+            });
+        }
+
+        if (remarks) {
+            const remarksY = currentY + 10;
+            doc.setFont('helvetica', 'bold');
+            doc.text("REMARKS", 25, remarksY);
+            doc.setFont('helvetica', 'normal');
+            doc.text(remarks, 25, remarksY + 10);
+        }
+        
+        // // Optional: Add Inventory Items Table (If applicable)
+        // if (selectedInventoryItems && selectedInventoryItems.length > 0) {
+        //     const inventoryTableData = selectedInventoryItems.map((item, index) => [
+        //         index + 1,
+        //         item.product_name,
+        //         item.unit,
+        //         item.price
+        //     ]);
+
+        //     // Table with only border lines and no color
+        //     doc.autoTable({
+        //         head: [['#', 'Product Name', 'Unit', 'Price']],
+        //         body: inventoryTableData,
+        //         startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 40 : startY + 60, // Position inventory table after the details
+        //         margin: { left: 20 },
+        //         styles: {
+        //             fillColor: null, // No background color
+        //             textColor: [0, 0, 0], // Black text
+        //             lineColor: [0, 0, 0], // Black borders
+        //             lineWidth: 0.1, // Thin border lines
+        //         },
+        //         headStyles: {
+        //             fillColor: null, // No background color for header
+        //             textColor: [0, 0, 0], // Black text for header
+        //             lineColor: [0, 0, 0], // Black border lines for header
+        //             lineWidth: 0.1, // Thin border lines for header
+        //         },
+        //         columnStyles: {
+        //             0: { cellWidth: 10 },  // Narrower column for '#'
+        //             1: { cellWidth: 100 },  // Narrower column for 'Product Name'
+        //             2: { cellWidth: 30 },  // Narrower column for 'Unit'
+        //             3: { cellWidth: 30 },  // Narrower column for 'Price'
+        //         }
+        //     });
+        // }
+        
+        const pdfBlob = doc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        
+        setPdfUrl(pdfUrl);
+        setShowModal(true);             
+    };
+
+    const closeModal = () => {
+        setShowModal(false); 
+        setPdfUrl(null); 
     };
 
     return (
@@ -244,128 +422,128 @@ const ScopeOfWork = () => {
             </div>
 
             <div className="sow-user-info">
-            <form className="sow-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
-                <h2>CUSTOMER</h2>
-                {!showCustomerDetails && (
-                    <div className="sow-search-bar">
-                        <span className="material-symbols-outlined sow-search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search Customer"
-                            className="sow-search-input"
-                            value={customerQuery}
-                            onChange={handleCustomerSearch}
-                            onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
-                        />
-                    </div>
-                )}
-                {filteredCustomers.length > 0 && (
-                    <div className="sow-dropdown">
-                        {filteredCustomers.map((customer, index) => (
-                            <div className="sow-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
-                                <span className="sow-dropdown-text">{customer.name}</span>
-                                <span className="sow-dropdown-actions">{customer.plateNo}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {selectedCustomer && !showCustomerDetails && (
-                    <div className="sow-customer-details">
-                        <p><strong>Name:</strong> {selectedCustomer.name}</p>
-                        <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
-                        <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
-                        <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                        <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                        <p><strong>Address:</strong> {selectedCustomer.address}</p>
-                    </div>
-                )}
-                <button 
-                    type="button" // Changed to "button" to prevent triggering form submit on toggle
-                    className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
-                    onClick={handleToggleCustomer}
-                >
-                    {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
-                </button>
+                <form className="sow-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
+                    <h2>CUSTOMER</h2>
+                    {!showCustomerDetails && (
+                        <div className="sow-search-bar">
+                            <span className="material-symbols-outlined sow-search-icon">search</span>
+                            <input
+                                type="text"
+                                placeholder="Search Customer"
+                                className="sow-search-input"
+                                value={customerQuery}
+                                onChange={handleCustomerSearch}
+                                onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                            />
+                        </div>
+                    )}
+                    {filteredCustomers.length > 0 && (
+                        <div className="sow-dropdown">
+                            {filteredCustomers.map((customer, index) => (
+                                <div className="sow-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
+                                    <span className="sow-dropdown-text">{customer.name}</span>
+                                    <span className="sow-dropdown-actions">{customer.plateNo}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {selectedCustomer && !showCustomerDetails && (
+                        <div className="sow-customer-details">
+                            <p><strong>Name:</strong> {selectedCustomer.name}</p>
+                            <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
+                            <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
+                            <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
+                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                        </div>
+                    )}
+                    <button 
+                        type="button" 
+                        className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
+                        onClick={handleToggleCustomer}
+                    >
+                        {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                    </button>
 
-                {showCustomerDetails && (
-                    <div className="sow-customer-details">
-                        <p><strong>Name:</strong></p>
-                        <input
-                            className="sow-placeholder"
-                            type="text"
-                            placeholder="Enter name"
-                            value={newCustomer.name}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                            required
-                        />
-                        {errors.name && <span className="error">{errors.name}</span>}
+                    {showCustomerDetails && (
+                        <div className="sow-customer-details">
+                            <p><strong>Name:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter name"
+                                value={newCustomer.name}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                required
+                            />
+                            {errors.name && <span className="error">{errors.name}</span>}
 
-                        <p><strong>Car Model:</strong></p>
-                        <input
-                            className="sow-placeholder"
-                            type="text"
-                            placeholder="Enter car model"
-                            value={newCustomer.carModel}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
-                            required
-                        />
-                        {errors.carModel && <span className="error">{errors.carModel}</span>}
+                            <p><strong>Car Model:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter car model"
+                                value={newCustomer.carModel}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                                required
+                            />
+                            {errors.carModel && <span className="error">{errors.carModel}</span>}
 
-                        <p><strong>Plate No:</strong></p>
-                        <input
-                            className="sow-placeholder"
-                            type="text"
-                            placeholder="Enter plate number"
-                            value={newCustomer.plateNo}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
-                            required
-                        />
-                        {errors.plateNo && <span className="error">{errors.plateNo}</span>}
+                            <p><strong>Plate No:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter plate number"
+                                value={newCustomer.plateNo}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
+                                required
+                            />
+                            {errors.plateNo && <span className="error">{errors.plateNo}</span>}
 
-                        <p><strong>Contact No:</strong></p>
-                        <input
-                            className="sow-placeholder"
-                            type="tel" 
-                            pattern="[0-9]{11}" 
-                            maxLength="11"
-                            placeholder="Enter contact number"
-                            value={newCustomer.contact}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
-                            required
-                        />
-                        {errors.contact && <span className="error">{errors.contact}</span>}
+                            <p><strong>Contact No:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="tel" 
+                                pattern="[0-9]{11}" 
+                                maxLength="11"
+                                placeholder="Enter contact number"
+                                value={newCustomer.contact}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                                required
+                            />
+                            {errors.contact && <span className="error">{errors.contact}</span>}
 
-                        <p><strong>Email:</strong></p>
-                        <input
-                            className="sow-placeholder"
-                            type="email"
-                            placeholder="Enter email"
-                            value={newCustomer.email}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                            required
-                        />
-                        {errors.email && <span className="error">{errors.email}</span>}
+                            <p><strong>Email:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="email"
+                                placeholder="Enter email"
+                                value={newCustomer.email}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                required
+                            />
+                            {errors.email && <span className="error">{errors.email}</span>}
 
-                        <p><strong>Address:</strong></p>
-                        <input
-                            className="sow-placeholder"
-                            type="text"
-                            placeholder="Enter address"
-                            value={newCustomer.address}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                            required
-                        />
-                        {errors.address && <span className="error">{errors.address}</span>}
+                            <p><strong>Address:</strong></p>
+                            <input
+                                className="sow-placeholder"
+                                type="text"
+                                placeholder="Enter address"
+                                value={newCustomer.address}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                                required
+                            />
+                            {errors.address && <span className="error">{errors.address}</span>}
 
-                        <button
-                            className="sow-submit-btn"
-                            type="submit" // Make this a submit button
-                        >
-                            Submit
-                        </button>
-                    </div>
-                )}
-            </form>
+                            <button
+                                className="sow-submit-btn"
+                                type="submit"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    )}
+                </form>
 
                 <form className="sow-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
                     <h2>EMPLOYEE</h2>
@@ -466,7 +644,7 @@ const ScopeOfWork = () => {
                 </form>
             </div>
 
-            <div className="sow-parts-section" ref={inventorySearchRef}>
+            {/* <div className="sow-parts-section" ref={inventorySearchRef}>
                 <div className="sow-header-section">
                     <h3>Inventory</h3>
                     <span className="material-symbols-outlined sow-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
@@ -507,7 +685,7 @@ const ScopeOfWork = () => {
                         </div>
                     ))}
                 </div>
-            </div>
+            </div> */}
 
             <div className="sow-services-section">
                 <div className="sow-header-section">
@@ -525,8 +703,18 @@ const ScopeOfWork = () => {
                 <textarea className="sow-remarks-textarea" placeholder="Enter remarks here..."></textarea>
             </div>
 
-            <button className="sow-save-button">Save as .PDF</button>
-
+            <button className="sow-save-button" onClick={generatePDF}>Preview PDF</button>
+            {showModal && (
+                <div className="modal">
+                    <span className="close" onClick={closeModal}>&times;</span>
+                    <iframe
+                        src={pdfUrl}
+                        width="100%"
+                        height="300px"
+                        title="PDF Preview"
+                    ></iframe>
+                </div>
+            )}
         </div>
     );
 };

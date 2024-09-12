@@ -259,6 +259,8 @@ const JobOrder = () => {
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
         setShowEmployeeDetails(false);
+        document.querySelector('.jo-services-textarea').value = "";
+        document.querySelector('.jo-remarks-textarea').value = "";
     };
 
     return (

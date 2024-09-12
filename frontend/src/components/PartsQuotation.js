@@ -260,6 +260,8 @@ const PartsQuotation = () => {
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
         setShowEmployeeDetails(false);
+        document.querySelector('.pq-services-textarea').value = "";
+        document.querySelector('.pq-remarks-textarea').value = "";
     };
 
     return (

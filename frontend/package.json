@@ -17,6 +17,8 @@
     "browserify-zlib": "^0.2.0",
     "chart.js": "^4.4.4",
     "https-browserify": "^1.0.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.3",
     "os-browserify": "^0.3.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
