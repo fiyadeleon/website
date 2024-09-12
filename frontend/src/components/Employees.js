@@ -10,9 +10,8 @@ function generateEmployeeId() {
 }
 
 function Employees() {
-    const AWS_REGION = process.env.REACT_APP_REGION;
     AWS.config.update({
-        region: AWS_REGION,
+        region: awsconfig.region,
         accessKeyId: process.env.REACT_APP_ACCESS_KEY,
         secretAccessKey: process.env.REACT_APP_SECRET_KEY,
     });
@@ -24,8 +23,7 @@ function Employees() {
     const createUserInCognito = async (email, role) => {
         const params = {
             UserPoolId: awsconfig.aws_user_pools_id,
-            Username: email, 
-            TemporaryPassword: 'TEMPORARY_PASSWORD', 
+            Username: email,
             UserAttributes: [
                 {
                     Name: 'email',
