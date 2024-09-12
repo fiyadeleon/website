@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Employees.css';
-import AWS from 'aws-sdk'; 
-import awsconfig from '../aws-exports';
+import { createUserInCognito, addEmployeeToAPI, updateEmployeeToAPI } from './employeeService';
+
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 function generateEmployeeId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -10,69 +12,6 @@ function generateEmployeeId() {
 }
 
 function Employees() {
-    AWS.config.update({
-        region: awsconfig.region,
-        accessKeyId: process.env.REACT_APP_ACCESS_KEY,
-        secretAccessKey: process.env.REACT_APP_SECRET_KEY,
-    });
-    
-    const cognito = new AWS.CognitoIdentityServiceProvider({
-        region: AWS_REGION
-    });
-    
-    const createUserInCognito = async (email, role) => {
-        const params = {
-            UserPoolId: awsconfig.aws_user_pools_id,
-            Username: email,
-            UserAttributes: [
-                {
-                    Name: 'email',
-                    Value: email,
-                },
-                {
-                    Name: 'email_verified',
-                    Value: 'true',
-                }
-            ],
-            DesiredDeliveryMediums: ['EMAIL']
-        };
-    
-        try {
-            // Step 1: Create the user in Cognito
-            const result = await cognito.adminCreateUser(params).promise();
-            console.log('User created in Cognito:', result);
-
-            let groupName = null;
-
-            if (role === "user") {
-                groupName = "stanghero-user-group";
-            } else if (role === "admin") {
-                groupName = "stanghero-admin-group";
-            } else {
-                groupName = "stanghero-default-group";
-            }
-
-            // Step 2: Add the user to the group
-            if (groupName) {
-                const addUserToGroupParams = {
-                    UserPoolId: process.env.COGNITO_USER_POOL_ID,
-                    Username: email,
-                    GroupName: groupName,
-                };
-                await cognito.adminAddUserToGroup(addUserToGroupParams).promise();
-                console.log(`User added to group: ${groupName}`);
-            }
-    
-            return result;
-        } catch (err) {
-            console.error('Error creating user in Cognito or adding to group:', err);
-            throw err;
-        }
-    };
-
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-    const API_KEY = process.env.REACT_APP_API_KEY;
-
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -247,24 +186,10 @@ function Employees() {
             // Step 2: Add or update the employee in your API
             let response;
             if (isEditMode && editEmployeeIndex !== null) {
-                response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
-                    method: 'PUT',
-                    headers: {
-                        'x-api-key': API_KEY,
-                    },
-                    body: JSON.stringify(newEmployee),
-                });
+                response = updateEmployeeToAPI(newEmployee);
             } else {
-                response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
-                    method: 'POST',
-                    headers: {
-                        'x-api-key': API_KEY,
-                    },
-                    body: JSON.stringify(newEmployee),
-                });
+                response = addEmployeeToAPI(newEmployee);
             }
-    
-            if (!response.ok) throw new Error(isEditMode ? 'Failed to update employee' : 'Failed to add employee');
     
             if (isEditMode && editEmployeeIndex !== null) {
                 setEmployees((prevEmployees) =>

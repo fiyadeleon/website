@@ -495,7 +495,7 @@ const JobOrder = () => {
 
             <div className="jo-parts-section" ref={inventorySearchRef}>
                 <div className="jo-header-section">
-                    <h3>Inventory</h3>
+                    <h2>INVENTORY</h2>
                     <span className="material-symbols-outlined jo-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
                 </div>
                 <div className="jo-search-bar">
@@ -566,7 +566,7 @@ const JobOrder = () => {
 
             <div className="jo-services-section">
                 <div className="jo-header-section">
-                    <h3>Services</h3>
+                    <h2>SERVICES</h2>
                     <span className="material-symbols-outlined jo-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
                 </div>
                 <textarea className="jo-services-textarea" placeholder="Enter service details here..." required></textarea>
@@ -574,13 +574,13 @@ const JobOrder = () => {
 
             <div className="jo-remarks-section">
                 <div className="jo-header-section">
-                    <h3>Remarks</h3>
+                    <h2>REMARKS</h2>
                     <span className="material-symbols-outlined jo-info-icon" data-tooltip="Further details regarding the completed inspections.">info</span>
                 </div>
                 <textarea className="jo-remarks-textarea" placeholder="Enter remarks here..."></textarea>
             </div>
 
-            <button className="jo-save-button">Save as .PDF</button>
+            <button className="jo-save-button">Preview .PDF</button>
 
         </div>
     );

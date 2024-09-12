@@ -3,9 +3,23 @@ import '../styles/ScopeOfWork.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import logo from '../images/pdf-logo.png';
+import { createUserInCognito, addEmployeeToAPI } from './employeeService';
+import { addCustomerToAPI } from './customerService';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
-const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+const API_KEY = process.env.REACT_APP_API_KEY;
+
+function generateCustomerId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return `CUST-${randomString}-${dateString}`;
+}
+
+function generateEmployeeId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return `EMP-${randomString}-${dateString}`;
+}
 
 const ScopeOfWork = () => {
     const [customerQuery, setCustomerQuery] = useState('');
@@ -13,23 +27,31 @@ const ScopeOfWork = () => {
     const [inventoryQuery, setInventoryQuery] = useState('');
     const [pdfUrl, setPdfUrl] = useState(null); 
     const [showModal, setShowModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const [newCustomer, setNewCustomer] = useState({
+    const initialCustomerState = {
         name: '',
         carModel: '',
         plateNo: '',
         contact: '',
         email: '',
         address: ''
-    });
+    };
 
-    const [newEmployee, setNewEmployee] = useState({
+    const initialEmployeeState = {
         name: '',
         jobTitle: '',
         contact: '',
         email: '',
-        address: ''
-    });
+        address: '',
+        role: '',
+        salary: 0
+    };
+
+    const [newCustomer, setNewCustomer] = useState(initialCustomerState);
+    const [newEmployee, setNewEmployee] = useState(initialEmployeeState);
+    const [isSubmittingCustomer, setIsSubmittingCustomer] = useState(false);
+    const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
 
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [filteredEmployees, setFilteredEmployees] = useState([]);
@@ -53,52 +75,52 @@ const ScopeOfWork = () => {
     const [employees, setEmployees] = useState([]);
     const [inventoryItems, setInventoryItems] = useState([]);
 
+    const fetchCustomers = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                method: 'GET',
+                headers: { 'x-api-key': API_KEY },
+            });
+            if (!response.ok) throw new Error('Failed to fetch customers');
+            const data = await response.json();
+            setCustomers(data);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+            alert('Error fetching customers!');
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                method: 'GET',
+                headers: { 'x-api-key': API_KEY },
+            });
+            if (!response.ok) throw new Error('Failed to fetch employees');
+            const data = await response.json();
+            setEmployees(data);
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+            alert('Error fetching employees!');
+        }
+    };
+
+    const fetchInventoryItems = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
+                method: 'GET',
+                headers: { 'x-api-key': API_KEY },
+            });
+            if (!response.ok) throw new Error('Failed to fetch inventory items');
+            const data = await response.json();
+            setInventoryItems(data);
+        } catch (error) {
+            console.error('Error fetching inventory items:', error);
+            alert('Error fetching inventory items!');
+        }
+    };
+
     useEffect(() => {
-        const fetchCustomers = async () => {
-            try {
-                const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
-                    method: 'GET',
-                    headers: { 'x-api-key': API_KEY },
-                });
-                if (!response.ok) throw new Error('Failed to fetch customers');
-                const data = await response.json();
-                setCustomers(data);
-            } catch (error) {
-                console.error('Error fetching customers:', error);
-                alert('Error fetching customers!');
-            }
-        };
-
-        const fetchEmployees = async () => {
-            try {
-                const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
-                    method: 'GET',
-                    headers: { 'x-api-key': API_KEY },
-                });
-                if (!response.ok) throw new Error('Failed to fetch employees');
-                const data = await response.json();
-                setEmployees(data);
-            } catch (error) {
-                console.error('Error fetching employees:', error);
-                alert('Error fetching employees!');
-            }
-        };
-
-        const fetchInventoryItems = async () => {
-            try {
-                const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
-                    method: 'GET',
-                    headers: { 'x-api-key': API_KEY },
-                });
-                if (!response.ok) throw new Error('Failed to fetch inventory items');
-                const data = await response.json();
-                setInventoryItems(data);
-            } catch (error) {
-                console.error('Error fetching inventory items:', error);
-                alert('Error fetching inventory items!');
-            }
-        };
-
         fetchCustomers();
         fetchEmployees();
         fetchInventoryItems();
@@ -202,39 +224,62 @@ const ScopeOfWork = () => {
         }
     };
 
-    const validateCustomer = () => {
-        let newErrors = {};
-        if (!newCustomer.name) newErrors.name = 'Name is required';
-        if (!newCustomer.carModel) newErrors.carModel = 'Car Model is required';
-        if (!newCustomer.plateNo) newErrors.plateNo = 'Plate Number is required';
-        if (!newCustomer.contact) newErrors.contact = 'Contact is required';
-        if (!newCustomer.email) newErrors.email = 'Email is required';
-        if (!newCustomer.address) newErrors.address = 'Address is required';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const validateEmployee = () => {
-        let newErrors = {};
-        if (!newEmployee.name) newErrors.name = 'Name is required';
-        if (!newEmployee.jobTitle) newErrors.jobTitle = 'Job Title is required';
-        if (!newEmployee.contact) newErrors.contact = 'Contact is required';
-        if (!newEmployee.email) newErrors.email = 'Email is required';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSaveNewCustomer = (e) => {
+    const handleSaveNewCustomer = async (e) => {
         e.preventDefault();
-        if (validateCustomer()) {
-            console.log('Customer validated and saved');
+        try {
+            setIsSubmittingCustomer(true);
+            setIsLoading(true);
+    
+            const customerToAdd = {
+                id: generateCustomerId(),
+                ...newCustomer,
+            };
+    
+            const response = await addCustomerToAPI(customerToAdd);
+            if (response && response.item && response.message === "Item added successfully!") {
+                alert('Customer created successfully!');
+                handleToggleCustomer(); 
+            } else {
+                alert('Error adding customer!');
+            }
+        } catch (error) {
+            console.error("Error adding customer:", error);
+            alert('Error adding customer!');
+        } finally {
+            setNewCustomer(initialCustomerState);
+            setIsLoading(false);
+            setIsSubmittingCustomer(false);
         }
     };
 
-    const handleSaveNewEmployee = (e) => {
+    const handleSaveNewEmployee = async (e) => {
         e.preventDefault();
-        if (validateEmployee()) {
-            console.log('Employee validated and saved');
+        try {
+            setIsSubmittingEmployee(true);
+            setIsLoading(true);
+
+            const cognitoResponse = await createUserInCognito(newEmployee.email, newEmployee.role);
+            if (cognitoResponse && cognitoResponse.User.Enabled) {
+                const employeeToAdd = {
+                    id: generateEmployeeId(),
+                    ...newEmployee,
+                };
+
+                const response = await addEmployeeToAPI(employeeToAdd);
+                if (response && response.item && response.message === "Item added successfully!") {
+                    alert('Employee created successfully!');
+                    handleToggleEmployee();
+                }
+            } else {
+                alert('Error adding employee!');
+            }
+        } catch (error) {
+            console.error("Error adding employee:", error);
+            alert('Error adding employee!');
+        } finally {
+            setNewEmployee(initialEmployeeState);
+            setIsLoading(false);
+            setIsSubmittingEmployee(false);
         }
     };
 
@@ -264,6 +309,7 @@ const ScopeOfWork = () => {
             if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
             if (!selectedCustomer.contact) errors.push('Customer contact is required.');
             if (!selectedCustomer.email) errors.push('Customer email is required.');
+            if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
         if (!selectedEmployee) {
             errors.push('Employee details are missing.');
@@ -272,6 +318,7 @@ const ScopeOfWork = () => {
             if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
             if (!selectedEmployee.contact) errors.push('Employee contact is required.');
             if (!selectedEmployee.email) errors.push('Employee email is required.');
+            if (!selectedEmployee.role) errors.push('Employee role is required.');
         }
         const serviceDetails = document.querySelector('.sow-services-textarea').value;
         if (!serviceDetails) errors.push('Service details are required.');
@@ -285,7 +332,11 @@ const ScopeOfWork = () => {
         const imgWidth = 80;
         const imgHeight = 30;
         const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
         const xCenter = (pageWidth - imgWidth) / 2;
+
+        const lineHeight = 5;
+        const maxWidth = pageWidth - 50;
         
         doc.addImage(logo, 'PNG', xCenter, 10, imgWidth, imgHeight);
         doc.setFont('helvetica', 'normal');
@@ -297,10 +348,11 @@ const ScopeOfWork = () => {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
         doc.text("SCOPE OF WORK", pageWidth / 2, imgHeight + 26, { align: 'center' });
-        
+
         const startY = imgHeight + 35;
         const columnWidth = pageWidth / 2;
 
+        // CUSTOMER DETAILS
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.text("CUSTOMER DETAILS", 25, startY);
@@ -318,6 +370,7 @@ const ScopeOfWork = () => {
             doc.text(detail, 25, startY + 8 + (index * 5));
         });
         
+        // EMPLOYEE DETAILS
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY);
@@ -334,79 +387,55 @@ const ScopeOfWork = () => {
             doc.text(detail, columnWidth + 25, startY + 8 + (index * 5)); 
         });
 
-        const serviceDetailsY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 40 : startY + 45; 
-        let currentY = serviceDetailsY + 10;
+        let currentY = startY + 40;
+        const checkPageOverflow = (heightToAdd) => {
+            if (currentY + heightToAdd > pageHeight) {
+                doc.addPage();
+                currentY = 20; 
+            }
+        };
 
+        // SERVICE DETAILS
+        checkPageOverflow(20); 
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("SERVICE DETAILS", 25, currentY);
+        currentY += 8;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
         if (serviceDetails) {
-            const serviceDetailsArray = typeof serviceDetails === 'string' ? serviceDetails.split("\n") : [];
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
-            doc.text("SERVICE DETAILS", 25, serviceDetailsY);
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(11);
-
-            serviceDetailsArray.forEach((line) => {
-                if (line.startsWith("•")) {
-                    doc.text(line, 30, currentY);
-                } else {
-                    doc.text(line, 25, currentY); 
-                }
-
-                currentY += 5;
+            const wrappedServiceDetails = doc.splitTextToSize(serviceDetails, maxWidth);
+            wrappedServiceDetails.forEach((line) => {
+                checkPageOverflow(lineHeight); 
+                doc.text(line, 25, currentY);
+                currentY += lineHeight;
             });
         }
 
-        if (remarks) {
-            const remarksY = currentY + 10;
-            doc.setFont('helvetica', 'bold');
-            doc.text("REMARKS", 25, remarksY);
-            doc.setFont('helvetica', 'normal');
-            doc.text(remarks, 25, remarksY + 10);
-        }
-        
-        // // Optional: Add Inventory Items Table (If applicable)
-        // if (selectedInventoryItems && selectedInventoryItems.length > 0) {
-        //     const inventoryTableData = selectedInventoryItems.map((item, index) => [
-        //         index + 1,
-        //         item.product_name,
-        //         item.unit,
-        //         item.price
-        //     ]);
+        // REMARKS
+        checkPageOverflow(20);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("REMARKS", 25, currentY + 8);
+        currentY += 16;
 
-        //     // Table with only border lines and no color
-        //     doc.autoTable({
-        //         head: [['#', 'Product Name', 'Unit', 'Price']],
-        //         body: inventoryTableData,
-        //         startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 40 : startY + 60, // Position inventory table after the details
-        //         margin: { left: 20 },
-        //         styles: {
-        //             fillColor: null, // No background color
-        //             textColor: [0, 0, 0], // Black text
-        //             lineColor: [0, 0, 0], // Black borders
-        //             lineWidth: 0.1, // Thin border lines
-        //         },
-        //         headStyles: {
-        //             fillColor: null, // No background color for header
-        //             textColor: [0, 0, 0], // Black text for header
-        //             lineColor: [0, 0, 0], // Black border lines for header
-        //             lineWidth: 0.1, // Thin border lines for header
-        //         },
-        //         columnStyles: {
-        //             0: { cellWidth: 10 },  // Narrower column for '#'
-        //             1: { cellWidth: 100 },  // Narrower column for 'Product Name'
-        //             2: { cellWidth: 30 },  // Narrower column for 'Unit'
-        //             3: { cellWidth: 30 },  // Narrower column for 'Price'
-        //         }
-        //     });
-        // }
-        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        if (remarks) {
+            const wrappedRemarks = doc.splitTextToSize(remarks, maxWidth);
+            wrappedRemarks.forEach((line) => {
+                checkPageOverflow(lineHeight); 
+                doc.text(line, 25, currentY);
+                currentY += lineHeight;
+            });
+        }
+
         const pdfBlob = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
-        
+
         setPdfUrl(pdfUrl);
-        setShowModal(true);             
+        setShowModal(true);
     };
 
     const closeModal = () => {
@@ -449,6 +478,7 @@ const ScopeOfWork = () => {
                                 value={customerQuery}
                                 onChange={handleCustomerSearch}
                                 onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                                disabled={isSubmittingCustomer}
                             />
                         </div>
                     )}
@@ -476,6 +506,7 @@ const ScopeOfWork = () => {
                         type="button" 
                         className={`sow-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
                         onClick={handleToggleCustomer}
+                        disabled={isSubmittingCustomer}
                     >
                         {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
                     </button>
@@ -490,8 +521,8 @@ const ScopeOfWork = () => {
                                 value={newCustomer.name}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
                                 required
+                                disabled={isSubmittingCustomer}
                             />
-                            {errors.name && <span className="error">{errors.name}</span>}
 
                             <p><strong>Car Model:</strong></p>
                             <input
@@ -501,8 +532,8 @@ const ScopeOfWork = () => {
                                 value={newCustomer.carModel}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
                                 required
+                                disabled={isSubmittingCustomer}
                             />
-                            {errors.carModel && <span className="error">{errors.carModel}</span>}
 
                             <p><strong>Plate No:</strong></p>
                             <input
@@ -512,8 +543,8 @@ const ScopeOfWork = () => {
                                 value={newCustomer.plateNo}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
                                 required
+                                disabled={isSubmittingCustomer}
                             />
-                            {errors.plateNo && <span className="error">{errors.plateNo}</span>}
 
                             <p><strong>Contact No:</strong></p>
                             <input
@@ -525,8 +556,8 @@ const ScopeOfWork = () => {
                                 value={newCustomer.contact}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
                                 required
+                                disabled={isSubmittingCustomer}
                             />
-                            {errors.contact && <span className="error">{errors.contact}</span>}
 
                             <p><strong>Email:</strong></p>
                             <input
@@ -536,8 +567,8 @@ const ScopeOfWork = () => {
                                 value={newCustomer.email}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                                 required
+                                disabled={isSubmittingCustomer}
                             />
-                            {errors.email && <span className="error">{errors.email}</span>}
 
                             <p><strong>Address:</strong></p>
                             <input
@@ -547,14 +578,15 @@ const ScopeOfWork = () => {
                                 value={newCustomer.address}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
                                 required
+                                disabled={isSubmittingCustomer}
                             />
-                            {errors.address && <span className="error">{errors.address}</span>}
 
                             <button
                                 className="sow-submit-btn"
                                 type="submit"
+                                disabled={isSubmittingCustomer}
                             >
-                                Submit
+                                {isSubmittingCustomer ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
                     )}
@@ -572,6 +604,7 @@ const ScopeOfWork = () => {
                                 value={employeeQuery}
                                 onChange={handleEmployeeSearch}
                                 onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
+                                disabled={isSubmittingEmployee}
                             />
                         </div>
                     )}
@@ -594,8 +627,10 @@ const ScopeOfWork = () => {
                         </div>
                     )}
                     <button 
+                        type="button"
                         className={`sow-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
                         onClick={handleToggleEmployee}
+                        disabled={isSubmittingEmployee}
                     >
                         {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
                     </button>
@@ -610,8 +645,8 @@ const ScopeOfWork = () => {
                                 value={newEmployee.name}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.name && <span className="error">{errors.name}</span>}
 
                             <p><strong>Job Title:</strong></p>
                             <input
@@ -621,8 +656,8 @@ const ScopeOfWork = () => {
                                 value={newEmployee.jobTitle}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
 
                             <p><strong>Contact No:</strong></p>
                             <input
@@ -634,8 +669,8 @@ const ScopeOfWork = () => {
                                 value={newEmployee.contact}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.contact && <span className="error">{errors.contact}</span>}
 
                             <p><strong>Email:</strong></p>
                             <input
@@ -645,66 +680,39 @@ const ScopeOfWork = () => {
                                 value={newEmployee.email}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.email && <span className="error">{errors.email}</span>}
+
+                            <p><strong>Role:</strong></p>
+                            <select
+                                className="employees-select"
+                                name="role"
+                                value={newEmployee.role}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
+                                required
+                                disabled={isSubmittingEmployee}
+                            >
+                                <option value="" disabled>Select a user's role</option>
+                                <option value="none">Not Applicable</option>
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
 
                             <button
                                 className="sow-submit-btn"
                                 type="submit"
+                                disabled={isSubmittingEmployee}
                             >
-                                Submit
+                                {isSubmittingEmployee ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
                     )}
                 </form>
             </div>
 
-            {/* <div className="sow-parts-section" ref={inventorySearchRef}>
-                <div className="sow-header-section">
-                    <h3>Inventory</h3>
-                    <span className="material-symbols-outlined sow-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
-                </div>
-                <div className="sow-search-bar">
-                    <span className="material-symbols-outlined sow-search-icon">search</span>
-                    <input
-                        type="text"
-                        placeholder="Search for parts or items"
-                        className="sow-search-input"
-                        value={inventoryQuery}
-                        onChange={handleInventorySearch}
-                        onFocus={handleInventoryFocus}
-                    />
-                </div>
-                {isInventoryInputFocused && filteredInventory.length > 0 && (
-                    <div className="sow-dropdown">
-                        {filteredInventory.map((item, index) => (
-                            <div className="sow-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
-                                <span className="sow-dropdown-text">{item.product_name}</span>
-                                <span className="sow-dropdown-actions">
-                                    {item.stock} {item.unit}{item.unit === 'box' ? 'es' : 's'}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                <div className="sow-selected-items">
-                    {selectedInventoryItems.map((item) => (
-                        <div key={item.id} className="sow-selected-item">
-                            <span>{item.product_name}</span>
-                            <button
-                                className="remove-item-btn"
-                                onClick={() => handleRemoveInventoryItem(item.id)}
-                            >
-                                &times;
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div> */}
-
             <div className="sow-services-section">
                 <div className="sow-header-section">
-                    <h3>Services</h3>
+                    <h2>SERVICES</h2>
                     <span className="material-symbols-outlined sow-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
                 </div>
                 <textarea className="sow-services-textarea" placeholder="Enter service details here..." required></textarea>
@@ -712,13 +720,13 @@ const ScopeOfWork = () => {
 
             <div className="sow-remarks-section">
                 <div className="sow-header-section">
-                    <h3>Remarks</h3>
+                    <h2>REMARKS</h2>
                     <span className="material-symbols-outlined sow-info-icon" data-tooltip="Further details regarding the completed inspections.">info</span>
                 </div>
                 <textarea className="sow-remarks-textarea" placeholder="Enter remarks here..."></textarea>
             </div>
 
-            <button className="sow-save-button" onClick={generatePDF}>Preview PDF</button>
+            <button className="sow-save-button" onClick={generatePDF}>Preview .PDF</button>
             {showModal && (
                 <div className="sow-modal">
                     <span className="close" onClick={closeModal}>&times;</span>
@@ -728,7 +736,7 @@ const ScopeOfWork = () => {
                         height="300px"
                         title="PDF Preview"
                     ></iframe>
-                    <button onClick={downloadPDF} className="sow-download-button">Download PDF</button>
+                    <button onClick={downloadPDF} className="sow-download-button">Download .PDF</button>
                 </div>
             )}
         </div>

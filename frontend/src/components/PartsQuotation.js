@@ -496,7 +496,7 @@ const PartsQuotation = () => {
 
             <div className="pq-parts-section" ref={inventorySearchRef}>
                 <div className="pq-header-section">
-                    <h3>Inventory</h3>
+                    <h2>INVENTORY</h2>
                     <span className="material-symbols-outlined pq-info-icon" data-tooltip="Select the part(s) or item(s) required for the quotation.">info</span>
                 </div>
                 <div className="pq-search-bar">
@@ -567,7 +567,7 @@ const PartsQuotation = () => {
 
             <div className="pq-services-section">
                 <div className="pq-header-section">
-                    <h3>Services</h3>
+                    <h2>SERVICES</h2>
                     <span className="material-symbols-outlined pq-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
                 </div>
                 <textarea className="pq-services-textarea" placeholder="Enter service details here..." required></textarea>
@@ -575,13 +575,13 @@ const PartsQuotation = () => {
 
             <div className="pq-remarks-section">
                 <div className="pq-header-section">
-                    <h3>Remarks</h3>
+                    <h2>REMARKS</h2>
                     <span className="material-symbols-outlined pq-info-icon" data-tooltip="Further details regarding the quotation.">info</span>
                 </div>
                 <textarea className="pq-remarks-textarea" placeholder="Enter remarks here..."></textarea>
             </div>
 
-            <button className="pq-save-button">Save as .PDF</button>
+            <button className="pq-save-button">Preview .PDF</button>
 
         </div>
     );

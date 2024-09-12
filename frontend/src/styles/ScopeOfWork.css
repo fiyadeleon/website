@@ -352,6 +352,18 @@
   background-color: #FFC107;
 }
 
+.sow-submit-btn:disabled {
+  background-color: #888; 
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sow-submit-btn:disabled:hover {
+  background-color: #888; 
+  cursor: not-allowed;
+  opacity: 0.6; 
+}
+
 .error-message {
   color: red;
   font-size: 12px;
