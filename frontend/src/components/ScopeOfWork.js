@@ -414,6 +414,21 @@ const ScopeOfWork = () => {
         setPdfUrl(null); 
     };
 
+    const downloadPDF = () => {
+        const doc = new jsPDF();
+    
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${year}${month}${day}`;
+    
+        let fileName = `SOW-${selectedCustomer?.name}-${selectedCustomer?.plateNo}-${formattedDate}.pdf`;
+        fileName = fileName.replace(/\s+/g, '');
+        
+        doc.save(fileName);
+    };
+
     return (
         <div className="sow-scope-of-work">
             <div className="sow-header">
@@ -713,6 +728,7 @@ const ScopeOfWork = () => {
                         height="300px"
                         title="PDF Preview"
                     ></iframe>
+                    <button onClick={downloadPDF} className="sow-download-button">Download PDF</button>
                 </div>
             )}
         </div>

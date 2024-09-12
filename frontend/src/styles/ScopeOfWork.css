@@ -382,7 +382,7 @@ input[type="number"] {
   left: 0;
   top: 0;
   width: 100%;
-  height: 78%;
+  height: 79%;
   background-color: #333 !important;
   overflow: hidden;
   color: #333;
@@ -405,5 +405,25 @@ input[type="number"] {
 
 iframe {
   width: 100%;
-  height: 90%;
+  height: 89%;
+}
+
+.sow-download-button {
+  background-color: #F8CE00;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+  font-weight: bold;
+  border-radius: 5px;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1100;
+  font-family: 'Poppins', sans-serif;
+}
+
+.sow-download-button:hover {
+  background-color: #FFC107;
 }
