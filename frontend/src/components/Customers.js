@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Customers.css';
 
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+const API_KEY = process.env.REACT_APP_API_KEY;
+
 function generateCustomerId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase(); 
     const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, ''); 
     return `CUST-${randomString}-${dateString}`;
 }
 
-function Customers() {
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-    const API_KEY = process.env.REACT_APP_API_KEY;
-    
+function Customers() {    
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedSort, setSelectedSort] = useState('Sort');
     const [selectedCheckboxes, setSelectedCheckboxes] = useState([]);
@@ -119,16 +119,19 @@ function Customers() {
 
                 const result = await response.json();
                 console.log('Deletion result:', result);
-
-                setCustomers((prevCustomers) =>
-                    prevCustomers.filter((_, index) => !selectedCheckboxes.includes(index))
-                );
-                setSelectedCheckboxes([]);
                 
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                await fetchCustomers();
             } catch (error) {
                 console.error('Error deleting customers:', error);
                 alert('Error deleting customers!');
             } finally {
+                setSelectedCheckboxes([]);
+
+                setCustomers((prevCustomers) =>
+                    prevCustomers.filter((_, index) => !selectedCheckboxes.includes(index))
+                );
+
                 setCurrentPage(1);
             }
         } else {
@@ -226,13 +229,14 @@ function Customers() {
                 setCustomers((prevCustomers) => [...prevCustomers, newCustomer]);
             }
 
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await fetchCustomers();
             toggleModal();
         } catch (error) {
             console.error('Error submitting customer:', error);
             alert('Error submitting customer!');
         } finally {
             setIsLoading(false);
-            fetchCustomers();
         }
     };
 

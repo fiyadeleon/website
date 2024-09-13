@@ -183,20 +183,20 @@ const Reports = () => {
                 x: {
                     title: {
                         display: true,
-                        text: 'Time Period',
+                        text: xAxisTitle,
                         font: {
-                            family: 'Poppins', // Set your desired font family for the x-axis title
-                            size: 14, // Set the font size for the x-axis title
+                            family: 'Poppins',
+                            size: 14,
                             weight: 'normal'
                         },
-                        color: '#333' // Set x-axis title color (optional)
+                        color: '#333'
                     },
                     ticks: {
                         font: {
-                            family: 'Poppins', // Set your desired font family for x-axis labels
-                            size: 12 // Set the font size for x-axis labels
+                            family: 'Poppins',
+                            size: 12
                         },
-                        color: '#666' // Set x-axis label color (optional)
+                        color: '#666'
                     }
                 },
                 y: {

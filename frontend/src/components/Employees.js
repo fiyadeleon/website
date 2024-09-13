@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Employees.css';
-import { createUserInCognito, addEmployeeToAPI, updateEmployeeToAPI } from './employeeService';
+import { createUserInCognito, addEmployeeToAPI, updateEmployeeToAPI, addUserToGroupInCognito, removeUserFromGroupInCognito, deleteEmployeeToAPI, deleteUserInCognito } from './employeeService';
 
 const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
 const API_KEY = process.env.REACT_APP_API_KEY;
@@ -25,6 +25,7 @@ function Employees() {
     const [employees, setEmployees] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [originalRole, setOriginalRole] = useState('');
     const pageSize = 5;
 
     useEffect(() => {
@@ -95,35 +96,37 @@ function Employees() {
             try {
                 const selectedEmployees = selectedCheckboxes.map(index => {
                     const employee = employees[index];
-                    return { id: employee.id };
+                    return { id: employee.id, email: employee.email };
                 });
 
-                const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
-                    method: 'DELETE',
-                    headers: {
-                        'x-api-key': API_KEY
-                    },
-                    body: JSON.stringify(selectedEmployees),
-                });
+                const responseCognito = await deleteUserInCognito(selectedEmployees);
 
-                if (!response.ok) throw new Error('Failed to delete employees');
+                if (responseCognito.$response.httpResponse.statusCode === 200) {
+                    const responseAPI = await deleteEmployeeToAPI(selectedEmployees);
 
-                const result = await response.json();
-                console.log('Deletion result:', result);
-
-                setEmployees((prevEmployees) =>
-                    prevEmployees.filter((_, index) => !selectedCheckboxes.includes(index))
-                );
-                setSelectedCheckboxes([]);
+                    console.log('responseAPI:', responseAPI);
+                } else {
+                    console.error('responseCognito:', responseCognito);
+                    alert('Error deleting employees!');
+                }
+        
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                await fetchEmployees();
             } catch (error) {
                 console.error('Error deleting employees:', error);
                 alert('Error deleting employees!');
             } finally {
+                setSelectedCheckboxes([]);
+
+                setEmployees((prevEmployees) =>
+                    prevEmployees.filter((_, index) => !selectedCheckboxes.includes(index))
+                );
+
                 setCurrentPage(1);
             }
         } else {
             setSelectedCheckboxes([]);
-        }
+        }         
     };
 
     const handleClearAll = () => setSelectedCheckboxes([]);
@@ -148,6 +151,7 @@ function Employees() {
             email: employee.email,
             role: employee.role,
         });
+        setOriginalRole(employee.role);
         console.log(`To update: ${employee.id}`)
         setIsEditMode(true);
         setEditEmployeeIndex(index);
@@ -186,7 +190,33 @@ function Employees() {
             // Step 2: Add or update the employee in your API
             let response;
             if (isEditMode && editEmployeeIndex !== null) {
-                response = updateEmployeeToAPI(newEmployee);
+                response = await updateEmployeeToAPI(newEmployee);
+
+                if (response && response.message && response.message.includes('updated successfully')) {
+                    if (isEditMode && originalRole !== newEmployee.role) {
+                        console.log('Role has changed from', originalRole, 'to', newEmployee.role);
+        
+                        try {
+                            if (originalRole) {
+                                const responseOriginalRole = await removeUserFromGroupInCognito(newEmployee.email, originalRole);
+                                console.log(responseOriginalRole);
+                                console.log(`Removed ${newEmployee.email} from ${originalRole} group`);
+                            }
+        
+                            if (newEmployee.role) {
+                                const responseNewRole = await addUserToGroupInCognito(newEmployee.email, newEmployee.role);
+                                console.log(responseNewRole);
+                                console.log(`Added ${newEmployee.email} to ${newEmployee.role} group`);
+                            }
+                        } catch (cognitoError) {
+                            console.error('Error updating Cognito groups:', cognitoError);
+                            alert('Error updating user roles in Cognito!');
+                        }
+                    }
+                } else {
+                    console.error('Failed to update employee. Response:', response);
+                    alert('Failed to update employee!');
+                }
             } else {
                 response = addEmployeeToAPI(newEmployee);
             }
@@ -201,13 +231,14 @@ function Employees() {
                 setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
             }
     
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await fetchEmployees();
             toggleModal();
         } catch (error) {
             console.error('Error submitting employee:', error);
             alert('Error submitting employee!');
         } finally {
             setIsLoading(false);
-            fetchEmployees();
         }
     };
 
