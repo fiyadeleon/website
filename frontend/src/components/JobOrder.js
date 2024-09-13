@@ -6,8 +6,8 @@ import logo from '../images/pdf-logo.png';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
 function generateCustomerId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -30,6 +30,7 @@ const JobOrder = () => {
     const [docInstance, setDocInstance] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [discount, setDiscount] = useState(0);
+    const [fileName, setFileName] = useState('');
 
     const initialCustomerState = {
         name: '',
@@ -318,6 +319,7 @@ const JobOrder = () => {
                     return {
                         ...item,
                         purchaseQuantity: updatedQuantity
+         
                     };
                 }
                 return item;
@@ -340,10 +342,9 @@ const JobOrder = () => {
         setServices(updatedServices);
     };
 
-    const generatePDF = () => {
+    const generatePDF = async () => {
         let errors = [];
-    
-        // Check for missing customer information
+
         if (!selectedCustomer) {
             errors.push('Customer details are missing.');
         } else {
@@ -354,9 +355,14 @@ const JobOrder = () => {
             if (!selectedCustomer.email) errors.push('Customer email is required.');
             if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
+
+        setFileName(generateFileName());
+        if (!fileName) {
+            errors.push('Please retry to preview the PDF.');
+            console.log("Error added:", errors);
+        }
     
-        // Check for missing employee information
-        if (!selectedEmployee) {
+        if (!selectedEmployee) {            
             errors.push('Employee details are missing.');
         } else {
             if (!selectedEmployee.name) errors.push('Employee name is required.');
@@ -366,7 +372,6 @@ const JobOrder = () => {
             if (!selectedEmployee.role) errors.push('Employee role is required.');
         }
     
-        // Validate inventory items
         selectedInventoryItems.forEach(item => {
             if (!item.purchaseQuantity || item.purchaseQuantity <= 0) {
                 errors.push(`Purchase quantity for item "${item.product_name}" is required and must be greater than 0.`);
@@ -375,17 +380,13 @@ const JobOrder = () => {
             }
         });
     
-        // Validate services
         if (services.length === 0) errors.push('Service details are required.');
     
-        // If errors exist, display them and stop PDF generation
         if (errors.length > 0) {
-            // Assuming you have a function or a state to display the errors
             alert(errors.join('\n'));
-            return; // Stop execution if there are errors
+            return;
         }
     
-        // Proceed with PDF generation if no errors
         const doc = new jsPDF();
         const imgWidth = 80;
         const imgHeight = 30;
@@ -395,7 +396,6 @@ const JobOrder = () => {
 
         const maxWidth = pageWidth - 50;
 
-        // Add content to the PDF document
         doc.addImage(logo, 'PNG', xCenter, 10, imgWidth, imgHeight);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
@@ -410,10 +410,16 @@ const JobOrder = () => {
         const startY = imgHeight + 35;
         const columnWidth = pageWidth / 2;
 
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text("JO No:", 25, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(fileName, 38, startY);
+
         // CUSTOMER DETAILS
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("CUSTOMER DETAILS", 25, startY);
+        doc.text("CUSTOMER DETAILS", 25, startY + 10);
         const customerDetails = [
             selectedCustomer?.name || "",
             selectedCustomer?.carModel || "",
@@ -425,13 +431,20 @@ const JobOrder = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         customerDetails.forEach((detail, index) => {
-            doc.text(detail, 25, startY + 8 + (index * 5));
+            doc.text(detail, 25, startY + 18 + (index * 5));
         });
+
+        const { formattedDate, date } = generateDate();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text("DATE ISSUED:", columnWidth + 25, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(date, columnWidth + 51, startY);
 
         // EMPLOYEE DETAILS
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY);
+        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
         const employeeDetails = [
             selectedEmployee?.name || "",
             selectedEmployee?.jobTitle || "",
@@ -442,10 +455,10 @@ const JobOrder = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         employeeDetails.forEach((detail, index) => {
-            doc.text(detail, columnWidth + 25, startY + 8 + (index * 5));
+            doc.text(detail, columnWidth + 25, startY + 18 + (index * 5));
         });
 
-        let currentY = startY + 40;
+        let currentY = startY + 50;
         const checkPageOverflow = (heightToAdd) => {
             if (currentY + heightToAdd > pageHeight) {
                 doc.addPage();
@@ -540,19 +553,23 @@ const JobOrder = () => {
         const marginX = 25; 
         const textWidth = pageWidth - 2 * marginX;
 
-        currentY += 20;
+        currentY += 15;
         const text = "I received my vehicle with all the repairs done as specified by me, which were satisfactory and complete. The jobs performed are inspected and verified.";
         const wrappedText = doc.splitTextToSize(text, textWidth);
 
         checkPageOverflow(wrappedText.length * 5);
         doc.text(wrappedText, 30, currentY);
+        
+        currentY += wrappedText.length * 5 + 20;
 
         const sigX = 45;
-        currentY += 20 + wrappedText.length * 5;
+        const mechanicSignatureX = sigX + 80;
+
+        const signatureHeight = 10;
+        checkPageOverflow(signatureHeight);
+
         doc.setFont('helvetica', 'bold');
         doc.text("Customer’s Signature", sigX, currentY);
-
-        const mechanicSignatureX = sigX + 80;
         doc.text("Mechanic’s Signature", mechanicSignatureX, currentY);
 
         const pdfBlob = doc.output('blob');
@@ -570,18 +587,29 @@ const JobOrder = () => {
 
     const downloadPDF = () => {
         if (!docInstance) return;
-    
+        
+        docInstance.save(fileName+".pdf");
+    };
+
+    const generateDate = () => {
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         const formattedDate = `${year}${month}${day}`;
+        const date = `${month}-${day}-${year}`;
+
+        return { formattedDate, date };
+    }
+
+    const generateFileName = () => {
+        const { formattedDate, date } = generateDate();
     
-        let fileName = `JO-${selectedCustomer?.name}-${selectedCustomer?.plateNo}-${formattedDate}.pdf`;
+        let fileName = `JO-${selectedCustomer?.plateNo}-${formattedDate}`;
         fileName = fileName.replace(/\s+/g, '');
-        
-        docInstance.save(fileName);
-    };
+
+        return fileName;
+    }
 
     return (
         <div className="jo-job-order">

@@ -114,8 +114,6 @@ const LoginPage = () => {
                     onSuccess: (result) => {
                         const idToken = result.getIdToken().getJwtToken();
                         const role = result.idToken.payload['custom:role'];
-                        console.log(result)
-                        console.log(role)
 
                         localStorage.setItem('email', result.idToken.payload.sub);
                         localStorage.setItem('role', role);

@@ -6,8 +6,8 @@ import logo from '../images/pdf-logo.png';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
 function generateCustomerId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -29,6 +29,7 @@ const ScopeOfWork = () => {
     const [docInstance, setDocInstance] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [fileName, setFileName] = useState('');
 
     const initialCustomerState = {
         name: '',
@@ -302,8 +303,9 @@ const ScopeOfWork = () => {
         document.querySelector('.sow-remarks-textarea').value = "";
     };
 
-    const generatePDF = () => {
+    const generatePDF = async () => {
         let errors = [];
+
         if (!selectedCustomer) {
             errors.push('Customer details are missing.');
         } else {
@@ -314,6 +316,13 @@ const ScopeOfWork = () => {
             if (!selectedCustomer.email) errors.push('Customer email is required.');
             if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
+
+        setFileName(generateFileName());
+        if (!fileName) {
+            errors.push('Please retry to preview the PDF.');
+            console.log("Error added:", errors);
+        }
+
         if (!selectedEmployee) {
             errors.push('Employee details are missing.');
         } else {
@@ -326,8 +335,9 @@ const ScopeOfWork = () => {
         const serviceDetails = document.querySelector('.sow-services-textarea').value;
         if (!serviceDetails) errors.push('Service details are required.');
         const remarks = document.querySelector('.sow-remarks-textarea').value;
+
         if (errors.length > 0) {
-            alert('Please fix the following issues before generating the PDF:\n' + errors.join('\n'));
+            alert(errors.join('\n'));
             return;
         }
 
@@ -337,7 +347,7 @@ const ScopeOfWork = () => {
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const xCenter = (pageWidth - imgWidth) / 2;
-
+        
         const lineHeight = 5;
         const maxWidth = pageWidth - 50;
         
@@ -351,14 +361,19 @@ const ScopeOfWork = () => {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
         doc.text("SCOPE OF WORK", pageWidth / 2, imgHeight + 26, { align: 'center' });
-
+        
         const startY = imgHeight + 35;
         const columnWidth = pageWidth / 2;
-
-        // CUSTOMER DETAILS
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text("SOW No:", 25, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(fileName, 41, startY);
+        
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("CUSTOMER DETAILS", 25, startY);
+        doc.text("CUSTOMER DETAILS", 25, startY + 10);
         const customerDetails = [
             selectedCustomer?.name || "",
             selectedCustomer?.carModel || "",
@@ -370,13 +385,19 @@ const ScopeOfWork = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         customerDetails.forEach((detail, index) => {
-            doc.text(detail, 25, startY + 8 + (index * 5));
+            doc.text(detail, 25, startY + 18 + (index * 5));
         });
         
-        // EMPLOYEE DETAILS
+        const { formattedDate, date } = generateDate();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text("DATE ISSUED:", columnWidth + 25, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(date, columnWidth + 51, startY);
+        
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY);
+        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
         const employeeDetails = [
             selectedEmployee?.name || "",
             selectedEmployee?.jobTitle || "",
@@ -387,24 +408,23 @@ const ScopeOfWork = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         employeeDetails.forEach((detail, index) => {
-            doc.text(detail, columnWidth + 25, startY + 8 + (index * 5)); 
+            doc.text(detail, columnWidth + 25, startY + 18 + (index * 5)); 
         });
-
-        let currentY = startY + 40;
+        
+        let currentY = startY + 50;
         const checkPageOverflow = (heightToAdd) => {
             if (currentY + heightToAdd > pageHeight) {
                 doc.addPage();
                 currentY = 20; 
             }
         };
-
-        // SERVICE DETAILS
+        
         checkPageOverflow(20); 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.text("SERVICE DETAILS", 25, currentY);
-        currentY += 8;
-
+        currentY += 10;
+        
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         if (serviceDetails) {
@@ -415,14 +435,13 @@ const ScopeOfWork = () => {
                 currentY += lineHeight;
             });
         }
-
-        // REMARKS
+        
         checkPageOverflow(20);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.text("REMARKS", 25, currentY + 8);
         currentY += 16;
-
+        
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         if (remarks) {
@@ -433,7 +452,7 @@ const ScopeOfWork = () => {
                 currentY += lineHeight;
             });
         }
-
+        
         const pdfBlob = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
@@ -449,18 +468,29 @@ const ScopeOfWork = () => {
 
     const downloadPDF = () => {
         if (!docInstance) return;
-    
+        
+        docInstance.save(fileName+".pdf");
+    };
+
+    const generateDate = () => {
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
         const formattedDate = `${year}${month}${day}`;
+        const date = `${month}-${day}-${year}`;
+
+        return { formattedDate, date };
+    }
+
+    const generateFileName = () => {
+        const { formattedDate, date } = generateDate();
     
-        let fileName = `SOW-${selectedCustomer?.name}-${selectedCustomer?.plateNo}-${formattedDate}.pdf`;
+        let fileName = `SOW-${selectedCustomer?.plateNo}-${formattedDate}`;
         fileName = fileName.replace(/\s+/g, '');
-        
-        docInstance.save(fileName);
-    };
+
+        return fileName;
+    }
 
     return (
         <div className="sow-scope-of-work">
