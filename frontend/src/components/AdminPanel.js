@@ -66,6 +66,7 @@ const AdminPanel = ({ children, onCircleSelect }) => {
 
   const handleLogoutClick = () => {
     localStorage.removeItem('id');
+    localStorage.removeItem('email');
     localStorage.removeItem('role');
     localStorage.removeItem('token');
     navigate('/login');

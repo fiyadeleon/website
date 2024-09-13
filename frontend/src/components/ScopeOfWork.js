@@ -26,6 +26,7 @@ const ScopeOfWork = () => {
     const [employeeQuery, setEmployeeQuery] = useState('');
     const [inventoryQuery, setInventoryQuery] = useState('');
     const [pdfUrl, setPdfUrl] = useState(null); 
+    const [docInstance, setDocInstance] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -249,6 +250,7 @@ const ScopeOfWork = () => {
             setNewCustomer(initialCustomerState);
             setIsLoading(false);
             setIsSubmittingCustomer(false);
+            fetchCustomers();
         }
     };
 
@@ -280,6 +282,7 @@ const ScopeOfWork = () => {
             setNewEmployee(initialEmployeeState);
             setIsLoading(false);
             setIsSubmittingEmployee(false);
+            fetchEmployees();
         }
     };
 
@@ -434,6 +437,7 @@ const ScopeOfWork = () => {
         const pdfBlob = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
+        setDocInstance(doc);
         setPdfUrl(pdfUrl);
         setShowModal(true);
     };
@@ -444,7 +448,7 @@ const ScopeOfWork = () => {
     };
 
     const downloadPDF = () => {
-        const doc = new jsPDF();
+        if (!docInstance) return;
     
         const today = new Date();
         const year = today.getFullYear();
@@ -455,7 +459,7 @@ const ScopeOfWork = () => {
         let fileName = `SOW-${selectedCustomer?.name}-${selectedCustomer?.plateNo}-${formattedDate}.pdf`;
         fileName = fileName.replace(/\s+/g, '');
         
-        doc.save(fileName);
+        docInstance.save(fileName);
     };
 
     return (
@@ -715,7 +719,7 @@ const ScopeOfWork = () => {
                     <h2>SERVICES</h2>
                     <span className="material-symbols-outlined sow-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
                 </div>
-                <textarea className="sow-services-textarea" placeholder="Enter service details here..." required></textarea>
+                <textarea className="sow-services-textarea" placeholder="Enter service details here..." />
             </div>
 
             <div className="sow-remarks-section">

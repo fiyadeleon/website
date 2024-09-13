@@ -40,7 +40,6 @@ const LoginPage = () => {
                 const decodedToken = result.getIdToken().decodePayload();
     
                 const groups = decodedToken['cognito:groups'] || [];
-                console.log(groups)
     
                 localStorage.setItem('email', username);
                 localStorage.setItem('token', idToken);
