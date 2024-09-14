@@ -1,28 +1,60 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/PartsQuotation.css';
-import UserPanel from './UserPanel';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import logo from '../images/pdf-logo.png';
+import { createUserInCognito, addEmployeeToAPI } from './employeeService';
+import { addCustomerToAPI } from './customerService';
+
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+const API_KEY = process.env.REACT_APP_API_KEY;
+
+function generateCustomerId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return `CUST-${randomString}-${dateString}`;
+}
+
+function generateEmployeeId() {
+    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return `EMP-${randomString}-${dateString}`;
+}
 
 const PartsQuotation = () => {
     const [customerQuery, setCustomerQuery] = useState('');
     const [employeeQuery, setEmployeeQuery] = useState('');
     const [inventoryQuery, setInventoryQuery] = useState('');
+    const [pdfUrl, setPdfUrl] = useState(null); 
+    const [showModal, setShowModal] = useState(false);
+    const [docInstance, setDocInstance] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [discount, setDiscount] = useState(0);
+    const [fileName, setFileName] = useState('');
 
-    const [newCustomer, setNewCustomer] = useState({
+    const initialCustomerState = {
         name: '',
         carModel: '',
         plateNo: '',
         contact: '',
         email: '',
         address: ''
-    });
+    };
 
-    const [newEmployee, setNewEmployee] = useState({
+    const initialEmployeeState = {
         name: '',
         jobTitle: '',
         contact: '',
         email: '',
-        address: ''
-    });
+        address: '',
+        role: '',
+        salary: 0
+    };
+
+    const [newCustomer, setNewCustomer] = useState(initialCustomerState);
+    const [newEmployee, setNewEmployee] = useState(initialEmployeeState);
+    const [isSubmittingCustomer, setIsSubmittingCustomer] = useState(false);
+    const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
 
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [filteredEmployees, setFilteredEmployees] = useState([]);
@@ -41,50 +73,67 @@ const PartsQuotation = () => {
     const customerSearchRef = useRef();
     const employeeSearchRef = useRef();
     const inventorySearchRef = useRef();
-
-    const [customers, setCustomers] = useState([
-        { id: 'CUST001', name: 'John Doe', contact: '1234567890', email: 'john@example.com', address: '123 Main St', plateNo: 'ABC123', carModel: 'Ford Mustang GT' },
-        { id: 'CUST002', name: 'Jane Smith', contact: '0987654321', email: 'jane@example.com', address: '456 Elm St', plateNo: 'XYZ456', carModel: 'Ford Mustang EcoBoost' },
-        { id: 'CUST003', name: 'Michael Brown', contact: '5555555555', email: 'michael@example.com', address: '789 Oak St', plateNo: 'LMN789', carModel: 'Ford Mustang Shelby GT500' },
-        { id: 'CUST004', name: 'Alice Johnson', contact: '1112223333', email: 'alice@example.com', address: '321 Pine St', plateNo: 'QRS234', carModel: 'Ford Mustang Mach 1' },
-        { id: 'CUST005', name: 'Bob Williams', contact: '4445556666', email: 'bob@example.com', address: '654 Cedar St', plateNo: 'TUV678', carModel: 'Ford Mustang GT Convertible' },
-        { id: 'CUST006', name: 'David Martin', contact: '9998887777', email: 'david@example.com', address: '101 Maple Ave', plateNo: 'JKL012', carModel: 'Tesla Model 3' },
-        { id: 'CUST007', name: 'Sarah Lee', contact: '8887776666', email: 'sarah@example.com', address: '202 Birch Ave', plateNo: 'PQR789', carModel: 'Toyota Prius' },
-        { id: 'CUST008', name: 'Chris Evans', contact: '7776665555', email: 'chris@example.com', address: '303 Spruce St', plateNo: 'STU123', carModel: 'Chevrolet Corvette' },
-        { id: 'CUST009', name: 'Laura Green', contact: '6665554444', email: 'laura@example.com', address: '404 Oak St', plateNo: 'VWX987', carModel: 'BMW X5' },
-        { id: 'CUST010', name: 'Kevin White', contact: '5554443333', email: 'kevin@example.com', address: '505 Pine St', plateNo: 'ZAB456', carModel: 'Mercedes-Benz C-Class' }
-    ]);
-  
-    const [employees, setEmployee] = useState([
-        { id: 'EMP001', jobTitle: 'Senior Mechanic', name: 'Liam Jackson', contact: '1234567890', email: 'liam@example.com', salary: 55000 },
-        { id: 'EMP002', jobTitle: 'Engine Specialist', name: 'Olivia Parker', contact: '0987654321', email: 'olivia@example.com', salary: 60000 },
-        { id: 'EMP003', jobTitle: 'Transmission Technician', name: 'Noah Miller', contact: '5555555555', email: 'noah@example.com', salary: 58000 },
-        { id: 'EMP004', jobTitle: 'Brake and Suspension Specialist', name: 'Emma Davis', contact: '1112223333', email: 'emma@example.com', salary: 57000 },
-        { id: 'EMP005', jobTitle: 'Diagnostic Technician', name: 'James Wilson', contact: '4445556666', email: 'james@example.com', salary: 62000 },
-        { id: 'EMP006', jobTitle: 'Electric Vehicle Specialist', name: 'Sophia Carter', contact: '3332221111', email: 'sophia@example.com', salary: 63000 },
-        { id: 'EMP007', jobTitle: 'Body Shop Technician', name: 'William Taylor', contact: '2221110000', email: 'william@example.com', salary: 59000 },
-        { id: 'EMP008', jobTitle: 'Air Conditioning Technician', name: 'Isabella Moore', contact: '1110009999', email: 'isabella@example.com', salary: 61000 },
-        { id: 'EMP009', jobTitle: 'Painter', name: 'Benjamin Harris', contact: '9991118888', email: 'benjamin@example.com', salary: 56000 },
-        { id: 'EMP010', jobTitle: 'Tire Specialist', name: 'Charlotte Thompson', contact: '8887776666', email: 'charlotte@example.com', salary: 54000 }
-    ]);        
     
-    const [inventoryItems, setInventoryItems] = useState([
-        { id: "PROD-CA1234-20240101", product_name: "Engine Oil", category: "Lubricants", stock: 120, unit: "box", price: 450.00},
-        { id: "PROD-BR5678-20240101", product_name: "Brake Pads", category: "Brakes", stock: 75, unit: "box", price: 1500.50},
-        { id: "PROD-TY9101-20240101", product_name: "All-Season Tires", category: "Tires", stock: 40, unit: "piece", price: 5500.00},
-        { id: "PROD-BT2345-20240101", product_name: "Car Battery", category: "Batteries", stock: 65, unit: "piece", price: 3200.00},
-        { id: "PROD-FL6789-20240101", product_name: "Fuel Filter", category: "Filters", stock: 200, unit: "piece", price: 300.00},
-        { id: "PROD-WP2345-20240102", product_name: "Windshield Wiper", category: "Accessories", stock: 150, unit: "box", price: 600.00},
-        { id: "PROD-OF5678-20240102", product_name: "Oil Filter", category: "Filters", stock: 95, unit: "piece", price: 350.00},
-        { id: "PROD-RB6789-20240103", product_name: "Radiator Belt", category: "Belts", stock: 50, unit: "piece", price: 1200.00},
-        { id: "PROD-EX7890-20240103", product_name: "Exhaust Pipe", category: "Exhaust", stock: 30, unit: "piece", price: 8000.00},
-        { id: "PROD-BR2345-20240104", product_name: "Brake Fluid", category: "Fluids", stock: 250, unit: "box", price: 400.00},
-        { id: "PROD-LB1234-20240105", product_name: "LED Headlights", category: "Lighting", stock: 80, unit: "box", price: 7000.00},
-        { id: "PROD-AC5678-20240105", product_name: "Air Conditioning Filter", category: "Filters", stock: 100, unit: "piece", price: 1200.00},
-        { id: "PROD-TR6789-20240106", product_name: "Transmission Fluid", category: "Fluids", stock: 60, unit: "box", price: 1600.00},
-        { id: "PROD-SP8901-20240106", product_name: "Spark Plug", category: "Engine Parts", stock: 220, unit: "piece", price: 300.00},
-        { id: "PROD-TB9012-20240107", product_name: "Timing Belt", category: "Belts", stock: 35, unit: "piece", price: 2500.00}
-    ]); 
+    const [customers, setCustomers] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [inventoryItems, setInventoryItems] = useState([]);
+
+    const [inventoryName, setInventoryName] = useState('');
+    const [inventoryPrice, setInventoryPrice] = useState('');
+    const [products, setProducts] = useState([]);
+
+    const [isAddProductVisible, setIsAddProductVisible] = useState(false);
+
+    const fetchCustomers = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
+                method: 'GET',
+                headers: { 'x-api-key': API_KEY },
+            });
+            if (!response.ok) throw new Error('Failed to fetch customers');
+            const data = await response.json();
+            setCustomers(data);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+            alert('Error fetching customers!');
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
+                method: 'GET',
+                headers: { 'x-api-key': API_KEY },
+            });
+            if (!response.ok) throw new Error('Failed to fetch employees');
+            const data = await response.json();
+            setEmployees(data);
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+            alert('Error fetching employees!');
+        }
+    };
+
+    const fetchInventoryItems = async () => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
+                method: 'GET',
+                headers: { 'x-api-key': API_KEY },
+            });
+            if (!response.ok) throw new Error('Failed to fetch inventory items');
+            const data = await response.json();
+            setInventoryItems(data);
+        } catch (error) {
+            console.error('Error fetching inventory items:', error);
+            alert('Error fetching inventory items!');
+        }
+    };
+
+    useEffect(() => {
+        fetchCustomers();
+        fetchEmployees();
+        fetchInventoryItems();
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -108,7 +157,7 @@ const PartsQuotation = () => {
     const handleCustomerSearch = (event) => {
         const query = event.target.value.toLowerCase();
         setCustomerQuery(query);
-        const customerResults = customers.filter(customer =>
+        const customerResults = customers.filter(customer => 
             customer.name.toLowerCase().includes(query) || 
             customer.plateNo.toLowerCase().includes(query)
         );
@@ -125,6 +174,16 @@ const PartsQuotation = () => {
         setFilteredEmployees(employeeResults.slice(0, 5));
     };
 
+    const handleInventorySearch = (event) => {
+        const query = event.target.value.toLowerCase();
+        setInventoryQuery(query);
+        const inventoryResults = inventoryItems.filter(item =>
+            item.product_name.toLowerCase().includes(query) &&
+            !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id)
+        );
+        setFilteredInventory(inventoryResults.slice(0, 5));
+    };
+
     const handleCustomerSelect = (customer) => {
         setSelectedCustomer(customer);
         setFilteredCustomers([]);
@@ -137,16 +196,6 @@ const PartsQuotation = () => {
         setShowEmployeeDetails(false);
     };
 
-    const handleInventorySearch = (event) => {
-        const query = event.target.value.toLowerCase();
-        setInventoryQuery(query);
-        const inventoryResults = inventoryItems.filter(item =>
-            item.product_name.toLowerCase().includes(query) &&
-            !selectedInventoryItems.some(selectedItem => selectedItem.id === item.id)
-        );
-        setFilteredInventory(inventoryResults.slice(0, 5));
-    };
-
     const handleInventorySelect = (item) => {
         setSelectedInventoryItems((prevSelectedItems) => [...prevSelectedItems, item]);
         setFilteredInventory([]);
@@ -155,14 +204,6 @@ const PartsQuotation = () => {
     };
 
     const handleRemoveInventoryItem = (itemId) => {
-        const itemToRemove = selectedInventoryItems.find(item => item.id === itemId);
-
-        setInventoryItems((prevItems) =>
-            prevItems.map((invItem) =>
-                invItem.id === itemId ? { ...invItem, stock: invItem.stock + itemToRemove.purchaseQuantity } : invItem
-            )
-        );
-
         setSelectedInventoryItems((prevSelectedItems) =>
             prevSelectedItems.filter(item => item.id !== itemId)
         );
@@ -174,24 +215,6 @@ const PartsQuotation = () => {
         );
         setFilteredInventory(availableInventory.slice(0, 5));
         setIsInventoryInputFocused(true);
-    };
-
-    const handlePurchaseQuantityChange = (itemId, newQuantity) => {
-        const quantity = parseInt(newQuantity, 10) || 0;
-
-        setSelectedInventoryItems(prevItems =>
-            prevItems.map(item => {
-                if (item.id === itemId) {
-                    const updatedQuantity = quantity > item.stock ? item.stock : quantity;
-
-                    return {
-                        ...item,
-                        purchaseQuantity: updatedQuantity
-                    };
-                }
-                return item;
-            })
-        );
     };
 
     const handleToggleCustomer = () => {
@@ -210,41 +233,64 @@ const PartsQuotation = () => {
         }
     };
 
-    const validateCustomer = () => {
-        let newErrors = {};
-        if (!newCustomer.name) newErrors.name = 'Name is required';
-        if (!newCustomer.carModel) newErrors.carModel = 'Car Model is required';
-        if (!newCustomer.plateNo) newErrors.plateNo = 'Plate Number is required';
-        if (!newCustomer.contact) newErrors.contact = 'Contact is required';
-        if (!newCustomer.email) newErrors.email = 'Email is required';
-        if (!newCustomer.address) newErrors.address = 'Address is required';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const validateEmployee = () => {
-        let newErrors = {};
-        if (!newEmployee.name) newErrors.name = 'Name is required';
-        if (!newEmployee.jobTitle) newErrors.jobTitle = 'Job Title is required';
-        if (!newEmployee.contact) newErrors.contact = 'Contact is required';
-        if (!newEmployee.email) newErrors.email = 'Email is required';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSaveNewCustomer = (e) => {
+    const handleSaveNewCustomer = async (e) => {
         e.preventDefault();
-        if (validateCustomer()) {
-            console.log('Customer validated and saved');
-            // Handle saving the customer
+        try {
+            setIsSubmittingCustomer(true);
+            setIsLoading(true);
+    
+            const customerToAdd = {
+                id: generateCustomerId(),
+                ...newCustomer,
+            };
+    
+            const response = await addCustomerToAPI(customerToAdd);
+            if (response && response.item && response.message === "Item added successfully!") {
+                alert('Customer created successfully!');
+                handleToggleCustomer(); 
+            } else {
+                alert('Error adding customer!');
+            }
+        } catch (error) {
+            console.error("Error adding customer:", error);
+            alert('Error adding customer!');
+        } finally {
+            setNewCustomer(initialCustomerState);
+            setIsLoading(false);
+            setIsSubmittingCustomer(false);
+            fetchCustomers();
         }
     };
 
-    const handleSaveNewEmployee = (e) => {
+    const handleSaveNewEmployee = async (e) => {
         e.preventDefault();
-        if (validateEmployee()) {
-            console.log('Employee validated and saved');
-            // Handle saving the employee
+        try {
+            setIsSubmittingEmployee(true);
+            setIsLoading(true);
+
+            const cognitoResponse = await createUserInCognito(newEmployee.email, newEmployee.role);
+            if (cognitoResponse && cognitoResponse.User.Enabled) {
+                const employeeToAdd = {
+                    id: generateEmployeeId(),
+                    ...newEmployee,
+                };
+
+                const response = await addEmployeeToAPI(employeeToAdd);
+                if (response && response.item && response.message === "Item added successfully!") {
+                    alert('Employee created successfully!');
+                    handleToggleEmployee();
+                }
+            } else {
+                alert('Error adding employee!');
+            }
+        } catch (error) {
+            console.error("Error adding employee:", error);
+            alert('Error adding employee!');
+        } finally {
+            setNewEmployee(initialEmployeeState);
+            setIsLoading(false);
+            setIsSubmittingEmployee(false);
+            fetchEmployees();
         }
     };
 
@@ -260,8 +306,317 @@ const PartsQuotation = () => {
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
         setShowEmployeeDetails(false);
-        document.querySelector('.pq-services-textarea').value = "";
-        document.querySelector('.pq-remarks-textarea').value = "";
+        setDiscount(0);
+        setProducts([]);
+    };
+
+    const handlePurchaseQuantityChange = (itemId, newQuantity) => {
+        const quantity = parseInt(newQuantity, 10) || 0;
+
+        setSelectedInventoryItems(prevItems =>
+            prevItems.map(item => {
+                if (item.id === itemId) {
+                    const updatedQuantity = quantity > item.stock ? item.stock : quantity;
+                    return {
+                        ...item,
+                        purchaseQuantity: updatedQuantity
+                    };
+                }
+                return item;
+            })
+        );
+
+        setProducts((prevProducts) =>
+            prevProducts.map(service => {
+                if (service.id === itemId) {
+                    return {
+                        ...service,
+                        purchaseQuantity: quantity
+                    };
+                }
+                return service;
+            })
+        );
+    };
+
+    const handleAddService = () => {
+        if (inventoryName && inventoryPrice) {
+            setProducts([...products, { name: inventoryName, price: parseFloat(inventoryPrice) }]);
+            setInventoryName('');
+            setInventoryPrice('');
+        } else {
+            alert('Please enter both service name and price.');
+        }
+    };
+
+    const handleRemoveService = (index) => {
+        const updatedServices = products.filter((_, i) => i !== index);
+        setProducts(updatedServices);
+    };
+
+    const generatePDF = async () => {
+        let errors = [];
+    
+        if (!selectedCustomer) {
+            errors.push('Please select or add a customer.');
+        } else {
+            if (!selectedCustomer.name) errors.push('Customer name is required.');
+            if (!selectedCustomer.carModel) errors.push('Customer car model is required.');
+            if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
+            if (!selectedCustomer.contact) errors.push('Customer contact is required.');
+            if (!selectedCustomer.email) errors.push('Customer email is required.');
+            if (!selectedCustomer.address) errors.push('Customer address is required.');
+        }
+
+        setFileName(generateFileName());
+        if (!fileName) {
+            errors.push('Please retry to preview the PDF.');
+            console.log("Error added:", errors);
+        }
+    
+        if (!selectedEmployee) {
+            errors.push('Please select or add an employee.');
+        } else {
+            if (!selectedEmployee.name) errors.push('Employee name is required.');
+            if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
+            if (!selectedEmployee.contact) errors.push('Employee contact is required.');
+            if (!selectedEmployee.email) errors.push('Employee email is required.');
+            if (!selectedEmployee.role) errors.push('Employee role is required.');
+        }
+    
+        if (selectedInventoryItems.length === 0 && products.length === 0) {
+            errors.push('Please add at least one product or service.');
+        }
+    
+        selectedInventoryItems.forEach(item => {
+            if (!item.purchaseQuantity || item.purchaseQuantity <= 0) {
+                errors.push(`Purchase quantity for item "${item.product_name}" must be greater than 0.`);
+            } else if (item.purchaseQuantity > item.stock) {
+                errors.push(`Purchase quantity for item "${item.product_name}" exceeds available stock (${item.stock}).`);
+            }
+        });
+    
+        if (errors.length > 0) {
+            alert(errors.join('\n'));
+            return;
+        }
+    
+        const doc = new jsPDF();
+        const imgWidth = 80;
+        const imgHeight = 30;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const xCenter = (pageWidth - imgWidth) / 2;
+
+        const maxWidth = pageWidth - 50;
+
+        doc.addImage(logo, 'PNG', xCenter, 10, imgWidth, imgHeight);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+
+        doc.text("Compound, 1 Pascual, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
+        doc.text("Contact no. 09978900746 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text("PARTS QUOTATION", pageWidth / 2, imgHeight + 26, { align: 'center' });
+
+        const startY = imgHeight + 35;
+        const columnWidth = pageWidth / 2;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text("PQ No:", 25, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(fileName, 38, startY);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("CUSTOMER DETAILS", 25, startY + 10);
+        const customerDetails = [
+            selectedCustomer?.name || "",
+            selectedCustomer?.carModel || "",
+            selectedCustomer?.plateNo || "",
+            selectedCustomer?.contact || "",
+            selectedCustomer?.email || ""
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        customerDetails.forEach((detail, index) => {
+            doc.text(detail, 25, startY + 18 + (index * 5));
+        });
+
+        const { formattedDate, date } = generateDate();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text("DATE ISSUED:", columnWidth + 25, startY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(date, columnWidth + 51, startY);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
+        const employeeDetails = [
+            selectedEmployee?.name || "",
+            selectedEmployee?.jobTitle || "",
+            selectedEmployee?.contact || "",
+            selectedEmployee?.email || ""
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        employeeDetails.forEach((detail, index) => {
+            doc.text(detail, columnWidth + 25, startY + 18 + (index * 5));
+        });
+
+        let currentY = startY + 50;
+        const checkPageOverflow = (heightToAdd) => {
+            if (currentY + heightToAdd > pageHeight) {
+                doc.addPage();
+                currentY = 20;
+            }
+        };
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        checkPageOverflow(12);
+        doc.text("QUOTATION", 25, currentY);
+        currentY += 7;
+
+        let totalAmountSubtotal = 0;
+
+        const tableBody = products.map(service => {
+            const serviceTotal = service.purchaseQuantity * service.price;
+            totalAmountSubtotal += serviceTotal;
+
+            return [
+                service.name,
+                service.purchaseQuantity,
+                `${service.price.toFixed(2)}`,
+                `${serviceTotal.toFixed(2)}`
+            ];
+        });
+
+        selectedInventoryItems.forEach(item => {
+            const totalAmount = item.purchaseQuantity * item.price;
+            totalAmountSubtotal += totalAmount;
+
+            tableBody.push([
+                item.product_name,
+                item.purchaseQuantity.toString(),
+                `${item.price.toFixed(2)}`,
+                `${totalAmount.toFixed(2)}`
+            ]);
+        });
+
+        doc.autoTable({
+            startY: currentY,
+            head: [['NAME', 'QUANTITY', 'UNIT PRICE', 'AMOUNT']],
+            body: tableBody,
+            tableWidth: maxWidth,
+            styles: {
+                fontSize: 10,
+                cellPadding: 2,
+                textColor: [0, 0, 0],
+                lineColor: [0, 0, 0],
+                lineWidth: 0.1,
+            },
+            headStyles: {
+                fillColor: [211, 211, 211],
+                textColor: [0, 0, 0],
+                fontStyle: 'bold',
+                lineWidth: 0.1,
+            },
+            tableLineColor: [0, 0, 0],
+            tableLineWidth: 0.1,
+            theme: 'grid',
+            margin: { left: 25 },
+        });
+
+        currentY = doc.autoTable.previous.finalY + 8;
+
+        const finalX = 120;
+        let valueX = 157;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        checkPageOverflow(7);
+        doc.text("SUBTOTAL:", finalX, currentY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${totalAmountSubtotal.toFixed(2)}`, valueX, currentY);
+
+        const discountAmount = totalAmountSubtotal * (discount / 100);
+        currentY += 7;
+        doc.setFont('helvetica', 'bold');
+        checkPageOverflow(7);
+        doc.text("DISCOUNT (" + discount + ")%:", finalX, currentY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`-${discountAmount.toFixed(2)}`, valueX, currentY);
+
+        const grandTotal = totalAmountSubtotal - discountAmount;
+        currentY += 7;
+        doc.setFont('helvetica', 'bold');
+        checkPageOverflow(7);
+        doc.text("GRAND TOTAL:", finalX, currentY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${grandTotal.toFixed(2)}`, valueX, currentY);
+
+        const marginX = 25;
+
+        const termsText = `
+        Terms and Condition:
+        - Customer will be billed after indicating Acceptance of this quote
+        - Payments will be due prior to delivery of service and goods
+        - 50% Down payment required
+        - Lead Time - 3 to 4 weeks
+        `;
+        const wrappedTermsText = doc.splitTextToSize(termsText, doc.internal.pageSize.width - marginX * 2);
+
+        checkPageOverflow(wrappedTermsText.length * 5);
+        doc.text(wrappedTermsText, 25, currentY + 10);
+
+        const pdfBlob = doc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        setDocInstance(doc);
+        setPdfUrl(pdfUrl);
+        setShowModal(true);
+    };     
+
+    const closeModal = () => {
+        setShowModal(false); 
+        setPdfUrl(null); 
+    };
+
+    const downloadPDF = () => {
+        if (!docInstance) return;
+        
+        docInstance.save(fileName+".pdf");
+    };
+
+    const generateDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${year}${month}${day}`;
+        const date = `${month}-${day}-${year}`;
+
+        return { formattedDate, date };
+    }
+
+    const generateFileName = () => {
+        const { formattedDate, date } = generateDate();
+    
+        let fileName = `PQ-${selectedCustomer?.plateNo}-${formattedDate}`;
+        fileName = fileName.replace(/\s+/g, '');
+
+        return fileName;
+    }
+
+    const toggleAddProduct = () => {
+        setIsAddProductVisible(!isAddProductVisible);
     };
 
     return (
@@ -272,128 +627,131 @@ const PartsQuotation = () => {
             </div>
 
             <div className="pq-user-info">
-            <form className="pq-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
-                <h2>CUSTOMER</h2>
-                {!showCustomerDetails && (
-                    <div className="pq-search-bar">
-                        <span className="material-symbols-outlined pq-search-icon">search</span>
-                        <input
-                            type="text"
-                            placeholder="Search Customer"
-                            className="pq-search-input"
-                            value={customerQuery}
-                            onChange={handleCustomerSearch}
-                            onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
-                        />
-                    </div>
-                )}
-                {filteredCustomers.length > 0 && (
-                    <div className="pq-dropdown">
-                        {filteredCustomers.map((customer, index) => (
-                            <div className="pq-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
-                                <span className="pq-dropdown-text">{customer.name}</span>
-                                <span className="pq-dropdown-actions">{customer.plateNo}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {selectedCustomer && !showCustomerDetails && (
-                    <div className="pq-customer-details">
-                        <p><strong>Name:</strong> {selectedCustomer.name}</p>
-                        <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
-                        <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
-                        <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                        <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                        <p><strong>Address:</strong> {selectedCustomer.address}</p>
-                    </div>
-                )}
-                <button
-                    type="button"
-                    className={`pq-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`}
-                    onClick={handleToggleCustomer}
-                >
-                    {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
-                </button>
+                <form className="pq-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
+                    <h2>CUSTOMER</h2>
+                    {!showCustomerDetails && (
+                        <div className="pq-search-bar">
+                            <span className="material-symbols-outlined pq-search-icon">search</span>
+                            <input
+                                type="text"
+                                placeholder="Search Customer"
+                                className="pq-search-input"
+                                value={customerQuery}
+                                onChange={handleCustomerSearch}
+                                onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
+                                disabled={isSubmittingCustomer}
+                            />
+                        </div>
+                    )}
+                    {filteredCustomers.length > 0 && (
+                        <div className="pq-dropdown">
+                            {filteredCustomers.map((customer, index) => (
+                                <div className="pq-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
+                                    <span className="pq-dropdown-text">{customer.name}</span>
+                                    <span className="pq-dropdown-actions">{customer.plateNo}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {selectedCustomer && !showCustomerDetails && (
+                        <div className="pq-customer-details">
+                            <p><strong>Name:</strong> {selectedCustomer.name}</p>
+                            <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
+                            <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
+                            <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
+                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                        </div>
+                    )}
+                    <button 
+                        type="button" 
+                        className={`pq-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
+                        onClick={handleToggleCustomer}
+                        disabled={isSubmittingCustomer}
+                    >
+                        {showCustomerDetails ? 'Cancel' : '+ Add New Customer'}
+                    </button>
 
-                {showCustomerDetails && (
-                    <div className="pq-customer-details">
-                        <p><strong>Name:</strong></p>
-                        <input
-                            className="pq-placeholder"
-                            type="text"
-                            placeholder="Enter name"
-                            value={newCustomer.name}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                            required
-                        />
-                        {errors.name && <span className="error">{errors.name}</span>}
+                    {showCustomerDetails && (
+                        <div className="pq-customer-details">
+                            <p><strong>Name:</strong></p>
+                            <input
+                                className="pq-placeholder"
+                                type="text"
+                                placeholder="Enter name"
+                                value={newCustomer.name}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                required
+                                disabled={isSubmittingCustomer}
+                            />
 
-                        <p><strong>Car Model:</strong></p>
-                        <input
-                            className="pq-placeholder"
-                            type="text"
-                            placeholder="Enter car model"
-                            value={newCustomer.carModel}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
-                            required
-                        />
-                        {errors.carModel && <span className="error">{errors.carModel}</span>}
+                            <p><strong>Car Model:</strong></p>
+                            <input
+                                className="pq-placeholder"
+                                type="text"
+                                placeholder="Enter car model"
+                                value={newCustomer.carModel}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, carModel: e.target.value })}
+                                required
+                                disabled={isSubmittingCustomer}
+                            />
 
-                        <p><strong>Plate No:</strong></p>
-                        <input
-                            className="pq-placeholder"
-                            type="text"
-                            placeholder="Enter plate number"
-                            value={newCustomer.plateNo}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
-                            required
-                        />
-                        {errors.plateNo && <span className="error">{errors.plateNo}</span>}
+                            <p><strong>Plate No:</strong></p>
+                            <input
+                                className="pq-placeholder"
+                                type="text"
+                                placeholder="Enter plate number"
+                                value={newCustomer.plateNo}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, plateNo: e.target.value })}
+                                required
+                                disabled={isSubmittingCustomer}
+                            />
 
-                        <p><strong>Contact No:</strong></p>
-                        <input
-                            className="pq-placeholder"
-                            type="tel" 
-                            pattern="[0-9]{11}" 
-                            maxLength="11"
-                            placeholder="Enter contact number"
-                            value={newCustomer.contact}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
-                            required
-                        />
-                        {errors.contact && <span className="error">{errors.contact}</span>}
+                            <p><strong>Contact No:</strong></p>
+                            <input
+                                className="pq-placeholder"
+                                type="tel" 
+                                pattern="[0-9]{11}" 
+                                maxLength="11"
+                                placeholder="Enter contact number"
+                                value={newCustomer.contact}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
+                                required
+                                disabled={isSubmittingCustomer}
+                            />
 
-                        <p><strong>Email:</strong></p>
-                        <input
-                            className="pq-placeholder"
-                            type="email"
-                            placeholder="Enter email"
-                            value={newCustomer.email}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                            required
-                        />
-                        {errors.email && <span className="error">{errors.email}</span>}
+                            <p><strong>Email:</strong></p>
+                            <input
+                                className="pq-placeholder"
+                                type="email"
+                                placeholder="Enter email"
+                                value={newCustomer.email}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                required
+                                disabled={isSubmittingCustomer}
+                            />
 
-                        <p><strong>Address:</strong></p>
-                        <input
-                            className="pq-placeholder"
-                            type="text"
-                            placeholder="Enter address"
-                            value={newCustomer.address}
-                            onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                            required
-                        />
-                        {errors.address && <span className="error">{errors.address}</span>}
+                            <p><strong>Address:</strong></p>
+                            <input
+                                className="pq-placeholder"
+                                type="text"
+                                placeholder="Enter address"
+                                value={newCustomer.address}
+                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                                required
+                                disabled={isSubmittingCustomer}
+                            />
 
-                        <button
-                            className="pq-submit-btn"
-                            type="submit"
-                        >
-                            Submit
-                        </button>
-                    </div>
-                )}
-            </form>
+                            <button
+                                className="pq-submit-btn"
+                                type="submit"
+                                disabled={isSubmittingCustomer}
+                            >
+                                {isSubmittingCustomer ? 'Submitting...' : 'Submit'}
+                            </button>
+                        </div>
+                    )}
+                </form>
 
                 <form className="pq-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
                     <h2>EMPLOYEE</h2>
@@ -407,6 +765,7 @@ const PartsQuotation = () => {
                                 value={employeeQuery}
                                 onChange={handleEmployeeSearch}
                                 onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
+                                disabled={isSubmittingEmployee}
                             />
                         </div>
                     )}
@@ -428,9 +787,11 @@ const PartsQuotation = () => {
                             <p><strong>Email:</strong> {selectedEmployee.email}</p>
                         </div>
                     )}
-                    <button
-                        className={`pq-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`}
+                    <button 
+                        type="button"
+                        className={`pq-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
                         onClick={handleToggleEmployee}
+                        disabled={isSubmittingEmployee}
                     >
                         {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
                     </button>
@@ -445,19 +806,19 @@ const PartsQuotation = () => {
                                 value={newEmployee.name}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.name && <span className="error">{errors.name}</span>}
 
                             <p><strong>Job Title:</strong></p>
                             <input
                                 className="pq-placeholder"
                                 type="text"
-                                placeholder="Enter job title"
+                                placeholder="Enter Job title"
                                 value={newEmployee.jobTitle}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
 
                             <p><strong>Contact No:</strong></p>
                             <input
@@ -469,8 +830,8 @@ const PartsQuotation = () => {
                                 value={newEmployee.contact}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.contact && <span className="error">{errors.contact}</span>}
 
                             <p><strong>Email:</strong></p>
                             <input
@@ -480,57 +841,134 @@ const PartsQuotation = () => {
                                 value={newEmployee.email}
                                 onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                                 required
+                                disabled={isSubmittingEmployee}
                             />
-                            {errors.email && <span className="error">{errors.email}</span>}
+
+                            <p><strong>Role:</strong></p>
+                            <select
+                                className="employees-select"
+                                name="role"
+                                value={newEmployee.role}
+                                onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
+                                required
+                                disabled={isSubmittingEmployee}
+                            >
+                                <option value="" disabled>Select a user's role</option>
+                                <option value="none">Not Applicable</option>
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
 
                             <button
                                 className="pq-submit-btn"
                                 type="submit"
+                                disabled={isSubmittingEmployee}
                             >
-                                Submit
+                                {isSubmittingEmployee ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
                     )}
                 </form>
             </div>
 
+            <div className="pq-discount-section">
+                <h2>DISCOUNT (%)</h2>
+                <input
+                    type="number"
+                    id="discount"
+                    value={discount}
+                    onChange={(e) => {
+                        let value = e.target.value;
+
+                        if (value.startsWith('0') && value.length > 1) {
+                            value = value.slice(1);
+                        }
+
+                        if (value === '' || (Number(value) >= 0 && Number(value) <= 100)) {
+                            setDiscount(value);
+                        }
+                    }}
+                    className="pq-discount-input"
+                    min="0"
+                    max="100"
+                    placeholder="Enter discount percentage"
+                />
+            </div>
+
             <div className="pq-parts-section" ref={inventorySearchRef}>
                 <div className="pq-header-section">
-                    <h2>INVENTORY</h2>
-                    <span className="material-symbols-outlined pq-info-icon" data-tooltip="Select the part(s) or item(s) required for the quotation.">info</span>
+                    <div className="pq-header-left">
+                        <h2>INVENTORY</h2>
+                        <span className="material-symbols-outlined pq-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined products.">info</span>
+                    </div>
+                    <button 
+                        onClick={toggleAddProduct} 
+                        className={`pq-add-service-btn ${isAddProductVisible ? 'cancel' : ''}`}>
+                        {isAddProductVisible ? 'Cancel' : '+ Add New Product'}
+                    </button>
                 </div>
-                <div className="pq-search-bar">
-                    <span className="material-symbols-outlined pq-search-icon">search</span>
-                    <input
-                        type="text"
-                        placeholder="Search for parts or items"
-                        className="pq-search-input"
-                        value={inventoryQuery}
-                        onChange={handleInventorySearch}
-                        onFocus={handleInventoryFocus}
-                    />
-                </div>
-                {isInventoryInputFocused && filteredInventory.length > 0 && (
+
+                {!isAddProductVisible && (
+                    <div className="pq-search-bar">
+                        <span className="material-symbols-outlined pq-search-icon">search</span>
+                        <input
+                            type="text"
+                            placeholder="Search for parts or items"
+                            className="pq-search-input"
+                            value={inventoryQuery}
+                            onChange={handleInventorySearch}
+                            onFocus={handleInventoryFocus}
+                        />
+                    </div>
+                )}
+
+                {filteredInventory.length > 0 && (
                     <div className="pq-dropdown">
                         {filteredInventory.map((item, index) => (
                             <div className="pq-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
                                 <span className="pq-dropdown-text">{item.product_name}</span>
-                                <span className="pq-dropdown-actions">
-                                    {item.stock} {item.unit}{item.unit === 'box' ? 'es' : 's'}
-                                </span>
+                                <span className="pq-dropdown-actions">{item.stock}</span>
                             </div>
                         ))}
                     </div>
                 )}
 
-                <div className="pq-inventory-table">
-                    {selectedInventoryItems.length > 0 && (
+                {isAddProductVisible && (
+                    <div className="pq-service-inputs-container">
+                        <div className="pq-service-inputs">
+                            <input
+                            placeholder="Enter service name"
+                            value={inventoryName}
+                            onChange={(e) => setInventoryName(e.target.value)}
+                            className="pq-service-name-input"
+                            />
+                            <input
+                            type="number"
+                            placeholder="Enter price"
+                            value={inventoryPrice}
+                            onChange={(e) => setInventoryPrice(e.target.value)}
+                            className="pq-service-price-input"
+                            />
+                        </div>
+
+                        <button className="pq-add-manual-btn" onClick={handleAddService}>
+                            <span className="material-symbols-outlined add-icon">add_box</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <div className="product-tables-container">
+                {selectedInventoryItems.length > 0 && (
+                    <div className="existing-products-table">
+                        <h2>Existing Products</h2>
                         <table>
                             <thead>
                                 <tr>
                                     <th>Product Name</th>
                                     <th>Stock</th>
                                     <th>Purchase Quantity</th>
+                                    <th>Total Amount</th>
                                     <th>Remove</th>
                                 </tr>
                             </thead>
@@ -538,22 +976,24 @@ const PartsQuotation = () => {
                                 {selectedInventoryItems.map((item) => (
                                     <tr key={item.id}>
                                         <td>{item.product_name}</td>
-                                        <td>{item.stock - (item.purchaseQuantity || 0)} {item.unit}{item.unit === 'box' ? 'es' : 's'}</td>
+                                        <td>
+                                            {item.stock - (item.purchaseQuantity || 0)}{' '}
+                                            {item.stock - (item.purchaseQuantity || 0) > 0
+                                                ? `${item.unit}${item.unit === 'box' ? 'es' : item.unit === 'piece' ? 's' : ''}`
+                                                : item.unit}
+                                        </td>
                                         <td>
                                             <input
                                                 type="number"
-                                                value={item.purchaseQuantity === 0 ? '' : item.purchaseQuantity}
+                                                value={item.purchaseQuantity || ''}
                                                 min="1"
-                                                max={item.stock}
                                                 onChange={(e) => handlePurchaseQuantityChange(item.id, e.target.value)}
                                                 className="purchase-quantity-input"
                                             />
                                         </td>
+                                        <td>₱{item.purchaseQuantity ? item.price * item.purchaseQuantity : item.price}</td>
                                         <td>
-                                            <button
-                                                className="remove-item-btn"
-                                                onClick={() => handleRemoveInventoryItem(item.id)}
-                                            >
+                                            <button className="remove-item-btn" onClick={() => handleRemoveInventoryItem(item.id)}>
                                                 <span className="material-symbols-outlined">delete</span>
                                             </button>
                                         </td>
@@ -561,28 +1001,63 @@ const PartsQuotation = () => {
                                 ))}
                             </tbody>
                         </table>
-                    )}
-                </div>
+                    </div>
+                )}
+
+                {products.length > 0 && (
+                    <div className="new-products-table">
+                        <h2>New Products</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Stock</th>
+                                    <th>Purchase Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {products.map((service, index) => (
+                                    <tr key={index}>
+                                        <td>{service.name}</td>
+                                        <td>None</td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                value={service.purchaseQuantity || ''}
+                                                min="1"
+                                                onChange={(e) => handlePurchaseQuantityChange(service.id, e.target.value)}
+                                                className="purchase-quantity-input"
+                                            />
+                                        </td>
+                                        <td>₱{(service.purchaseQuantity > 0 ? service.purchaseQuantity * service.price : service.price).toFixed(2)}</td>
+                                        <td>
+                                            <button onClick={() => handleRemoveService(index)} className="pq-remove-service-btn">
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
-            <div className="pq-services-section">
-                <div className="pq-header-section">
-                    <h2>SERVICES</h2>
-                    <span className="material-symbols-outlined pq-info-icon" data-tooltip="These are the services performed on the client's vehicle.">info</span>
+            <button className="pq-save-button" onClick={generatePDF}>Preview .PDF</button>
+            {showModal && (
+                <div className="pq-modal">
+                    <span className="close" onClick={closeModal}>&times;</span>
+                    <iframe
+                        src={pdfUrl}
+                        width="100%"
+                        height="300px"
+                        title="PDF Preview"
+                    ></iframe>
+                    <button onClick={downloadPDF} className="pq-download-button">Download .PDF</button>
                 </div>
-                <textarea className="pq-services-textarea" placeholder="Enter service details here..." required></textarea>
-            </div>
-
-            <div className="pq-remarks-section">
-                <div className="pq-header-section">
-                    <h2>REMARKS</h2>
-                    <span className="material-symbols-outlined pq-info-icon" data-tooltip="Further details regarding the quotation.">info</span>
-                </div>
-                <textarea className="pq-remarks-textarea" placeholder="Enter remarks here..."></textarea>
-            </div>
-
-            <button className="pq-save-button">Preview .PDF</button>
-
+            )}
         </div>
     );
 };
