@@ -1,0 +1,594 @@
+.inv-invoice {
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  width: 100%; /* Full width */
+  box-sizing: border-box;
+}
+
+.inv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.inv-header h1 {
+  font-size: 35px;
+  color: #333;
+  font-weight: bold;
+  z-index: 3;
+  margin: 0;
+}
+
+.inv-header-section {
+  color: #333;
+  margin-top: -20px;
+  display: flex;
+  align-items: center;
+}
+
+.inv-clear-button {
+  background-color: #F8CE00; /* Yellow */
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #333;
+  font-weight: bold;
+  border-radius: 5px;
+  font-family: 'Poppins', sans-serif;
+  height: 50px;
+  margin-top: 20px;
+}
+
+.inv-clear-button:hover {
+  background-color: #FFC107;
+}
+
+.inv-user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; 
+  gap: 20px; 
+}
+
+.inv-customer-section, .inv-employee-section {
+  width: 48%;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding: 20px;
+  transition: all 0.3s ease-in-out;
+}
+
+.inv-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 5px; 
+}
+
+.inv-search-icon {
+  position: absolute;
+  left: 12px; /* Adjusted for better alignment */
+  top: 50%; /* Vertically center the icon */
+  transform: translateY(-50%);
+  color: #666666; /* Icon color */
+  font-size: 20px; /* Adjust the icon size if necessary */
+  pointer-events: none; /* Make sure the icon doesn't block input interaction */
+}
+
+.inv-search-input {
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  padding: 8px 12px 8px 36px; /* Adjust padding to leave space for the icon */
+  width: 300px;
+  font-size: 14px;
+  color: #666666;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-search-input::placeholder {
+  color: gray;
+  font-size: 14px;
+}
+
+.inv-placeholder {
+  width: 100%;
+  padding: 10px;
+  margin-top: -35px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-placeholder:focus {
+  outline: none;
+  border-color: #888;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.inv-placeholder::placeholder {
+  color: #aaa;
+}
+
+.inv-parts-section, .inv-services-section, .inv-remarks-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.inv-parts-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inv-parts-search-bar input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-add-customer-btn {
+  background-color: #F8CE00; 
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  position: absolute; 
+  top: 30px;  
+  right: 20px;  
+}
+
+.inv-add-customer-btn, .inv-add-employee-btn {
+  background-color: #F8CE00;
+  color: #333;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  position: absolute; 
+  top: 30px;  
+  right: 20px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.inv-add-customer-btn.cancel, .inv-add-employee-btn.cancel {
+  background-color: #cccccc; 
+  color: #333; 
+}
+
+.inv-add-customer-btn.cancel:hover,
+.inv-add-employee-btn.cancel:hover {
+  background-color: #b3b3b3;
+}
+
+.inv-add-employee-btn:hover,
+.inv-add-customer-btn:hover {
+  background-color: #FFC107;
+}
+
+.inv-save-button {
+  background-color: #F8CE00;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+  font-weight: bold;
+  border-radius: 5px;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-save-button:hover {
+  background-color: #FFC107;
+}
+
+.inv-info-icon {
+  margin-left: 12px; 
+  font-size: 20px;
+  color: #666;
+  position: relative;
+  cursor: pointer;
+}
+
+.inv-info-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  left: 120%; 
+  top: 50%;
+  transform: translateY(-50%); 
+  white-space: nowrap;
+  font-size: 14px; 
+  font-family: Arial, sans-serif; 
+  display: none; 
+  opacity: 0;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+.inv-info-icon:hover::after {
+  display: block;
+  opacity: 1;
+}
+
+.inv-parts-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.inv-dropdown {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  z-index: 1000;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.inv-dropdown-option {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  align-items: center; /* Ensure vertical alignment */
+}
+
+.inv-dropdown-option:hover {
+  background-color: #f0f0f0;
+}
+
+.inv-dropdown-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.inv-dropdown-actions {
+  font-size: 14px;
+  color: #999;
+  text-align: right;
+}
+
+.inv-customer-details,
+.inv-employee-details,
+.inv-inventory-details {
+  margin-left: 20px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-selected-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.inv-selected-item {
+  border: 1px solid #dddddd;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666666;
+}
+
+.remove-item-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.remove-item-btn:hover {
+  color: darkred;
+}
+
+.inv-submit-btn {
+  background-color: #F8CE00;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+  margin-top: 20px;
+  font-family: 'Poppins', sans-serif;
+  float: right;
+}
+
+.inv-submit-btn:hover {
+  background-color: #FFC107;
+}
+
+.inv-submit-btn:disabled {
+  background-color: #888; 
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.inv-submit-btn:disabled:hover {
+  background-color: #888; 
+  cursor: not-allowed;
+  opacity: 0.6; 
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+input {
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"] {
+  font-size: 14px;
+}
+
+.inv-inventory-table table {
+  width: 100%;
+  border-collapse: collapse;
+  padding: 10px;
+  margin-top: 20px;
+  margin-left: 30px;
+  color: #666666;
+}
+
+.inv-inventory-table th, .inv-inventory-table td {
+  text-align: left;
+}
+
+.inv-inventory-table th {
+  font-weight: bold;
+}
+
+.inv-inventory-table td input.purchase-quantity-input {
+  width: 50px;
+  padding: 5px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.remove-item-btn {
+  color: red;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.inv-modal {
+  position: fixed;
+  top: 60px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 79%;
+  background-color: #333 !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.close {
+  color: #fff;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #ccc;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+iframe {
+  width: 100%;
+  height: 94%;
+}
+
+.inv-download-button {
+  background-color: #F8CE00;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+  font-weight: bold;
+  border-radius: 5px;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1100;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-download-button:hover {
+  background-color: #FFC107;
+}
+
+.inv-services-section {
+  margin-bottom: 60px;
+}
+
+.inv-header-section {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.inv-service-inputs-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inv-service-inputs {
+  display: flex;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.inv-service-name-input {
+  flex: 5;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  min-height: 20px;
+  height: 100px;
+  max-height: 200px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-service-price-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100px;
+  height: 40px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inv-add-service-btn {
+  padding: 10px 20px;
+  background-color: #F8CE00; 
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  align-self: first baseline;
+}
+
+.inv-add-service-btn:hover {
+  background-color: #FFC107;
+}
+
+.inv-service-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 20px;
+  margin-left: 25px;
+  margin-right: 25px;
+}
+
+.inv-service-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  color: #666666;
+}
+
+.inv-service-list .service-name {
+  flex-grow: 1;
+}
+
+.inv-service-list .service-price {
+  white-space: nowrap;
+  margin-left: 20px;
+}
+
+.inv-remove-service-btn {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.inv-remove-service-btn:hover {
+  color: darkred;
+}
+
+.inv-discount-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.inv-discount-section h2 {
+  color: #333;
+  margin-top: -10px;
+  display: flex;
+  align-items: center;
+}
+
+.inv-discount-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}

@@ -470,7 +470,7 @@ const JobOrder = () => {
         doc.setFontSize(12);
         checkPageOverflow(12);
         doc.text("SERVICES AND PRODUCTS", 25, currentY);
-        currentY += 8;
+        currentY += 7;
 
         let totalAmountSubtotal = 0;
 
@@ -529,7 +529,7 @@ const JobOrder = () => {
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        checkPageOverflow(7);
+        checkPageOverflow(20);
         doc.text("SUBTOTAL:", finalX, currentY);
         doc.setFont('helvetica', 'normal');
         doc.text(`${totalAmountSubtotal.toFixed(2)}`, valueX, currentY);
@@ -537,7 +537,7 @@ const JobOrder = () => {
         const discountAmount = totalAmountSubtotal * (discount / 100);
         currentY += 7;
         doc.setFont('helvetica', 'bold');
-        checkPageOverflow(7);
+        checkPageOverflow(20);
         doc.text("DISCOUNT ("+discount+")%:", finalX, currentY);
         doc.setFont('helvetica', 'normal');
         doc.text(`-${discountAmount.toFixed(2)}`, valueX, currentY);
@@ -545,7 +545,7 @@ const JobOrder = () => {
         const grandTotal = totalAmountSubtotal - discountAmount;
         currentY += 7;
         doc.setFont('helvetica', 'bold');
-        checkPageOverflow(7);
+        checkPageOverflow(20);
         doc.text("GRAND TOTAL:", finalX, currentY);
         doc.setFont('helvetica', 'normal');
         doc.text(`${grandTotal.toFixed(2)}`, valueX, currentY);
