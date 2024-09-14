@@ -31,6 +31,7 @@ const PartsQuotation = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [discount, setDiscount] = useState(0);
     const [fileName, setFileName] = useState('');
+    const [grandTotal, setGrandTotal] = useState(0);
 
     const initialCustomerState = {
         name: '',
@@ -555,6 +556,7 @@ const PartsQuotation = () => {
         doc.text(`-${discountAmount.toFixed(2)}`, valueX, currentY);
 
         const grandTotal = totalAmountSubtotal - discountAmount;
+        setGrandTotal(grandTotal);
         currentY += 7;
         doc.setFont('helvetica', 'bold');
         checkPageOverflow(20);
@@ -589,10 +591,53 @@ const PartsQuotation = () => {
         setPdfUrl(null); 
     };
 
-    const downloadPDF = () => {
+    const downloadPDF = async () => {
         if (!docInstance) return;
         
         docInstance.save(fileName+".pdf");
+
+        await saveTransactionDetails();
+    };
+
+    const saveTransactionDetails = async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const dateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+        const transactionData = {
+            id: fileName,
+            customerName: selectedCustomer['name'],
+            mechanicName: selectedEmployee['name'],
+            plateNo: selectedCustomer['plateNo'],
+            type: "Parts Quotation",
+            dateTime: dateTime,
+            amount: grandTotal
+        };
+    
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': API_KEY,
+                },
+                body: JSON.stringify(transactionData),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to save transaction details');
+            }
+    
+            const data = await response.json();
+            console.log('Transaction saved successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error saving transaction details:', error);
+            alert('Error saving transaction details to history');
+        }
     };
 
     const generateDate = () => {

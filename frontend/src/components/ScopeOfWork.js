@@ -6,8 +6,8 @@ import logo from '../images/pdf-logo.png';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
 function generateCustomerId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -466,10 +466,53 @@ const ScopeOfWork = () => {
         setPdfUrl(null); 
     };
 
-    const downloadPDF = () => {
+    const downloadPDF = async () => {
         if (!docInstance) return;
         
         docInstance.save(fileName+".pdf");
+
+        await saveTransactionDetails();
+    };
+
+    const saveTransactionDetails = async () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const dateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+        const transactionData = {
+            id: fileName,
+            customerName: selectedCustomer['name'],
+            mechanicName: selectedEmployee['name'],
+            plateNo: selectedCustomer['plateNo'],
+            type: "Scope of Work",
+            dateTime: dateTime,
+            amount: 0
+        };
+    
+        try {
+            const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': API_KEY,
+                },
+                body: JSON.stringify(transactionData),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to save transaction details');
+            }
+    
+            const data = await response.json();
+            console.log('Transaction saved successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error saving transaction details:', error);
+            alert('Error saving transaction details to history');
+        }
     };
 
     const generateDate = () => {
