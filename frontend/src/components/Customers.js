@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Autocomplete } from '@react-google-maps/api';
+import { loadGoogleMapsAPI } from './loadGoogleMapsAPI';
 import '../styles/Customers.css';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
 function generateCustomerId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase(); 
@@ -257,6 +259,36 @@ function Customers() {
         setCurrentPage(pageNumber);
     };
 
+    const [autocomplete, setAutocomplete] = useState(null);
+
+    useEffect(() => {
+        loadGoogleMapsAPI()
+            .then(() => {
+                console.log('Google Maps API loaded successfully');
+            })
+            .catch((err) => {
+                console.error('Error loading Google Maps API:', err);
+            });
+    }, []);
+
+    const onLoad = (autoC) => {
+        setAutocomplete(autoC);
+    };
+
+    const onPlaceChanged = () => {
+        if (autocomplete !== null) {
+            const place = autocomplete.getPlace();
+            if (place.formatted_address) {
+                setCustomerDetails((prevDetails) => ({
+                    ...prevDetails,
+                    address: place.formatted_address,
+                }));
+            }
+        } else {
+            console.log('Autocomplete is not loaded yet!');
+        }
+    };
+
     return (
         <div className="customers">
             <div className="customers-header">
@@ -451,14 +483,16 @@ function Customers() {
                                 </div>
                                 <div className="form-group">
                                     <label>Address</label>
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        placeholder="Enter customer's address"
-                                        value={customerDetails.address}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
+                                    <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            placeholder="Enter customer's address"
+                                            value={customerDetails.address}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                    </Autocomplete>
                                 </div>
                                 <div className="modal-actions">
                                     <button type="button" onClick={toggleModal}>Cancel</button>

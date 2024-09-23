@@ -5,9 +5,11 @@ import 'jspdf-autotable';
 import logo from '../images/pdf-logo.png';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
+import { Autocomplete } from '@react-google-maps/api';
+import { loadGoogleMapsAPI } from './loadGoogleMapsAPI';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
 
 function generateCustomerId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -83,6 +85,8 @@ const Invoice = () => {
     const [servicePrice, setServicePrice] = useState('');
     const [services, setServices] = useState([]);
 
+    const [autocompleteInstance, setAutocompleteInstance] = useState(null);
+
     const fetchCustomers = async () => {
         try {
             const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
@@ -132,6 +136,10 @@ const Invoice = () => {
         fetchCustomers();
         fetchEmployees();
         fetchInventoryItems();
+        
+        loadGoogleMapsAPI()
+        .then(() => console.log('Google Maps API loaded successfully'))
+        .catch((err) => console.error('Error loading Google Maps API:', err));
     }, []);
 
     useEffect(() => {
@@ -222,6 +230,8 @@ const Invoice = () => {
             setSelectedCustomer(null);
             setCustomerQuery('');
         }
+
+        setFilteredCustomers([]);
     };
 
     const handleToggleEmployee = () => {
@@ -230,6 +240,8 @@ const Invoice = () => {
             setSelectedEmployee(null);
             setEmployeeQuery('');
         }
+        
+        setFilteredEmployees([]);
     };
 
     const handleSaveNewCustomer = async (e) => {
@@ -641,6 +653,24 @@ const Invoice = () => {
         return fileName;
     }
 
+    const onLoad = (autocomplete) => {
+        setAutocompleteInstance(autocomplete);
+    };
+    
+    const onPlaceChanged = () => {
+        if (autocompleteInstance) {
+            const place = autocompleteInstance.getPlace();
+            if (place.formatted_address) {
+                setNewCustomer((prevCustomer) => ({
+                    ...prevCustomer,
+                    address: place.formatted_address
+                }));
+            }
+        } else {
+            console.log('Autocomplete is not loaded yet!');
+        }
+    };
+
     return (
         <div className="inv-invoice">
             <div className="inv-header">
@@ -754,15 +784,17 @@ const Invoice = () => {
                             />
 
                             <p><strong>Address:</strong></p>
-                            <input
-                                className="inv-placeholder"
-                                type="text"
-                                placeholder="Enter address"
-                                value={newCustomer.address}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                                required
-                                disabled={isSubmittingCustomer}
-                            />
+                            <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                                <input
+                                    className="inv-placeholder"
+                                    type="text"
+                                    placeholder="Enter address"
+                                    value={newCustomer.address}
+                                    onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                                    required
+                                    disabled={isSubmittingCustomer}
+                                />
+                            </Autocomplete>
 
                             <button
                                 className="inv-submit-btn"

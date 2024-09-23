@@ -1,70 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import jwtDecode from 'jwt-decode'; // You can use this library to decode JWT tokens
 
 const ProtectedRoute = ({ element, adminElement, allowedRoles }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setIsAuthenticated(false);
-        setLoading(false);
-        return;
-      }
+    if (!token) {
+        return <Navigate to="/login" />;
+    }
 
-      try {
-        // Decode the token to extract payload (e.g., role)
-        const decodedToken = jwtDecode(token);
-        
-        // Check if the token is expired
-        const currentTime = Date.now() / 1000;
-        if (decodedToken.exp < currentTime) {
-          localStorage.removeItem('token');
-          setIsAuthenticated(false);
-          setLoading(false);
-          return;
+    if (allowedRoles.includes(role)) {
+        if (role === 'admin' && adminElement) {
+        return adminElement;
         }
 
-        // Check for role from the decoded token or local storage
-        const roleFromToken = decodedToken['custom:role'] || localStorage.getItem('role');
-        setRole(roleFromToken);
+        return element;
+    }
 
-        // Validate if the role is allowed
-        if (allowedRoles.includes(roleFromToken)) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error('Token validation error', error);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (role === 'admin') {
+        return <Navigate to="/reports" />;
+    }
 
-    checkAuth();
-  }, [allowedRoles]);
+    if (role === 'user') {
+        return <Navigate to="/userHomepage" />;
+    }
 
-  if (loading) {
-    return <div>Loading...</div>; // Show a loader while checking auth status
-  }
-
-  if (!isAuthenticated) {
     return <Navigate to="/login" />;
-  }
-
-  // Render admin element if role is 'admin'
-  if (role === 'admin' && adminElement) {
-    return adminElement;
-  }
-
-  // Render user element if role is 'user'
-  return element;
 };
 
 export default ProtectedRoute;

@@ -5,6 +5,8 @@ import 'jspdf-autotable';
 import logo from '../images/pdf-logo.png';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
+import { Autocomplete } from '@react-google-maps/api';
+import { loadGoogleMapsAPI } from './loadGoogleMapsAPI';
 
 const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
 const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
@@ -77,6 +79,8 @@ const ScopeOfWork = () => {
     const [employees, setEmployees] = useState([]);
     const [inventoryItems, setInventoryItems] = useState([]);
 
+    const [autocompleteInstance, setAutocompleteInstance] = useState(null);
+
     const fetchCustomers = async () => {
         try {
             const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
@@ -126,6 +130,10 @@ const ScopeOfWork = () => {
         fetchCustomers();
         fetchEmployees();
         fetchInventoryItems();
+
+        loadGoogleMapsAPI()
+        .then(() => console.log('Google Maps API loaded successfully'))
+        .catch((err) => console.error('Error loading Google Maps API:', err));
     }, []);
 
     useEffect(() => {
@@ -216,6 +224,8 @@ const ScopeOfWork = () => {
             setSelectedCustomer(null);
             setCustomerQuery('');
         }
+
+        setFilteredCustomers([]);
     };
 
     const handleToggleEmployee = () => {
@@ -224,6 +234,8 @@ const ScopeOfWork = () => {
             setSelectedEmployee(null);
             setEmployeeQuery('');
         }
+
+        setFilteredEmployees([]);
     };
 
     const handleSaveNewCustomer = async (e) => {
@@ -535,6 +547,24 @@ const ScopeOfWork = () => {
         return fileName;
     }
 
+    const onLoad = (autocomplete) => {
+        setAutocompleteInstance(autocomplete);
+    };
+    
+    const onPlaceChanged = () => {
+        if (autocompleteInstance) {
+            const place = autocompleteInstance.getPlace();
+            if (place.formatted_address) {
+                setNewCustomer((prevCustomer) => ({
+                    ...prevCustomer,
+                    address: place.formatted_address
+                }));
+            }
+        } else {
+            console.log('Autocomplete is not loaded yet!');
+        }
+    };
+
     return (
         <div className="sow-scope-of-work">
             <div className="sow-header">
@@ -648,15 +678,17 @@ const ScopeOfWork = () => {
                             />
 
                             <p><strong>Address:</strong></p>
-                            <input
-                                className="sow-placeholder"
-                                type="text"
-                                placeholder="Enter address"
-                                value={newCustomer.address}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
-                                required
-                                disabled={isSubmittingCustomer}
-                            />
+                            <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                                <input
+                                    className="sow-placeholder"
+                                    type="text"
+                                    placeholder="Enter address"
+                                    value={newCustomer.address}
+                                    onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                                    required
+                                    disabled={isSubmittingCustomer}
+                                />
+                            </Autocomplete>
 
                             <button
                                 className="sow-submit-btn"
