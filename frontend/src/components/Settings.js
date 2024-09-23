@@ -8,9 +8,8 @@ import awsconfig from '../aws-exports';
 const cognito = new AWS.CognitoIdentityServiceProvider();
 const USER_POOL_ID = process.env.REACT_APP_COGNITO_USER_POOL_ID || awsconfig.aws_user_pools_id;
 const CLIENT_ID = process.env.REACT_APP_COGNITO_CLIENT_ID || awsconfig.aws_user_pools_web_client_id;
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
-const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
-const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY || "AIzaSyCSSlUVnHRKnG3fQzXPmRSTyuJ_6MBImuE";
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 const Settings = () => {
     const [isEditing, setIsEditing] = useState(false);

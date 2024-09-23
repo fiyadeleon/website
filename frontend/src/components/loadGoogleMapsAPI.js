@@ -1,4 +1,4 @@
-const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY || "AIzaSyCSSlUVnHRKnG3fQzXPmRSTyuJ_6MBImuE";
+const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 
 export function loadGoogleMapsAPI() {
     return new Promise((resolve, reject) => {
