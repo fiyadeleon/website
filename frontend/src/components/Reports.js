@@ -7,8 +7,8 @@ import StockedUpIcon from '../images/box.png';
 
 ChartJS.register(ArcElement, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+let API_KEY = process.env.REACT_APP_API_KEY;
 
 const Reports = () => {
     const [activeButton, setActiveButton] = useState('Today'); 

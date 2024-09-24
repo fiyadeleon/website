@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import '../styles/Employees.css';
 import { createUserInCognito, addEmployeeToAPI, updateEmployeeToAPI, addUserToGroupInCognito, removeUserFromGroupInCognito, deleteEmployeeToAPI, deleteUserInCognito } from './employeeService';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+let API_KEY = process.env.REACT_APP_API_KEY;
 
 function generateEmployeeId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();

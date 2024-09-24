@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Inventory.css';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+let API_KEY = process.env.REACT_APP_API_KEY;
 
 function generateProductId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase(); 

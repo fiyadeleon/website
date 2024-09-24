@@ -1,8 +1,8 @@
 import AWS from 'aws-sdk'; 
 import awsconfig from '../aws-exports';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+let API_KEY = process.env.REACT_APP_API_KEY;
 
 AWS.config.update({
     region: awsconfig.region,
