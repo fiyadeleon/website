@@ -58,7 +58,8 @@ resource "aws_cognito_user_pool_client" "cognito_app_client" {
 
   explicit_auth_flows = [
     "ALLOW_USER_SRP_AUTH",
-    "ALLOW_REFRESH_TOKEN_AUTH"
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_ADMIN_USER_PASSWORD_AUTH"
   ]
 
   callback_urls = [
@@ -69,4 +70,10 @@ resource "aws_cognito_user_pool_client" "cognito_app_client" {
   logout_urls   = ["https://main.d9a4qs4tsciaz.amplifyapp.com/login"]
 
   prevent_user_existence_errors = "ENABLED"
+
+  token_validity_units {
+    access_token  = "minutes"
+    id_token      = "minutes" 
+    refresh_token = "days"
+  }
 }
