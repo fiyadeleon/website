@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import '../styles/Invoice.css';
+import '../styles/SalesOrder.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import logo from '../images/pdf-logo.png';
+import logo from '../images/logo6-cropped.jpg';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
 import { Autocomplete } from '@react-google-maps/api';
@@ -23,7 +23,7 @@ function generateEmployeeId() {
     return `EMP-${randomString}-${dateString}`;
 }
 
-const Invoice = () => {
+const SalesOrder = () => {
     const [customerQuery, setCustomerQuery] = useState('');
     const [employeeQuery, setEmployeeQuery] = useState('');
     const [inventoryQuery, setInventoryQuery] = useState('');
@@ -40,7 +40,6 @@ const Invoice = () => {
         carModel: '',
         plateNo: '',
         contact: '',
-        email: '',
         address: ''
     };
 
@@ -86,6 +85,8 @@ const Invoice = () => {
     const [services, setServices] = useState([]);
 
     const [autocompleteInstance, setAutocompleteInstance] = useState(null);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
     const fetchCustomers = async () => {
         try {
@@ -319,6 +320,7 @@ const Invoice = () => {
         setShowEmployeeDetails(false);
         setDiscount(0);
         setServices([]);
+        setSelectedDate('');
     };
 
     const handlePurchaseQuantityChange = (itemId, newQuantity) => {
@@ -358,6 +360,14 @@ const Invoice = () => {
     const generatePDF = async () => {
         let errors = [];
 
+        if (!selectedDate) {
+            errors.push('Date & time is required.');
+        }
+
+        if (!selectedPaymentMethod) {
+            errors.push('Payment method is required.');
+        }
+
         if (!selectedCustomer) {
             errors.push('Customer details are missing.');
         } else {
@@ -365,8 +375,6 @@ const Invoice = () => {
             if (!selectedCustomer.carModel) errors.push('Customer car model is required.');
             if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
             if (!selectedCustomer.contact) errors.push('Customer contact is required.');
-            if (!selectedCustomer.email) errors.push('Customer email is required.');
-            if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
 
         setFileName(generateFileName());
@@ -379,10 +387,6 @@ const Invoice = () => {
             errors.push('Employee details are missing.');
         } else {
             if (!selectedEmployee.name) errors.push('Employee name is required.');
-            if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
-            if (!selectedEmployee.contact) errors.push('Employee contact is required.');
-            if (!selectedEmployee.email) errors.push('Employee email is required.');
-            if (!selectedEmployee.role) errors.push('Employee role is required.');
         }
     
         selectedInventoryItems.forEach(item => {
@@ -413,21 +417,21 @@ const Invoice = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
 
-        doc.text("Compound, 1 Pascual, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
-        doc.text("Contact no. 09978900746 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
+        doc.text("Pascual 1 Compound Brgy. San Antonio, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
+        doc.text("Contact no. 09088200922 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
-        doc.text("INVOICE", pageWidth / 2, imgHeight + 26, { align: 'center' });
+        doc.text("SALES ORDER", pageWidth / 2, imgHeight + 26, { align: 'center' });
 
         const startY = imgHeight + 35;
         const columnWidth = pageWidth / 2;
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.text("INVOICE No:", 25, startY);
+        doc.text("SO No:", 25, startY);
         doc.setFont('helvetica', 'normal');
-        doc.text(fileName, 47, startY);
+        doc.text(fileName, 38, startY);
 
         // CUSTOMER DETAILS
         doc.setFont('helvetica', 'bold');
@@ -438,7 +442,7 @@ const Invoice = () => {
             selectedCustomer?.carModel || "",
             selectedCustomer?.plateNo || "",
             selectedCustomer?.contact || "",
-            selectedCustomer?.email || ""
+            selectedCustomer?.address?.trim() && selectedCustomer.address !== "N/A" ? selectedCustomer.address : ""
         ];
 
         doc.setFont('helvetica', 'normal');
@@ -452,17 +456,14 @@ const Invoice = () => {
         doc.setFontSize(10);
         doc.text("DATE ISSUED:", columnWidth + 25, startY);
         doc.setFont('helvetica', 'normal');
-        doc.text(date, columnWidth + 51, startY);
+        doc.text(new Date(selectedDate).toLocaleDateString(), columnWidth + 51, startY);
 
         // EMPLOYEE DETAILS
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
+        doc.text("MECHANIC", columnWidth + 25, startY + 10);
         const employeeDetails = [
-            selectedEmployee?.name || "",
-            selectedEmployee?.jobTitle || "",
-            selectedEmployee?.contact || "",
-            selectedEmployee?.email || ""
+            selectedEmployee?.name || ""
         ];
 
         doc.setFont('helvetica', 'normal');
@@ -564,12 +565,92 @@ const Invoice = () => {
         doc.setFont('helvetica', 'normal');
         doc.text(`${grandTotal.toFixed(2)}`, valueX, currentY);
 
+        if (selectedPaymentMethod !== "cash"){
+            currentY += 10;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text("PAYMENT METHOD", finalX, currentY);
+            currentY += 5;
+        }
+
+        if (selectedPaymentMethod === 'bpi-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("BPI", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("316-959-4626", finalX, currentY);
+        } else if (selectedPaymentMethod === 'e-wallet') {
+            doc.setFontSize(10);
+            doc.text("GCash / Paymaya", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("0997-890-0746", finalX, currentY);
+        } else if (selectedPaymentMethod === 'metro-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("Metrobank", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Maria Jesusa Anne Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("0513-0517-82560", finalX, currentY);
+        } else if (selectedPaymentMethod === 'security-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("Security Bank", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Maria Jesusa Anne Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("00000-5428-5873", finalX, currentY);
+            currentY += 7;
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("00000-5685-4883", finalX, currentY);
+        }
+
         currentY += 30;
         const sigX = 120;
         checkPageOverflow(20);
         
         doc.setFont('helvetica', 'bold');
         doc.text("Authorized Name and Signature", sigX, currentY);
+        currentY += 5;
+        
+        const footerMarginX = 25;
+        const footerTextWidth = pageWidth - 2 * footerMarginX;
+        
+        const footerText = `
+        TERMS & CONDITIONS:
+        
+        Hereby authorizes STANGHERO AUTOMOTIVE CARE SERVICES to carry out the above repair and grant its employees permission to operate the vehicle herein described on streets, highways, or elsewhere for the purpose of testing and/or inspection.
+        
+        PARTS NOT CLAIMED WITHIN TWO WEEKS AFTER THE RELEASE OF THE VEHICLE ARE SUBJECTED TO COMPANY DISPOSAL.
+        `;
+        
+        const footerSentences = footerText.split(/[.!?]\s+/).filter(Boolean);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        
+        footerSentences.forEach(function (sentence, index) {
+            if (index < footerSentences.length - 1) {
+                sentence += '.';
+            }
+        
+            const wrappedSentence = doc.splitTextToSize(sentence, footerTextWidth);
+        
+            checkPageOverflow(wrappedSentence.length * 5);
+        
+            wrappedSentence.forEach(function (line) {
+                doc.text(line, footerMarginX, currentY);
+                currentY += 3; 
+            });
+        
+            currentY += 5;
+        });
         
         const pdfBlob = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -593,21 +674,13 @@ const Invoice = () => {
     };
 
     const saveTransactionDetails = async () => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const dateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
-
         const transactionData = {
             id: fileName,
             customerName: selectedCustomer['name'],
             mechanicName: selectedEmployee['name'],
             plateNo: selectedCustomer['plateNo'],
-            type: "Invoice",
-            dateTime: dateTime,
+            type: "Sales Order",
+            dateTime: selectedDate.replace('T', ' '),
             amount: grandTotal
         };
     
@@ -647,7 +720,7 @@ const Invoice = () => {
     const generateFileName = () => {
         const { formattedDate, date } = generateDate();
     
-        let fileName = `INVOICE-${selectedCustomer?.plateNo}-${formattedDate}`;
+        let fileName = `SO-${selectedCustomer?.plateNo}-${formattedDate}`;
         fileName = fileName.replace(/\s+/g, '');
 
         return fileName;
@@ -672,22 +745,35 @@ const Invoice = () => {
     };
 
     return (
-        <div className="inv-invoice">
-            <div className="inv-header">
-                <h1>INVOICE</h1>
-                <button className="inv-clear-button" onClick={handleClear}>Clear</button>
+        <div className="so-sales-order">
+            <div className="so-header">
+                <h1>SALES ORDER</h1>
+                <button className="so-clear-button" onClick={handleClear}>Clear</button>
             </div>
 
-            <div className="inv-user-info">
-                <form className="inv-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
+            <div className="so-date-input-wrapper">
+                <div className="so-header-section">
+                    <h2>DATE & TIME ISSUED</h2>
+                </div>
+                <input
+                    className="so-placeholder"
+                    type="datetime-local"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    required
+                />
+            </div>
+
+            <div className="so-user-info">
+                <form className="so-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
                     <h2>CUSTOMER</h2>
                     {!showCustomerDetails && (
-                        <div className="inv-search-bar">
-                            <span className="material-symbols-outlined inv-search-icon">search</span>
+                        <div className="so-search-bar">
+                            <span className="material-symbols-outlined so-search-icon">search</span>
                             <input
                                 type="text"
                                 placeholder="Search Customer"
-                                className="inv-search-input"
+                                className="so-search-input"
                                 value={customerQuery}
                                 onChange={handleCustomerSearch}
                                 onFocus={() => setFilteredCustomers(customers.slice(0, 5))}
@@ -696,28 +782,27 @@ const Invoice = () => {
                         </div>
                     )}
                     {filteredCustomers.length > 0 && (
-                        <div className="inv-dropdown">
+                        <div className="so-dropdown">
                             {filteredCustomers.map((customer, index) => (
-                                <div className="inv-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
-                                    <span className="inv-dropdown-text">{customer.name}</span>
-                                    <span className="inv-dropdown-actions">{customer.plateNo}</span>
+                                <div className="so-dropdown-option" key={index} onClick={() => handleCustomerSelect(customer)}>
+                                    <span className="so-dropdown-text">{customer.name}</span>
+                                    <span className="so-dropdown-actions">{customer.plateNo}</span>
                                 </div>
                             ))}
                         </div>
                     )}
                     {selectedCustomer && !showCustomerDetails && (
-                        <div className="inv-customer-details">
+                        <div className="so-customer-details">
                             <p><strong>Name:</strong> {selectedCustomer.name}</p>
                             <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
                             <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
                             <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address || "N/A"}</p>
                         </div>
                     )}
                     <button 
                         type="button" 
-                        className={`inv-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
+                        className={`so-add-customer-btn ${showCustomerDetails ? 'cancel' : ''}`} 
                         onClick={handleToggleCustomer}
                         disabled={isSubmittingCustomer}
                     >
@@ -725,10 +810,10 @@ const Invoice = () => {
                     </button>
 
                     {showCustomerDetails && (
-                        <div className="inv-customer-details">
+                        <div className="so-customer-details">
                             <p><strong>Name:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="text"
                                 placeholder="Enter name"
                                 value={newCustomer.name}
@@ -739,7 +824,7 @@ const Invoice = () => {
 
                             <p><strong>Car Model:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="text"
                                 placeholder="Enter car model"
                                 value={newCustomer.carModel}
@@ -750,7 +835,7 @@ const Invoice = () => {
 
                             <p><strong>Plate No:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="text"
                                 placeholder="Enter plate number"
                                 value={newCustomer.plateNo}
@@ -761,7 +846,7 @@ const Invoice = () => {
 
                             <p><strong>Contact No:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="tel" 
                                 pattern="[0-9]{11}" 
                                 maxLength="11"
@@ -772,21 +857,10 @@ const Invoice = () => {
                                 disabled={isSubmittingCustomer}
                             />
 
-                            <p><strong>Email:</strong></p>
-                            <input
-                                className="inv-placeholder"
-                                type="email"
-                                placeholder="Enter email"
-                                value={newCustomer.email}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                                required
-                                disabled={isSubmittingCustomer}
-                            />
-
                             <p><strong>Address:</strong></p>
                             <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                                 <input
-                                    className="inv-placeholder"
+                                    className="so-placeholder"
                                     type="text"
                                     placeholder="Enter address"
                                     value={newCustomer.address}
@@ -797,7 +871,7 @@ const Invoice = () => {
                             </Autocomplete>
 
                             <button
-                                className="inv-submit-btn"
+                                className="so-submit-btn"
                                 type="submit"
                                 disabled={isSubmittingCustomer}
                             >
@@ -807,15 +881,15 @@ const Invoice = () => {
                     )}
                 </form>
 
-                <form className="inv-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
+                <form className="so-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
                     <h2>EMPLOYEE</h2>
                     {!showEmployeeDetails && (
-                        <div className="inv-search-bar">
-                            <span className="material-symbols-outlined inv-search-icon">search</span>
+                        <div className="so-search-bar">
+                            <span className="material-symbols-outlined so-search-icon">search</span>
                             <input
                                 type="text"
                                 placeholder="Search Employee"
-                                className="inv-search-input"
+                                className="so-search-input"
                                 value={employeeQuery}
                                 onChange={handleEmployeeSearch}
                                 onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
@@ -824,17 +898,17 @@ const Invoice = () => {
                         </div>
                     )}
                     {filteredEmployees.length > 0 && (
-                        <div className="inv-dropdown">
+                        <div className="so-dropdown">
                             {filteredEmployees.map((employee, index) => (
-                                <div className="inv-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
-                                    <span className="inv-dropdown-text">{employee.name}</span>
-                                    <span className="inv-dropdown-actions">{employee.jobTitle}</span>
+                                <div className="so-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
+                                    <span className="so-dropdown-text">{employee.name}</span>
+                                    <span className="so-dropdown-actions">{employee.jobTitle}</span>
                                 </div>
                             ))}
                         </div>
                     )}
                     {selectedEmployee && !showEmployeeDetails && (
-                        <div className="inv-employee-details">
+                        <div className="so-employee-details">
                             <p><strong>Name:</strong> {selectedEmployee.name}</p>
                             <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
                             <p><strong>Contact:</strong> {selectedEmployee.contact}</p>
@@ -843,7 +917,7 @@ const Invoice = () => {
                     )}
                     <button 
                         type="button"
-                        className={`inv-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
+                        className={`so-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
                         onClick={handleToggleEmployee}
                         disabled={isSubmittingEmployee}
                     >
@@ -851,10 +925,10 @@ const Invoice = () => {
                     </button>
 
                     {showEmployeeDetails && (
-                        <div className="inv-employee-details">
+                        <div className="so-employee-details">
                             <p><strong>Name:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="text"
                                 placeholder="Enter name"
                                 value={newEmployee.name}
@@ -865,7 +939,7 @@ const Invoice = () => {
 
                             <p><strong>Job Title:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="text"
                                 placeholder="Enter job title"
                                 value={newEmployee.jobTitle}
@@ -876,7 +950,7 @@ const Invoice = () => {
 
                             <p><strong>Contact No:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="tel" 
                                 pattern="[0-9]{11}" 
                                 maxLength="11"
@@ -889,7 +963,7 @@ const Invoice = () => {
 
                             <p><strong>Email:</strong></p>
                             <input
-                                className="inv-placeholder"
+                                className="so-placeholder"
                                 type="email"
                                 placeholder="Enter email"
                                 value={newEmployee.email}
@@ -914,7 +988,7 @@ const Invoice = () => {
                             </select>
 
                             <button
-                                className="inv-submit-btn"
+                                className="so-submit-btn"
                                 type="submit"
                                 disabled={isSubmittingEmployee}
                             >
@@ -925,7 +999,7 @@ const Invoice = () => {
                 </form>
             </div>
 
-            <div className="inv-discount-section">
+            <div className="so-discount-section">
                 <h2>DISCOUNT (%)</h2>
                 <input
                     type="number"
@@ -942,35 +1016,54 @@ const Invoice = () => {
                             setDiscount(value);
                         }
                     }}
-                    className="inv-discount-input"
+                    className="so-discount-input"
                     min="0"
                     max="100"
                     placeholder="Enter discount percentage"
                 />
             </div>
 
-            <div className="inv-parts-section" ref={inventorySearchRef}>
-                <div className="inv-header-section">
-                    <h2>INVENTORY</h2>
-                    <span className="material-symbols-outlined inv-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
+            <div className="so-payment-section">
+                <div className="so-header-section">
+                    <h2>PREFERRED PAYMENT</h2>
                 </div>
-                <div className="inv-search-bar">
-                    <span className="material-symbols-outlined inv-search-icon">search</span>
+                <select
+                    className="so-placeholder"
+                    value={selectedPaymentMethod}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                    required
+                >
+                    <option value="" disabled>Select payment method</option>
+                    <option value="cash">Cash</option>
+                    <option value="bpi-bank-transfer">BPI - Bank Transfer</option>
+                    <option value="metro-bank-transfer">Metrobank - Bank Transfer</option>
+                    <option value="security-bank-transfer">Security Bank - Bank Transfer</option>
+                    <option value="e-wallet">GCash / Paymaya</option>
+                </select>
+            </div>
+
+            <div className="so-parts-section" ref={inventorySearchRef}>
+                <div className="so-header-section">
+                    <h2>INVENTORY</h2>
+                    <span className="material-symbols-outlined so-info-icon" data-tooltip="Select the part(s) or item(s) required to complete the outlined services.">info</span>
+                </div>
+                <div className="so-search-bar">
+                    <span className="material-symbols-outlined so-search-icon">search</span>
                     <input
                         type="text"
                         placeholder="Search for parts or items"
-                        className="inv-search-input"
+                        className="so-search-input"
                         value={inventoryQuery}
                         onChange={handleInventorySearch}
                         onFocus={handleInventoryFocus}
                     />
                 </div>
                 {isInventoryInputFocused && filteredInventory.length > 0 && (
-                    <div className="inv-dropdown">
+                    <div className="so-dropdown">
                         {filteredInventory.map((item, index) => (
-                            <div className="inv-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
-                                <span className="inv-dropdown-text">{item.product_name}</span>
-                                <span className="inv-dropdown-actions">
+                            <div className="so-dropdown-option" key={index} onClick={() => handleInventorySelect(item)}>
+                                <span className="so-dropdown-text">{item.product_name}</span>
+                                <span className="so-dropdown-actions">
                                     {item.stock} {item.unit}{item.stock < 1 ? '' : (item.unit === 'box' ? 'es' : 's')}
                                 </span>
                             </div>
@@ -978,7 +1071,7 @@ const Invoice = () => {
                     </div>
                 )}
 
-                <div className="inv-inventory-table">
+                <div className="so-inventory-table">
                     {selectedInventoryItems.length > 0 && (
                         <table>
                             <thead>
@@ -1024,31 +1117,31 @@ const Invoice = () => {
                 </div>
             </div>
 
-            <div className="inv-services-section">
-                <div className="inv-header-section">
+            <div className="so-services-section">
+                <div className="so-header-section">
                     <h2>SERVICES</h2>
-                    <span className="material-symbols-outlined inv-info-icon" data-tooltip="Add services performed on the vehicle.">info</span>
+                    <span className="material-symbols-outlined so-info-icon" data-tooltip="Add services performed on the vehicle.">info</span>
                 </div>
-                <div className="inv-service-inputs-container">
-                    <div className="inv-service-inputs">
+                <div className="so-service-inputs-container">
+                    <div className="so-service-inputs">
                         <textarea
                             placeholder="Enter service name"
                             value={serviceName}
                             onChange={(e) => setServiceName(e.target.value)}
-                            className="inv-service-name-input"
+                            className="so-service-name-input"
                         />
                         <input
                             type="number"
                             placeholder="Enter price"
                             value={servicePrice}
                             onChange={(e) => setServicePrice(e.target.value)}
-                            className="inv-service-price-input"
+                            className="so-service-price-input"
                         />
                     </div>
-                    <button onClick={handleAddService} className="inv-add-service-btn">Add Service</button>
+                    <button onClick={handleAddService} className="so-add-service-btn">Add Service</button>
                 </div>
 
-                <ul className="inv-service-list">
+                <ul className="so-service-list">
                     {services.map((service, index) => {
                         const tasks = service.name.split('\n');
 
@@ -1063,7 +1156,7 @@ const Invoice = () => {
                                 ))}
                             </a>
                             <span className="service-price">₱{service.price.toFixed(2)}</span>
-                            <button onClick={() => handleRemoveService(index)} className="inv-remove-service-btn">
+                            <button onClick={() => handleRemoveService(index)} className="so-remove-service-btn">
                             <span className="material-symbols-outlined">delete</span>
                             </button>
                         </li>
@@ -1072,9 +1165,9 @@ const Invoice = () => {
                 </ul>
             </div>
 
-            <button className="inv-save-button" onClick={generatePDF}>Preview .PDF</button>
+            <button className="so-save-button" onClick={generatePDF}>Preview .PDF</button>
             {showModal && (
-                <div className="inv-modal">
+                <div className="so-modal">
                     <span className="close" onClick={closeModal}>&times;</span>
                     <iframe
                         src={pdfUrl}
@@ -1082,11 +1175,11 @@ const Invoice = () => {
                         height="300px"
                         title="PDF Preview"
                     ></iframe>
-                    <button onClick={downloadPDF} className="inv-download-button">Download .PDF</button>
+                    <button onClick={downloadPDF} className="so-download-button">Download .PDF</button>
                 </div>
             )}
         </div>
     );
 };
 
-export default Invoice;
+export default SalesOrder;

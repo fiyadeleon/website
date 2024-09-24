@@ -101,7 +101,7 @@
   margin-top: -35px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 14px;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
@@ -116,7 +116,7 @@
   color: #aaa;
 }
 
-.jo-parts-section, .jo-services-section, .jo-remarks-section {
+.jo-parts-section, .jo-services-section, .jo-remarks-section, .jo-payment-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -591,4 +591,33 @@ iframe {
   font-size: 16px;
   font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
+}
+
+.jo-date-input-wrapper {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.jo-date-input-wrapper h2 {
+  font-size: 24px;
+  color: #333;
+}
+
+.jo-date-input-wrapper input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-top: 5px;
+  box-sizing: border-box;
+  height: 45px; 
+  border: 1px solid #dddddd;
+  color: #666666;
+  font-family: 'Poppins', sans-serif;
 }

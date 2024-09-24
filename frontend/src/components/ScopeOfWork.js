@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../styles/ScopeOfWork.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import logo from '../images/pdf-logo.png';
+import logo from '../images/logo6-cropped.jpg';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
 import { Autocomplete } from '@react-google-maps/api';
@@ -38,7 +38,6 @@ const ScopeOfWork = () => {
         carModel: '',
         plateNo: '',
         contact: '',
-        email: '',
         address: ''
     };
 
@@ -80,6 +79,7 @@ const ScopeOfWork = () => {
     const [inventoryItems, setInventoryItems] = useState([]);
 
     const [autocompleteInstance, setAutocompleteInstance] = useState(null);
+    const [selectedDate, setSelectedDate] = useState('');
 
     const fetchCustomers = async () => {
         try {
@@ -311,12 +311,17 @@ const ScopeOfWork = () => {
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
         setShowEmployeeDetails(false);
+        setSelectedDate('');
         document.querySelector('.sow-services-textarea').value = "";
         document.querySelector('.sow-remarks-textarea').value = "";
     };
 
     const generatePDF = async () => {
         let errors = [];
+
+        if (!selectedDate) {
+            errors.push('Date & time is required.');
+        }
 
         if (!selectedCustomer) {
             errors.push('Customer details are missing.');
@@ -325,8 +330,6 @@ const ScopeOfWork = () => {
             if (!selectedCustomer.carModel) errors.push('Customer car model is required.');
             if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
             if (!selectedCustomer.contact) errors.push('Customer contact is required.');
-            if (!selectedCustomer.email) errors.push('Customer email is required.');
-            if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
 
         setFileName(generateFileName());
@@ -339,10 +342,6 @@ const ScopeOfWork = () => {
             errors.push('Employee details are missing.');
         } else {
             if (!selectedEmployee.name) errors.push('Employee name is required.');
-            if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
-            if (!selectedEmployee.contact) errors.push('Employee contact is required.');
-            if (!selectedEmployee.email) errors.push('Employee email is required.');
-            if (!selectedEmployee.role) errors.push('Employee role is required.');
         }
         const serviceDetails = document.querySelector('.sow-services-textarea').value;
         if (!serviceDetails) errors.push('Service details are required.');
@@ -367,8 +366,8 @@ const ScopeOfWork = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
         
-        doc.text("Compound, 1 Pascual, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
-        doc.text("Contact no. 09978900746 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
+        doc.text("Pascual 1 Compound Brgy. San Antonio, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
+        doc.text("Contact no. 09088200922 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
         
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
@@ -391,7 +390,7 @@ const ScopeOfWork = () => {
             selectedCustomer?.carModel || "",
             selectedCustomer?.plateNo || "",
             selectedCustomer?.contact || "",
-            selectedCustomer?.email || ""
+            selectedCustomer?.address?.trim() && selectedCustomer.address !== "N/A" ? selectedCustomer.address : ""
         ];
         
         doc.setFont('helvetica', 'normal');
@@ -405,16 +404,13 @@ const ScopeOfWork = () => {
         doc.setFontSize(10);
         doc.text("DATE ISSUED:", columnWidth + 25, startY);
         doc.setFont('helvetica', 'normal');
-        doc.text(date, columnWidth + 51, startY);
+        doc.text(new Date(selectedDate).toLocaleDateString(), columnWidth + 51, startY);
         
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
+        doc.text("MECHANIC", columnWidth + 25, startY + 10);
         const employeeDetails = [
-            selectedEmployee?.name || "",
-            selectedEmployee?.jobTitle || "",
-            selectedEmployee?.contact || "",
-            selectedEmployee?.email || ""
+            selectedEmployee?.name || ""
         ];
         
         doc.setFont('helvetica', 'normal');
@@ -449,14 +445,15 @@ const ScopeOfWork = () => {
         }
         
         checkPageOverflow(20);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
-        doc.text("REMARKS", 25, currentY + 8);
-        currentY += 16;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(11);
-        if (remarks) {
+        if (remarks && remarks.trim() !== "") {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text("REMARKS", 25, currentY + 8);
+            currentY += 16;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            
             const wrappedRemarks = doc.splitTextToSize(remarks, maxWidth);
             wrappedRemarks.forEach((line) => {
                 checkPageOverflow(lineHeight); 
@@ -464,6 +461,39 @@ const ScopeOfWork = () => {
                 currentY += lineHeight;
             });
         }
+
+        const footerMarginX = 25;
+        const footerTextWidth = pageWidth - 2 * footerMarginX;
+        
+        const footerText = `
+        TERMS & CONDITIONS:
+        
+        Hereby authorizes STANGHERO AUTOMOTIVE CARE SERVICES to carry out the above repair and grant its employees permission to operate the vehicle herein described on streets, highways, or elsewhere for the purpose of testing and/or inspection.
+        
+        PARTS NOT CLAIMED WITHIN TWO WEEKS AFTER THE RELEASE OF THE VEHICLE ARE SUBJECTED TO COMPANY DISPOSAL.
+        `;
+        
+        const footerSentences = footerText.split(/[.!?]\s+/).filter(Boolean);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        
+        footerSentences.forEach(function (sentence, index) {
+            if (index < footerSentences.length - 1) {
+                sentence += '.';
+            }
+        
+            const wrappedSentence = doc.splitTextToSize(sentence, footerTextWidth);
+        
+            checkPageOverflow(wrappedSentence.length * 5);
+        
+            wrappedSentence.forEach(function (line) {
+                doc.text(line, footerMarginX, currentY + 5);
+                currentY += 3; 
+            });
+        
+            currentY += 5;
+        });        
         
         const pdfBlob = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -487,21 +517,13 @@ const ScopeOfWork = () => {
     };
 
     const saveTransactionDetails = async () => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const dateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
-
         const transactionData = {
             id: fileName,
             customerName: selectedCustomer['name'],
             mechanicName: selectedEmployee['name'],
             plateNo: selectedCustomer['plateNo'],
             type: "Scope of Work",
-            dateTime: dateTime,
+            dateTime: selectedDate.replace('T', ' '),
             amount: 0
         };
     
@@ -572,6 +594,19 @@ const ScopeOfWork = () => {
                 <button className="sow-clear-button" onClick={handleClear}>Clear</button>
             </div>
 
+            <div className="sow-date-input-wrapper">
+                <div className="sow-header-section">
+                    <h2>DATE & TIME ISSUED</h2>
+                </div>
+                <input
+                    className="sow-placeholder"
+                    type="datetime-local"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    required
+                />
+            </div>
+
             <div className="sow-user-info">
                 <form className="sow-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
                     <h2>CUSTOMER</h2>
@@ -605,8 +640,7 @@ const ScopeOfWork = () => {
                             <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
                             <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
                             <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address || "N/A"}</p>
                         </div>
                     )}
                     <button 
@@ -662,17 +696,6 @@ const ScopeOfWork = () => {
                                 placeholder="Enter contact number"
                                 value={newCustomer.contact}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
-                                required
-                                disabled={isSubmittingCustomer}
-                            />
-
-                            <p><strong>Email:</strong></p>
-                            <input
-                                className="sow-placeholder"
-                                type="email"
-                                placeholder="Enter email"
-                                value={newCustomer.email}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                                 required
                                 disabled={isSubmittingCustomer}
                             />

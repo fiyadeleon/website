@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../styles/JobOrder.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import logo from '../images/pdf-logo.png';
+import logo from '../images/logo6-cropped.jpg';
 import { createUserInCognito, addEmployeeToAPI } from './employeeService';
 import { addCustomerToAPI } from './customerService';
 import { Autocomplete } from '@react-google-maps/api';
@@ -40,7 +40,6 @@ const JobOrder = () => {
         carModel: '',
         plateNo: '',
         contact: '',
-        email: '',
         address: ''
     };
 
@@ -86,6 +85,8 @@ const JobOrder = () => {
     const [services, setServices] = useState([]);
 
     const [autocompleteInstance, setAutocompleteInstance] = useState(null);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
     const fetchCustomers = async () => {
         try {
@@ -319,6 +320,7 @@ const JobOrder = () => {
         setShowEmployeeDetails(false);
         setDiscount(0);
         setServices([]);
+        setSelectedDate('');
     };
 
     const handlePurchaseQuantityChange = (itemId, newQuantity) => {
@@ -358,6 +360,14 @@ const JobOrder = () => {
     const generatePDF = async () => {
         let errors = [];
 
+        if (!selectedDate) {
+            errors.push('Date & time is required.');
+        }
+
+        if (!selectedPaymentMethod) {
+            errors.push('Payment method is required.');
+        }
+
         if (!selectedCustomer) {
             errors.push('Customer details are missing.');
         } else {
@@ -365,8 +375,6 @@ const JobOrder = () => {
             if (!selectedCustomer.carModel) errors.push('Customer car model is required.');
             if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
             if (!selectedCustomer.contact) errors.push('Customer contact is required.');
-            if (!selectedCustomer.email) errors.push('Customer email is required.');
-            if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
 
         setFileName(generateFileName());
@@ -379,10 +387,6 @@ const JobOrder = () => {
             errors.push('Employee details are missing.');
         } else {
             if (!selectedEmployee.name) errors.push('Employee name is required.');
-            if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
-            if (!selectedEmployee.contact) errors.push('Employee contact is required.');
-            if (!selectedEmployee.email) errors.push('Employee email is required.');
-            if (!selectedEmployee.role) errors.push('Employee role is required.');
         }
     
         selectedInventoryItems.forEach(item => {
@@ -413,8 +417,8 @@ const JobOrder = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
 
-        doc.text("Compound, 1 Pascual, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
-        doc.text("Contact no. 09978900746 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
+        doc.text("Pascual 1 Compound Brgy. San Antonio, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
+        doc.text("Contact no. 09088200922 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
@@ -438,7 +442,7 @@ const JobOrder = () => {
             selectedCustomer?.carModel || "",
             selectedCustomer?.plateNo || "",
             selectedCustomer?.contact || "",
-            selectedCustomer?.email || ""
+            selectedCustomer?.address?.trim() && selectedCustomer.address !== "N/A" ? selectedCustomer.address : ""
         ];
 
         doc.setFont('helvetica', 'normal');
@@ -452,17 +456,14 @@ const JobOrder = () => {
         doc.setFontSize(10);
         doc.text("DATE ISSUED:", columnWidth + 25, startY);
         doc.setFont('helvetica', 'normal');
-        doc.text(date, columnWidth + 51, startY);
+        doc.text(new Date(selectedDate).toLocaleDateString(), columnWidth + 51, startY);
 
         // EMPLOYEE DETAILS
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
+        doc.text("MECHANIC", columnWidth + 25, startY + 10);
         const employeeDetails = [
-            selectedEmployee?.name || "",
-            selectedEmployee?.jobTitle || "",
-            selectedEmployee?.contact || "",
-            selectedEmployee?.email || ""
+            selectedEmployee?.name || ""
         ];
 
         doc.setFont('helvetica', 'normal');
@@ -564,30 +565,109 @@ const JobOrder = () => {
         doc.setFont('helvetica', 'normal');
         doc.text(`${grandTotal.toFixed(2)}`, valueX, currentY);
 
+        if (selectedPaymentMethod !== "cash"){
+            currentY += 10;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text("PAYMENT METHOD", finalX, currentY);
+            currentY += 5;
+        }
+
+        if (selectedPaymentMethod === 'bpi-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("BPI", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("316-959-4626", finalX, currentY);
+        } else if (selectedPaymentMethod === 'e-wallet') {
+            doc.setFontSize(10);
+            doc.text("GCash / Paymaya", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("0997-890-0746", finalX, currentY);
+        } else if (selectedPaymentMethod === 'metro-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("Metrobank", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Maria Jesusa Anne Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("0513-0517-82560", finalX, currentY);
+        } else if (selectedPaymentMethod === 'security-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("Security Bank", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Maria Jesusa Anne Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("00000-5428-5873", finalX, currentY);
+            currentY += 7;
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("00000-5685-4883", finalX, currentY);
+        }
+
         const marginX = 25; 
         const textWidth = pageWidth - 2 * marginX;
-
-        currentY += 15;
+        
+        currentY += 10;
         const text = "I received my vehicle with all the repairs done as specified by me, which were satisfactory and complete. The jobs performed are inspected and verified.";
         const wrappedText = doc.splitTextToSize(text, textWidth);
-
-        checkPageOverflow(wrappedText.length * 5);
-        doc.text(wrappedText, 30, currentY);
         
-        currentY += wrappedText.length * 5 + 20;
-
+        checkPageOverflow(wrappedText.length * 5);
+        doc.text(wrappedText, marginX, currentY);
+        currentY += wrappedText.length * 5 + 25;
+        
         const sigX = 45;
         const mechanicSignatureX = sigX + 80;
-
-        const signatureHeight = 10;
+        const signatureHeight = 5;
+        
         checkPageOverflow(signatureHeight);
-
+        
         doc.setFont('helvetica', 'bold');
         doc.text("Customer’s Signature", sigX, currentY);
         doc.text("Mechanic’s Signature", mechanicSignatureX, currentY);
-
+        currentY += signatureHeight;
+        
+        const footerMarginX = 25; 
+        const footerTextWidth = pageWidth - 2 * footerMarginX;
+        
+        const footerText = `
+        TERMS & CONDITIONS:
+        
+        Hereby authorizes STANGHERO AUTOMOTIVE CARE SERVICES to carry out the above repair and grant its employees permission to operate the vehicle herein described on streets, highways, or elsewhere for the purpose of testing and/or inspection.
+        
+        PARTS NOT CLAIMED WITHIN TWO WEEKS AFTER THE RELEASE OF THE VEHICLE ARE SUBJECTED TO COMPANY DISPOSAL.
+        `;
+        
+        const footerSentences = footerText.split(/[.!?]\s+/).filter(Boolean); 
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        
+        footerSentences.forEach(function (sentence, index) {
+            if (index < footerSentences.length - 1) {
+                sentence += '.';
+            }
+        
+            const wrappedSentence = doc.splitTextToSize(sentence, footerTextWidth);
+        
+            checkPageOverflow(wrappedSentence.length * 5);
+        
+            wrappedSentence.forEach(function (line) {
+                doc.text(line, footerMarginX, currentY);
+                currentY += 3;
+            });
+        
+            currentY += 5;
+        });
+        
         const pdfBlob = doc.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const pdfUrl = URL.createObjectURL(pdfBlob);        
 
         setDocInstance(doc);
         setPdfUrl(pdfUrl);
@@ -598,6 +678,7 @@ const JobOrder = () => {
         setShowModal(false); 
         setPdfUrl(null); 
     };
+
     const downloadPDF = async () => {
         if (!docInstance) return;
         
@@ -607,21 +688,13 @@ const JobOrder = () => {
     };
 
     const saveTransactionDetails = async () => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const dateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
-
         const transactionData = {
             id: fileName,
             customerName: selectedCustomer['name'],
             mechanicName: selectedEmployee['name'],
             plateNo: selectedCustomer['plateNo'],
             type: "Job Order",
-            dateTime: dateTime,
+            dateTime: selectedDate.replace('T', ' '),
             amount: grandTotal
         };
     
@@ -692,6 +765,19 @@ const JobOrder = () => {
                 <button className="jo-clear-button" onClick={handleClear}>Clear</button>
             </div>
 
+            <div className="jo-date-input-wrapper">
+                <div className="jo-header-section">
+                    <h2>DATE & TIME ISSUED</h2>
+                </div>
+                <input
+                    className="jo-placeholder"
+                    type="datetime-local"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    required
+                />
+            </div>
+
             <div className="jo-user-info">
                 <form className="jo-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
                     <h2>CUSTOMER</h2>
@@ -725,8 +811,7 @@ const JobOrder = () => {
                             <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
                             <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
                             <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address || "N/A"}</p>
                         </div>
                     )}
                     <button 
@@ -782,17 +867,6 @@ const JobOrder = () => {
                                 placeholder="Enter contact number"
                                 value={newCustomer.contact}
                                 onChange={(e) => setNewCustomer({ ...newCustomer, contact: e.target.value })}
-                                required
-                                disabled={isSubmittingCustomer}
-                            />
-
-                            <p><strong>Email:</strong></p>
-                            <input
-                                className="jo-placeholder"
-                                type="email"
-                                placeholder="Enter email"
-                                value={newCustomer.email}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                                 required
                                 disabled={isSubmittingCustomer}
                             />
@@ -961,6 +1035,25 @@ const JobOrder = () => {
                     max="100"
                     placeholder="Enter discount percentage"
                 />
+            </div>
+
+            <div className="jo-payment-section">
+                <div className="jo-header-section">
+                    <h2>PREFERRED PAYMENT</h2>
+                </div>
+                <select
+                    className="jo-placeholder"
+                    value={selectedPaymentMethod}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                    required
+                >
+                    <option value="" disabled>Select payment method</option>
+                    <option value="cash">Cash</option>
+                    <option value="bpi-bank-transfer">BPI - Bank Transfer</option>
+                    <option value="metro-bank-transfer">Metrobank - Bank Transfer</option>
+                    <option value="security-bank-transfer">Security Bank - Bank Transfer</option>
+                    <option value="e-wallet">GCash / Paymaya</option>
+                </select>
             </div>
 
             <div className="jo-parts-section" ref={inventorySearchRef}>

@@ -20,7 +20,7 @@ function Customers() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editCustomerIndex, setEditCustomerIndex] = useState(null);
     const [customerDetails, setCustomerDetails] = useState({
-        id: '', name: '', contact: '', email: '', address: '', plateNo: '', carModel: ''
+        id: '', name: '', contact: '', address: '', plateNo: '', carModel: ''
     });
     const [searchQuery, setSearchQuery] = useState('');
     const [customers, setCustomers] = useState([]);
@@ -150,7 +150,7 @@ function Customers() {
         if (!isModalOpen) {
             setIsEditMode(false);
             setEditCustomerIndex(null);
-            setCustomerDetails({ id: '', name: '', contact: '', email: '', address: '', plateNo: '', carModel: '' });
+            setCustomerDetails({ id: '', name: '', contact: '', address: '', plateNo: '', carModel: '' });
         }
     };
 
@@ -160,7 +160,6 @@ function Customers() {
             id: customer.id,
             name: customer.name,
             contact: customer.contact,
-            email: customer.email,
             address: customer.address,
             plateNo: customer.plateNo,
             carModel: customer.carModel,
@@ -187,8 +186,7 @@ function Customers() {
             id: isEditMode ? customerDetails.id : generateCustomerId(),
             name: customerDetails.name,
             contact: customerDetails.contact,
-            email: customerDetails.email,
-            address: customerDetails.address,
+            address: customerDetails.address && customerDetails.address.trim() !== "" ? customerDetails.address : "N/A",
             plateNo: customerDetails.plateNo,
             carModel: customerDetails.carModel
         };
@@ -349,7 +347,6 @@ function Customers() {
                             <th>CAR MODEL</th>
                             <th>PLATE NO.</th>
                             <th>CONTACT NO.</th>
-                            <th>EMAIL</th>
                             <th>ADDRESS</th>
                             <th>ACTION</th>
                         </tr>
@@ -380,7 +377,6 @@ function Customers() {
                                         <td>{customer.carModel}</td>
                                         <td>{customer.plateNo}</td>
                                         <td>{customer.contact}</td>
-                                        <td>{customer.email}</td>
                                         <td>{customer.address}</td>
                                         <td>
                                             <span
@@ -471,17 +467,6 @@ function Customers() {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Email</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        placeholder="Enter customer's email address"
-                                        value={customerDetails.email}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
                                     <label>Address</label>
                                     <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                                         <input
@@ -490,7 +475,6 @@ function Customers() {
                                             placeholder="Enter customer's address"
                                             value={customerDetails.address}
                                             onChange={handleInputChange}
-                                            required
                                         />
                                     </Autocomplete>
                                 </div>

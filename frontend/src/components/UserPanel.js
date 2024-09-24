@@ -36,7 +36,7 @@ const UserPanel = ({ children, onCircleSelect }) => {
         case '/jobOrder':
             setSelectedCircle(3);
             break;
-        case '/invoice':
+        case '/salesOrder':
             setSelectedCircle(4);
             break;
         case '/partsQuotation':
@@ -68,7 +68,7 @@ const UserPanel = ({ children, onCircleSelect }) => {
             navigate('/jobOrder');
             break;
         case 4:
-            navigate('/invoice');
+            navigate('/salesOrder');
             break;
         case 5:
             navigate('/partsQuotation');
@@ -97,7 +97,7 @@ const UserPanel = ({ children, onCircleSelect }) => {
         "Inventory",
         "Scope of Work",
         "Job Order",
-        "Invoice",
+        "Sales Order",
         "Parts Quotation",
         "Transactions"
     ];

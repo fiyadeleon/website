@@ -1,11 +1,11 @@
-.inv-invoice {
+.so-sales-order {
   padding: 20px;
   font-family: 'Poppins', sans-serif;
   width: 100%; /* Full width */
   box-sizing: border-box;
 }
 
-.inv-header {
+.so-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -13,7 +13,7 @@
   gap: 10px;
 }
 
-.inv-header h1 {
+.so-header h1 {
   font-size: 35px;
   color: #333;
   font-weight: bold;
@@ -21,14 +21,14 @@
   margin: 0;
 }
 
-.inv-header-section {
+.so-header-section {
   color: #333;
   margin-top: -20px;
   display: flex;
   align-items: center;
 }
 
-.inv-clear-button {
+.so-clear-button {
   background-color: #F8CE00; /* Yellow */
   border: none;
   padding: 10px 20px;
@@ -42,18 +42,18 @@
   margin-top: 20px;
 }
 
-.inv-clear-button:hover {
+.so-clear-button:hover {
   background-color: #FFC107;
 }
 
-.inv-user-info {
+.so-user-info {
   display: flex;
   justify-content: space-between;
   align-items: flex-start; 
   gap: 20px; 
 }
 
-.inv-customer-section, .inv-employee-section {
+.so-customer-section, .so-employee-section {
   width: 48%;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -63,14 +63,14 @@
   transition: all 0.3s ease-in-out;
 }
 
-.inv-search-bar {
+.so-search-bar {
   position: relative;
   display: flex;
   align-items: center;
   margin-left: 5px; 
 }
 
-.inv-search-icon {
+.so-search-icon {
   position: absolute;
   left: 12px; /* Adjusted for better alignment */
   top: 50%; /* Vertically center the icon */
@@ -80,7 +80,7 @@
   pointer-events: none; /* Make sure the icon doesn't block input interaction */
 }
 
-.inv-search-input {
+.so-search-input {
   border: 1px solid #dddddd;
   border-radius: 4px;
   padding: 8px 12px 8px 36px; /* Adjust padding to leave space for the icon */
@@ -90,33 +90,33 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-search-input::placeholder {
+.so-search-input::placeholder {
   color: gray;
   font-size: 14px;
 }
 
-.inv-placeholder {
+.so-placeholder {
   width: 100%;
   padding: 10px;
   margin-top: -35px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 14px;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-placeholder:focus {
+.so-placeholder:focus {
   outline: none;
   border-color: #888;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
-.inv-placeholder::placeholder {
+.so-placeholder::placeholder {
   color: #aaa;
 }
 
-.inv-parts-section, .inv-services-section, .inv-remarks-section {
+.so-parts-section, .so-services-section, .so-remarks-section, .so-payment-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -124,13 +124,13 @@
   margin-top: 20px;
 }
 
-.inv-parts-search-bar {
+.so-parts-search-bar {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.inv-parts-search-bar input {
+.so-parts-search-bar input {
   width: 100%;
   padding: 10px;
   border: 1px solid #dddddd;
@@ -138,7 +138,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-add-customer-btn {
+.so-add-customer-btn {
   background-color: #F8CE00; 
   color: #333;
   border: none;
@@ -153,7 +153,7 @@
   right: 20px;  
 }
 
-.inv-add-customer-btn, .inv-add-employee-btn {
+.so-add-customer-btn, .so-add-employee-btn {
   background-color: #F8CE00;
   color: #333;
   border: none;
@@ -169,22 +169,22 @@
   transition: background-color 0.3s ease-in-out;
 }
 
-.inv-add-customer-btn.cancel, .inv-add-employee-btn.cancel {
+.so-add-customer-btn.cancel, .so-add-employee-btn.cancel {
   background-color: #cccccc; 
   color: #333; 
 }
 
-.inv-add-customer-btn.cancel:hover,
-.inv-add-employee-btn.cancel:hover {
+.so-add-customer-btn.cancel:hover,
+.so-add-employee-btn.cancel:hover {
   background-color: #b3b3b3;
 }
 
-.inv-add-employee-btn:hover,
-.inv-add-customer-btn:hover {
+.so-add-employee-btn:hover,
+.so-add-customer-btn:hover {
   background-color: #FFC107;
 }
 
-.inv-save-button {
+.so-save-button {
   background-color: #F8CE00;
   border: none;
   padding: 12px 20px;
@@ -200,11 +200,11 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-save-button:hover {
+.so-save-button:hover {
   background-color: #FFC107;
 }
 
-.inv-info-icon {
+.so-info-icon {
   margin-left: 12px; 
   font-size: 20px;
   color: #666;
@@ -212,7 +212,7 @@
   cursor: pointer;
 }
 
-.inv-info-icon::after {
+.so-info-icon::after {
   content: attr(data-tooltip);
   position: absolute;
   background-color: #333;
@@ -231,12 +231,12 @@
   transition: opacity 0.3s ease;
 }
 
-.inv-info-icon:hover::after {
+.so-info-icon:hover::after {
   display: block;
   opacity: 1;
 }
 
-.inv-parts-section {
+.so-parts-section {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
@@ -244,7 +244,7 @@
   margin-top: 20px;
 }
 
-.inv-dropdown {
+.so-dropdown {
   position: relative;
   background-color: #fff;
   border: 1px solid #ddd;
@@ -257,7 +257,7 @@
   max-height: 200px;
 }
 
-.inv-dropdown-option {
+.so-dropdown-option {
   display: flex;
   justify-content: space-between;
   padding: 10px;
@@ -266,30 +266,30 @@
   align-items: center; /* Ensure vertical alignment */
 }
 
-.inv-dropdown-option:hover {
+.so-dropdown-option:hover {
   background-color: #f0f0f0;
 }
 
-.inv-dropdown-text {
+.so-dropdown-text {
   font-size: 14px;
   color: #333;
 }
 
-.inv-dropdown-actions {
+.so-dropdown-actions {
   font-size: 14px;
   color: #999;
   text-align: right;
 }
 
-.inv-customer-details,
-.inv-employee-details,
-.inv-inventory-details {
+.so-customer-details,
+.so-employee-details,
+.so-inventory-details {
   margin-left: 20px;
   color: #666;
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-selected-items {
+.so-selected-items {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -297,7 +297,7 @@
   margin-left: 10px;
 }
 
-.inv-selected-item {
+.so-selected-item {
   border: 1px solid #dddddd;
   border-radius: 10px;
   padding: 8px 10px;
@@ -321,7 +321,7 @@
   color: darkred;
 }
 
-.inv-submit-btn {
+.so-submit-btn {
   background-color: #F8CE00;
   color: #333;
   border: none;
@@ -335,17 +335,17 @@
   float: right;
 }
 
-.inv-submit-btn:hover {
+.so-submit-btn:hover {
   background-color: #FFC107;
 }
 
-.inv-submit-btn:disabled {
+.so-submit-btn:disabled {
   background-color: #888; 
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.inv-submit-btn:disabled:hover {
+.so-submit-btn:disabled:hover {
   background-color: #888; 
   cursor: not-allowed;
   opacity: 0.6; 
@@ -374,7 +374,7 @@ input[type="number"] {
   font-size: 14px;
 }
 
-.inv-inventory-table table {
+.so-inventory-table table {
   width: 100%;
   border-collapse: collapse;
   padding: 10px;
@@ -383,15 +383,15 @@ input[type="number"] {
   color: #666666;
 }
 
-.inv-inventory-table th, .inv-inventory-table td {
+.so-inventory-table th, .so-inventory-table td {
   text-align: left;
 }
 
-.inv-inventory-table th {
+.so-inventory-table th {
   font-weight: bold;
 }
 
-.inv-inventory-table td input.purchase-quantity-input {
+.so-inventory-table td input.purchase-quantity-input {
   width: 50px;
   padding: 5px;
   text-align: center;
@@ -405,7 +405,7 @@ input[type="number"] {
   cursor: pointer;
 }
 
-.inv-modal {
+.so-modal {
   position: fixed;
   top: 60px; 
   left: 50%;
@@ -439,7 +439,7 @@ iframe {
   height: 94%;
 }
 
-.inv-download-button {
+.so-download-button {
   background-color: #F8CE00;
   border: none;
   padding: 12px 20px;
@@ -455,33 +455,33 @@ iframe {
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-download-button:hover {
+.so-download-button:hover {
   background-color: #FFC107;
 }
 
-.inv-services-section {
+.so-services-section {
   margin-bottom: 60px;
 }
 
-.inv-header-section {
+.so-header-section {
   display: flex;
   justify-content: flex-start;
   align-items: center;
 }
 
-.inv-service-inputs-container {
+.so-service-inputs-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.inv-service-inputs {
+.so-service-inputs {
   display: flex;
   gap: 10px;
   flex-grow: 1;
 }
 
-.inv-service-name-input {
+.so-service-name-input {
   flex: 5;
   padding: 10px;
   border: 1px solid #ccc;
@@ -493,7 +493,7 @@ iframe {
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-service-price-input {
+.so-service-price-input {
   flex: 1;
   padding: 10px;
   border: 1px solid #ccc;
@@ -504,7 +504,7 @@ iframe {
   font-family: 'Poppins', sans-serif;
 }
 
-.inv-add-service-btn {
+.so-add-service-btn {
   padding: 10px 20px;
   background-color: #F8CE00; 
   color: #333;
@@ -518,11 +518,11 @@ iframe {
   align-self: first baseline;
 }
 
-.inv-add-service-btn:hover {
+.so-add-service-btn:hover {
   background-color: #FFC107;
 }
 
-.inv-service-list {
+.so-service-list {
   list-style: none;
   padding-left: 0;
   margin-top: 20px;
@@ -530,7 +530,7 @@ iframe {
   margin-right: 25px;
 }
 
-.inv-service-list li {
+.so-service-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -541,16 +541,16 @@ iframe {
   color: #666666;
 }
 
-.inv-service-list .service-name {
+.so-service-list .service-name {
   flex-grow: 1;
 }
 
-.inv-service-list .service-price {
+.so-service-list .service-price {
   white-space: nowrap;
   margin-left: 20px;
 }
 
-.inv-remove-service-btn {
+.so-remove-service-btn {
   background: none;
   border: none;
   color: red;
@@ -560,11 +560,11 @@ iframe {
   align-items: center;
 }
 
-.inv-remove-service-btn:hover {
+.so-remove-service-btn:hover {
   color: darkred;
 }
 
-.inv-discount-section {
+.so-discount-section {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -576,14 +576,14 @@ iframe {
   margin-top: 20px;
 }
 
-.inv-discount-section h2 {
+.so-discount-section h2 {
   color: #333;
   margin-top: -10px;
   display: flex;
   align-items: center;
 }
 
-.inv-discount-input {
+.so-discount-input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -591,4 +591,33 @@ iframe {
   font-size: 16px;
   font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
+}
+
+.so-date-input-wrapper {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.so-date-input-wrapper h2 {
+  font-size: 24px;
+  color: #333;
+}
+
+.so-date-input-wrapper input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-top: 5px;
+  box-sizing: border-box;
+  height: 45px; 
+  border: 1px solid #dddddd;
+  color: #666666;
+  font-family: 'Poppins', sans-serif;
 }

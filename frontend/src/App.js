@@ -6,7 +6,7 @@ import UserHomepage from './components/UserHomepage';
 import Inventory from './components/Inventory';
 import ScopeOfWork from './components/ScopeOfWork';
 import JobOrder from './components/JobOrder';
-import Invoice from './components/Invoice';
+import SalesOrder from './components/SalesOrder';
 import PartsQuotation from './components/PartsQuotation';
 import Transactions from './components/Transactions'; 
 import Customers from './components/Customers'; 
@@ -40,8 +40,8 @@ function App() {
             element={<ProtectedRoute element={<UserPanel><JobOrder /></UserPanel>} allowedRoles={['user']} />} 
           />
           <Route 
-            path="/invoice" 
-            element={<ProtectedRoute element={<UserPanel><Invoice /></UserPanel>} allowedRoles={['user']} />} 
+            path="/salesOrder" 
+            element={<ProtectedRoute element={<UserPanel><SalesOrder /></UserPanel>} allowedRoles={['user']} />} 
           />
           <Route 
             path="/partsQuotation" 

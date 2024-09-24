@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../styles/PartsQuotation.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import logo from '../images/pdf-logo.png';
-import { createUserInCognito, addEmployeeToAPI } from './employeeService';
+import logo from '../images/logo6-cropped.jpg';
 import { addCustomerToAPI } from './customerService';
 import { Autocomplete } from '@react-google-maps/api';
 import { loadGoogleMapsAPI } from './loadGoogleMapsAPI';
@@ -17,15 +16,8 @@ function generateCustomerId() {
     return `CUST-${randomString}-${dateString}`;
 }
 
-function generateEmployeeId() {
-    const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
-    const dateString = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    return `EMP-${randomString}-${dateString}`;
-}
-
 const PartsQuotation = () => {
     const [customerQuery, setCustomerQuery] = useState('');
-    const [employeeQuery, setEmployeeQuery] = useState('');
     const [inventoryQuery, setInventoryQuery] = useState('');
     const [pdfUrl, setPdfUrl] = useState(null); 
     const [showModal, setShowModal] = useState(false);
@@ -40,45 +32,27 @@ const PartsQuotation = () => {
         carModel: '',
         plateNo: '',
         contact: '',
-        email: '',
         address: ''
     };
 
-    const initialEmployeeState = {
-        name: '',
-        jobTitle: '',
-        contact: '',
-        email: '',
-        address: '',
-        role: '',
-        salary: 0
-    };
-
     const [newCustomer, setNewCustomer] = useState(initialCustomerState);
-    const [newEmployee, setNewEmployee] = useState(initialEmployeeState);
     const [isSubmittingCustomer, setIsSubmittingCustomer] = useState(false);
-    const [isSubmittingEmployee, setIsSubmittingEmployee] = useState(false);
 
     const [filteredCustomers, setFilteredCustomers] = useState([]);
-    const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [filteredInventory, setFilteredInventory] = useState([]);
 
     const [selectedCustomer, setSelectedCustomer] = useState(null);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [selectedInventoryItems, setSelectedInventoryItems] = useState([]);
 
     const [showCustomerDetails, setShowCustomerDetails] = useState(false);
-    const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
 
     const [isInventoryInputFocused, setIsInventoryInputFocused] = useState(false);
     const [errors, setErrors] = useState({});
 
     const customerSearchRef = useRef();
-    const employeeSearchRef = useRef();
     const inventorySearchRef = useRef();
     
     const [customers, setCustomers] = useState([]);
-    const [employees, setEmployees] = useState([]);
     const [inventoryItems, setInventoryItems] = useState([]);
 
     const [inventoryName, setInventoryName] = useState('');
@@ -87,6 +61,8 @@ const PartsQuotation = () => {
 
     const [isAddProductVisible, setIsAddProductVisible] = useState(false);
     const [autocompleteInstance, setAutocompleteInstance] = useState(null);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
     const fetchCustomers = async () => {
         try {
@@ -100,21 +76,6 @@ const PartsQuotation = () => {
         } catch (error) {
             console.error('Error fetching customers:', error);
             alert('Error fetching customers!');
-        }
-    };
-
-    const fetchEmployees = async () => {
-        try {
-            const response = await fetch(`${API_ENDPOINT}/item?resource=employee`, {
-                method: 'GET',
-                headers: { 'x-api-key': API_KEY },
-            });
-            if (!response.ok) throw new Error('Failed to fetch employees');
-            const data = await response.json();
-            setEmployees(data);
-        } catch (error) {
-            console.error('Error fetching employees:', error);
-            alert('Error fetching employees!');
         }
     };
 
@@ -135,7 +96,6 @@ const PartsQuotation = () => {
 
     useEffect(() => {
         fetchCustomers();
-        fetchEmployees();
         fetchInventoryItems();
 
         loadGoogleMapsAPI()
@@ -147,11 +107,9 @@ const PartsQuotation = () => {
         const handleClickOutside = (event) => {
             if (
                 customerSearchRef.current && !customerSearchRef.current.contains(event.target) &&
-                employeeSearchRef.current && !employeeSearchRef.current.contains(event.target) &&
                 inventorySearchRef.current && !inventorySearchRef.current.contains(event.target)
             ) {
                 setFilteredCustomers([]);
-                setFilteredEmployees([]);
                 setFilteredInventory([]);
                 setIsInventoryInputFocused(false);
             }
@@ -172,16 +130,6 @@ const PartsQuotation = () => {
         setFilteredCustomers(customerResults.slice(0, 5));
     };
 
-    const handleEmployeeSearch = (event) => {
-        const query = event.target.value.toLowerCase();
-        setEmployeeQuery(query);
-        const employeeResults = employees.filter(employee =>
-            employee.name.toLowerCase().includes(query) ||
-            employee.jobTitle.toLowerCase().includes(query)
-        );
-        setFilteredEmployees(employeeResults.slice(0, 5));
-    };
-
     const handleInventorySearch = (event) => {
         const query = event.target.value.toLowerCase();
         setInventoryQuery(query);
@@ -196,12 +144,6 @@ const PartsQuotation = () => {
         setSelectedCustomer(customer);
         setFilteredCustomers([]);
         setShowCustomerDetails(false);
-    };
-
-    const handleEmployeeSelect = (employee) => {
-        setSelectedEmployee(employee);
-        setFilteredEmployees([]);
-        setShowEmployeeDetails(false);
     };
 
     const handleInventorySelect = (item) => {
@@ -235,16 +177,6 @@ const PartsQuotation = () => {
         setFilteredCustomers([]);
     };
 
-    const handleToggleEmployee = () => {
-        setShowEmployeeDetails(!showEmployeeDetails);
-        if (showEmployeeDetails) {
-            setSelectedEmployee(null);
-            setEmployeeQuery('');
-        }
-
-        setFilteredEmployees([]);
-    };
-
     const handleSaveNewCustomer = async (e) => {
         e.preventDefault();
         try {
@@ -274,90 +206,63 @@ const PartsQuotation = () => {
         }
     };
 
-    const handleSaveNewEmployee = async (e) => {
-        e.preventDefault();
-        try {
-            setIsSubmittingEmployee(true);
-            setIsLoading(true);
-
-            const cognitoResponse = await createUserInCognito(newEmployee.email, newEmployee.role);
-            if (cognitoResponse && cognitoResponse.User.Enabled) {
-                const employeeToAdd = {
-                    id: generateEmployeeId(),
-                    ...newEmployee,
-                };
-
-                const response = await addEmployeeToAPI(employeeToAdd);
-                if (response && response.item && response.message === "Item added successfully!") {
-                    alert('Employee created successfully!');
-                    handleToggleEmployee();
-                }
-            } else {
-                alert('Error adding employee!');
-            }
-        } catch (error) {
-            console.error("Error adding employee:", error);
-            alert('Error adding employee!');
-        } finally {
-            setNewEmployee(initialEmployeeState);
-            setIsLoading(false);
-            setIsSubmittingEmployee(false);
-            fetchEmployees();
-        }
-    };
 
     const handleClear = () => {
         setCustomerQuery('');
-        setEmployeeQuery('');
         setInventoryQuery('');
         setFilteredCustomers([]);
-        setFilteredEmployees([]);
         setFilteredInventory([]);
         setSelectedCustomer(null);
-        setSelectedEmployee(null);
         setSelectedInventoryItems([]);
         setShowCustomerDetails(false);
-        setShowEmployeeDetails(false);
         setDiscount(0);
         setProducts([]);
+        setSelectedDate('');
     };
 
-    const handlePurchaseQuantityChange = (itemId, newQuantity) => {
+    const handlePurchaseQuantityChange = (itemId, newQuantity, isProduct = false) => {
         const quantity = parseInt(newQuantity, 10) || 0;
 
-        setSelectedInventoryItems(prevItems =>
-            prevItems.map(item => {
-                if (item.id === itemId) {
-                    const updatedQuantity = quantity > item.stock ? item.stock : quantity;
-                    return {
-                        ...item,
-                        purchaseQuantity: updatedQuantity
-                    };
-                }
-                return item;
-            })
-        );
-
-        setProducts((prevProducts) =>
-            prevProducts.map(service => {
-                if (service.id === itemId) {
-                    return {
-                        ...service,
-                        purchaseQuantity: quantity
-                    };
-                }
-                return service;
-            })
-        );
+        if (isProduct) {
+            setProducts(prevProducts =>
+                prevProducts.map(product => {
+                    if (product.id === itemId) {
+                        return {
+                            ...product,
+                            purchaseQuantity: quantity
+                        };
+                    }
+                    return product;
+                })
+            );
+        } else {
+            setSelectedInventoryItems(prevItems =>
+                prevItems.map(item => {
+                    if (item.id === itemId) {
+                        return {
+                            ...item,
+                            purchaseQuantity: quantity > item.stock ? item.stock : quantity
+                        };
+                    }
+                    return item;
+                })
+            );
+        }
     };
 
     const handleAddService = () => {
         if (inventoryName && inventoryPrice) {
-            setProducts([...products, { name: inventoryName, price: parseFloat(inventoryPrice) }]);
+            const newProduct = {
+                id: Date.now(),
+                name: inventoryName,
+                price: parseFloat(inventoryPrice),
+                purchaseQuantity: 1 
+            };
+            setProducts([...products, newProduct]);
             setInventoryName('');
             setInventoryPrice('');
         } else {
-            alert('Please enter both service name and price.');
+            alert('Please enter both product name and price.');
         }
     };
 
@@ -368,6 +273,14 @@ const PartsQuotation = () => {
 
     const generatePDF = async () => {
         let errors = [];
+
+        if (!selectedDate) {
+            errors.push('Date & time is required.');
+        }
+
+        if (!selectedPaymentMethod) {
+            errors.push('Payment method is required.');
+        }
     
         if (!selectedCustomer) {
             errors.push('Please select or add a customer.');
@@ -376,24 +289,12 @@ const PartsQuotation = () => {
             if (!selectedCustomer.carModel) errors.push('Customer car model is required.');
             if (!selectedCustomer.plateNo) errors.push('Customer plate number is required.');
             if (!selectedCustomer.contact) errors.push('Customer contact is required.');
-            if (!selectedCustomer.email) errors.push('Customer email is required.');
-            if (!selectedCustomer.address) errors.push('Customer address is required.');
         }
 
         setFileName(generateFileName());
         if (!fileName) {
             errors.push('Please retry to preview the PDF.');
             console.log("Error added:", errors);
-        }
-    
-        if (!selectedEmployee) {
-            errors.push('Please select or add an employee.');
-        } else {
-            if (!selectedEmployee.name) errors.push('Employee name is required.');
-            if (!selectedEmployee.jobTitle) errors.push('Employee job title is required.');
-            if (!selectedEmployee.contact) errors.push('Employee contact is required.');
-            if (!selectedEmployee.email) errors.push('Employee email is required.');
-            if (!selectedEmployee.role) errors.push('Employee role is required.');
         }
     
         if (selectedInventoryItems.length === 0 && products.length === 0) {
@@ -405,6 +306,12 @@ const PartsQuotation = () => {
                 errors.push(`Purchase quantity for item "${item.product_name}" must be greater than 0.`);
             } else if (item.purchaseQuantity > item.stock) {
                 errors.push(`Purchase quantity for item "${item.product_name}" exceeds available stock (${item.stock}).`);
+            }
+        });
+
+        products.forEach(product => {
+            if (!product.purchaseQuantity || product.purchaseQuantity <= 0) {
+                errors.push(`Purchase quantity for new product "${product.name}" must be greater than 0.`);
             }
         });
     
@@ -426,8 +333,8 @@ const PartsQuotation = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
 
-        doc.text("Compound, 1 Pascual, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
-        doc.text("Contact no. 09978900746 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
+        doc.text("Pascual 1 Compound Brgy. San Antonio, Parañaque, 1700 Metro Manila", pageWidth / 2, imgHeight + 12, { align: 'center' });
+        doc.text("Contact no. 09088200922 | Email address: stanghero21@gmail.com", pageWidth / 2, imgHeight + 16, { align: 'center' });
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
@@ -450,7 +357,7 @@ const PartsQuotation = () => {
             selectedCustomer?.carModel || "",
             selectedCustomer?.plateNo || "",
             selectedCustomer?.contact || "",
-            selectedCustomer?.email || ""
+            selectedCustomer?.address?.trim() && selectedCustomer.address !== "N/A" ? selectedCustomer.address : ""
         ];
 
         doc.setFont('helvetica', 'normal');
@@ -464,23 +371,7 @@ const PartsQuotation = () => {
         doc.setFontSize(10);
         doc.text("DATE ISSUED:", columnWidth + 25, startY);
         doc.setFont('helvetica', 'normal');
-        doc.text(date, columnWidth + 51, startY);
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
-        doc.text("EMPLOYEE DETAILS", columnWidth + 25, startY + 10);
-        const employeeDetails = [
-            selectedEmployee?.name || "",
-            selectedEmployee?.jobTitle || "",
-            selectedEmployee?.contact || "",
-            selectedEmployee?.email || ""
-        ];
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(11);
-        employeeDetails.forEach((detail, index) => {
-            doc.text(detail, columnWidth + 25, startY + 18 + (index * 5));
-        });
+        doc.text(new Date(selectedDate).toLocaleDateString(), columnWidth + 51, startY);
 
         let currentY = startY + 50;
         const checkPageOverflow = (heightToAdd) => {
@@ -575,19 +466,89 @@ const PartsQuotation = () => {
         doc.setFont('helvetica', 'normal');
         doc.text(`${grandTotal.toFixed(2)}`, valueX, currentY);
 
-        const marginX = 25;
+        if (selectedPaymentMethod !== "cash"){
+            currentY += 10;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text("PAYMENT METHOD", finalX, currentY);
+            currentY += 5;
+        }
 
-        const termsText = `
-        Terms and Condition:
-        - Customer will be billed after indicating Acceptance of this quote
-        - Payments will be due prior to delivery of service and goods
-        - 50% Down payment required
-        - Lead Time - 3 to 4 weeks
+        if (selectedPaymentMethod === 'bpi-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("BPI", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("316-959-4626", finalX, currentY);
+        } else if (selectedPaymentMethod === 'e-wallet') {
+            doc.setFontSize(10);
+            doc.text("GCash / Paymaya", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("0997-890-0746", finalX, currentY);
+        } else if (selectedPaymentMethod === 'metro-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("Metrobank", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Maria Jesusa Anne Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("0513-0517-82560", finalX, currentY);
+        } else if (selectedPaymentMethod === 'security-bank-transfer') {
+            doc.setFontSize(10);
+            doc.text("Security Bank", finalX, currentY);
+            currentY += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.text("Maria Jesusa Anne Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("00000-5428-5873", finalX, currentY);
+            currentY += 7;
+            doc.text("Jerish Balandra", finalX, currentY);
+            currentY += 5;
+            doc.text("00000-5685-4883", finalX, currentY);
+        }
+
+        const footerMarginX = 25;
+        const footerTextWidth = pageWidth - 2 * footerMarginX;
+        
+        const footerText = `
+        TERMS & CONDITIONS:
+
+        Customer will be billed after indicating acceptance of this quote
+        Payments will be due prior to delivery of service and goods
+        Minimum of 70% Downpayment is required
+        Ordered parts will take 5-7 business days after downpayment, provided there are no delays from the courier or customs clearance
+        
+        Hereby authorizes STANGHERO AUTOMOTIVE CARE SERVICES to carry out the above repair and grant its employees permission to operate the vehicle herein described on streets, highways, or elsewhere for the purpose of testing and/or inspection.
+        
+        PARTS NOT CLAIMED WITHIN TWO WEEKS AFTER THE RELEASE OF THE VEHICLE ARE SUBJECTED TO COMPANY DISPOSAL.
         `;
-        const wrappedTermsText = doc.splitTextToSize(termsText, doc.internal.pageSize.width - marginX * 2);
-
-        checkPageOverflow(wrappedTermsText.length * 5);
-        doc.text(wrappedTermsText, 25, currentY + 10);
+        
+        const footerSentences = footerText.split(/[.!?]\s+/).filter(Boolean);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        
+        footerSentences.forEach(function (sentence, index) {
+            if (index < footerSentences.length - 1) {
+                sentence += '.';
+            }
+        
+            const wrappedSentence = doc.splitTextToSize(sentence, footerTextWidth);
+        
+            checkPageOverflow(wrappedSentence.length * 5);
+        
+            wrappedSentence.forEach(function (line) {
+                doc.text(line, footerMarginX, currentY + 5);
+                currentY += 3; 
+            });
+        
+            currentY += 5;
+        });
 
         const pdfBlob = doc.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -611,21 +572,13 @@ const PartsQuotation = () => {
     };
 
     const saveTransactionDetails = async () => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const dateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
-
         const transactionData = {
             id: fileName,
             customerName: selectedCustomer['name'],
-            mechanicName: selectedEmployee['name'],
+            mechanicName: "N/A",
             plateNo: selectedCustomer['plateNo'],
             type: "Parts Quotation",
-            dateTime: dateTime,
+            dateTime: selectedDate.replace('T', ' '),
             amount: grandTotal
         };
     
@@ -673,6 +626,7 @@ const PartsQuotation = () => {
 
     const toggleAddProduct = () => {
         setIsAddProductVisible(!isAddProductVisible);
+        setFilteredInventory([]);
     };
 
     const onLoad = (autocomplete) => {
@@ -701,6 +655,18 @@ const PartsQuotation = () => {
             </div>
 
             <div className="pq-user-info">
+                <div className="pq-date-input-wrapper">
+                    <div className="pq-date-header-section">
+                    <h2>DATE & TIME ISSUED</h2>
+                    </div>
+                    <input
+                    className="pq-placeholder"
+                    type="datetime-local"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    required
+                    />
+                </div>
                 <form className="pq-customer-section" ref={customerSearchRef} onSubmit={handleSaveNewCustomer}>
                     <h2>CUSTOMER</h2>
                     {!showCustomerDetails && (
@@ -733,8 +699,7 @@ const PartsQuotation = () => {
                             <p><strong>Car Model:</strong> {selectedCustomer.carModel}</p>
                             <p><strong>Plate No:</strong> {selectedCustomer.plateNo}</p>
                             <p><strong>Contact:</strong> {selectedCustomer.contact}</p>
-                            <p><strong>Email:</strong> {selectedCustomer.email}</p>
-                            <p><strong>Address:</strong> {selectedCustomer.address}</p>
+                            <p><strong>Address:</strong> {selectedCustomer.address || "N/A"}</p>
                         </div>
                     )}
                     <button 
@@ -794,17 +759,6 @@ const PartsQuotation = () => {
                                 disabled={isSubmittingCustomer}
                             />
 
-                            <p><strong>Email:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="email"
-                                placeholder="Enter email"
-                                value={newCustomer.email}
-                                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                                required
-                                disabled={isSubmittingCustomer}
-                            />
-
                             <p><strong>Address:</strong></p>
                             <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
                                 <input
@@ -824,123 +778,6 @@ const PartsQuotation = () => {
                                 disabled={isSubmittingCustomer}
                             >
                                 {isSubmittingCustomer ? 'Submitting...' : 'Submit'}
-                            </button>
-                        </div>
-                    )}
-                </form>
-
-                <form className="pq-employee-section" ref={employeeSearchRef} onSubmit={handleSaveNewEmployee}>
-                    <h2>EMPLOYEE</h2>
-                    {!showEmployeeDetails && (
-                        <div className="pq-search-bar">
-                            <span className="material-symbols-outlined pq-search-icon">search</span>
-                            <input
-                                type="text"
-                                placeholder="Search Employee"
-                                className="pq-search-input"
-                                value={employeeQuery}
-                                onChange={handleEmployeeSearch}
-                                onFocus={() => setFilteredEmployees(employees.slice(0, 5))}
-                                disabled={isSubmittingEmployee}
-                            />
-                        </div>
-                    )}
-                    {filteredEmployees.length > 0 && (
-                        <div className="pq-dropdown">
-                            {filteredEmployees.map((employee, index) => (
-                                <div className="pq-dropdown-option" key={index} onClick={() => handleEmployeeSelect(employee)}>
-                                    <span className="pq-dropdown-text">{employee.name}</span>
-                                    <span className="pq-dropdown-actions">{employee.jobTitle}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {selectedEmployee && !showEmployeeDetails && (
-                        <div className="pq-employee-details">
-                            <p><strong>Name:</strong> {selectedEmployee.name}</p>
-                            <p><strong>Job Title:</strong> {selectedEmployee.jobTitle}</p>
-                            <p><strong>Contact:</strong> {selectedEmployee.contact}</p>
-                            <p><strong>Email:</strong> {selectedEmployee.email}</p>
-                        </div>
-                    )}
-                    <button 
-                        type="button"
-                        className={`pq-add-employee-btn ${showEmployeeDetails ? 'cancel' : ''}`} 
-                        onClick={handleToggleEmployee}
-                        disabled={isSubmittingEmployee}
-                    >
-                        {showEmployeeDetails ? 'Cancel' : '+ Add New Employee'}
-                    </button>
-
-                    {showEmployeeDetails && (
-                        <div className="pq-employee-details">
-                            <p><strong>Name:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="text"
-                                placeholder="Enter name"
-                                value={newEmployee.name}
-                                onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-                                required
-                                disabled={isSubmittingEmployee}
-                            />
-
-                            <p><strong>Job Title:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="text"
-                                placeholder="Enter Job title"
-                                value={newEmployee.jobTitle}
-                                onChange={(e) => setNewEmployee({ ...newEmployee, jobTitle: e.target.value })}
-                                required
-                                disabled={isSubmittingEmployee}
-                            />
-
-                            <p><strong>Contact No:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="tel" 
-                                pattern="[0-9]{11}" 
-                                maxLength="11"
-                                placeholder="Enter contact number"
-                                value={newEmployee.contact}
-                                onChange={(e) => setNewEmployee({ ...newEmployee, contact: e.target.value })}
-                                required
-                                disabled={isSubmittingEmployee}
-                            />
-
-                            <p><strong>Email:</strong></p>
-                            <input
-                                className="pq-placeholder"
-                                type="email"
-                                placeholder="Enter email"
-                                value={newEmployee.email}
-                                onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
-                                required
-                                disabled={isSubmittingEmployee}
-                            />
-
-                            <p><strong>Role:</strong></p>
-                            <select
-                                className="employees-select"
-                                name="role"
-                                value={newEmployee.role}
-                                onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
-                                required
-                                disabled={isSubmittingEmployee}
-                            >
-                                <option value="" disabled>Select a user's role</option>
-                                <option value="none">Not Applicable</option>
-                                <option value="user">User</option>
-                                <option value="admin">Admin</option>
-                            </select>
-
-                            <button
-                                className="pq-submit-btn"
-                                type="submit"
-                                disabled={isSubmittingEmployee}
-                            >
-                                {isSubmittingEmployee ? 'Submitting...' : 'Submit'}
                             </button>
                         </div>
                     )}
@@ -969,6 +806,25 @@ const PartsQuotation = () => {
                     max="100"
                     placeholder="Enter discount percentage"
                 />
+            </div>
+
+            <div className="pq-payment-section">
+                <div className="pq-header-section">
+                    <h2>PREFERRED PAYMENT</h2>
+                </div>
+                <select
+                    className="pq-placeholder"
+                    value={selectedPaymentMethod}
+                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                    required
+                >
+                    <option value="" disabled>Select payment method</option>
+                    <option value="cash">Cash</option>
+                    <option value="bpi-bank-transfer">BPI - Bank Transfer</option>
+                    <option value="metro-bank-transfer">Metrobank - Bank Transfer</option>
+                    <option value="security-bank-transfer">Security Bank - Bank Transfer</option>
+                    <option value="e-wallet">GCash / Paymaya</option>
+                </select>
             </div>
 
             <div className="pq-parts-section" ref={inventorySearchRef}>
@@ -1013,7 +869,7 @@ const PartsQuotation = () => {
                     <div className="pq-service-inputs-container">
                         <div className="pq-service-inputs">
                             <input
-                            placeholder="Enter service name"
+                            placeholder="Enter product name"
                             value={inventoryName}
                             onChange={(e) => setInventoryName(e.target.value)}
                             className="pq-service-name-input"
@@ -1103,7 +959,7 @@ const PartsQuotation = () => {
                                                 type="number"
                                                 value={service.purchaseQuantity || ''}
                                                 min="1"
-                                                onChange={(e) => handlePurchaseQuantityChange(service.id, e.target.value)}
+                                                onChange={(e) => handlePurchaseQuantityChange(service.id, e.target.value, true)}
                                                 className="purchase-quantity-input"
                                             />
                                         </td>
