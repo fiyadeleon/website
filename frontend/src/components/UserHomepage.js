@@ -45,10 +45,10 @@ const UserHomepage = () => {
             </div>
             <div
                 className="menu-item"
-                onClick={() => handleNavigation('/invoice')}
+                onClick={() => handleNavigation('/salesOrder')}
             >
-                <img src={invoiceImage} alt="Invoice" />
-                <p>Invoice</p>
+                <img src={invoiceImage} alt="Sales Order" />
+                <p>Sales Order</p>
             </div>
             <div
                 className="menu-item"
