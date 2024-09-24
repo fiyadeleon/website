@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Transactions.css';
 
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+const API_KEY = process.env.REACT_APP_API_KEY || "XZSNV5hFIaaCJRBznp9mW2VPndBpD97V98E1irxs";
+
+let userRole = localStorage.getItem('role') || 'user';
 
 function generateTransactionId() {
     const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -329,7 +331,7 @@ function Transactions() {
                             <th>TYPE</th>
                             <th>CUSTOMER NAME</th>
                             <th>PLATE NO.</th>
-                            <th>AMOUNT</th>
+                            {userRole !== 'user' && <th>AMOUNT</th>}
                             <th>DATE & TIME</th>
                             <th>ACTION</th>
                         </tr>
@@ -360,7 +362,7 @@ function Transactions() {
                                         <td>{transaction.type}</td>
                                         <td>{transaction.customerName}</td>
                                         <td>{transaction.plateNo}</td>
-                                        <td>₱{transaction.amount.toFixed(2)}</td>
+                                        {userRole !== 'user' && <td>₱{transaction.amount.toFixed(2)}</td>}
                                         <td>{transaction.dateTime}</td>
                                         <td>
                                             <span
@@ -442,17 +444,19 @@ function Transactions() {
                                         required
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label>Amount</label>
-                                    <input
-                                        type="number"
-                                        name="amount"
-                                        value={transactionDetails.amount}
-                                        onChange={handleInputChange}
-                                        required
-                                        step="0.01"
-                                    />
-                                </div>
+                                {userRole !== 'user' && (
+                                    <div className="form-group">
+                                        <label>Amount</label>
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            value={transactionDetails.amount}
+                                            onChange={handleInputChange}
+                                            required
+                                            step="0.01"
+                                        />
+                                    </div>
+                                )}
                                 <div className="form-group">
                                     <label>Date & Time</label>
                                     <input
