@@ -72,7 +72,7 @@ const ForgotPassword = () => {
                             <input
                                 className="input-field" 
                                 type="username"
-                                placeholder="Username"
+                                placeholder="Email address"
                                 required
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}

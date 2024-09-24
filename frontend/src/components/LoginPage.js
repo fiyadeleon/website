@@ -153,7 +153,7 @@ const LoginPage = () => {
                                 type="text"
                                 id="username"
                                 className="input-field"
-                                placeholder="Username"
+                                placeholder="Email address"
                                 required
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
