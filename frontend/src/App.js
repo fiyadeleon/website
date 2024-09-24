@@ -17,36 +17,14 @@ import AdminPanel from './components/AdminPanel';
 import UserPanel from './components/UserPanel';
 import ForgotPassword from './components/ForgotPassword';
 
-const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
-};
-
-const getUserRole = () => {
-  return localStorage.getItem('role');
-};
-
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
           {/* Public Routes */}
-          <Route 
-            path="/login" 
-            element={isAuthenticated() ? (
-              getUserRole() === 'admin' ? <Navigate to="/reports" /> : <Navigate to="/userHomepage" />
-            ) : (
-              <LoginPage />
-            )}
-          />
-          <Route 
-            path="/forgot-password" 
-            element={isAuthenticated() ? (
-              getUserRole() === 'admin' ? <Navigate to="/reports" /> : <Navigate to="/userHomepage" />
-            ) : (
-              <ForgotPassword />
-            )}
-          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* User-only routes */}
           <Route 
