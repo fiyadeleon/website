@@ -734,7 +734,7 @@ const JobOrder = () => {
     const generateFileName = () => {
         const { formattedDate, date } = generateDate();
     
-        let fileName = `JO-${selectedCustomer?.plateNo}-${formattedDate}`;
+        let fileName = `JO-${selectedCustomer?.plateNo}-${selectedDate}`;
         fileName = fileName.replace(/\s+/g, '');
 
         return fileName;

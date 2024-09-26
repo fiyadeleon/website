@@ -618,7 +618,7 @@ const PartsQuotation = () => {
     const generateFileName = () => {
         const { formattedDate, date } = generateDate();
     
-        let fileName = `PQ-${selectedCustomer?.plateNo}-${formattedDate}`;
+        let fileName = `PQ-${selectedCustomer?.plateNo}-${selectedDate}`;
         fileName = fileName.replace(/\s+/g, '');
 
         return fileName;

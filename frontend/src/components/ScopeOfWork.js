@@ -563,7 +563,7 @@ const ScopeOfWork = () => {
     const generateFileName = () => {
         const { formattedDate, date } = generateDate();
     
-        let fileName = `SOW-${selectedCustomer?.plateNo}-${formattedDate}`;
+        let fileName = `SOW-${selectedCustomer?.plateNo}-${selectedDate}`;
         fileName = fileName.replace(/\s+/g, '');
 
         return fileName;

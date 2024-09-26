@@ -720,7 +720,7 @@ const SalesOrder = () => {
     const generateFileName = () => {
         const { formattedDate, date } = generateDate();
     
-        let fileName = `SO-${selectedCustomer?.plateNo}-${formattedDate}`;
+        let fileName = `SO-${selectedCustomer?.plateNo}-${selectedDate}`;
         fileName = fileName.replace(/\s+/g, '');
 
         return fileName;
