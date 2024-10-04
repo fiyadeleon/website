@@ -134,8 +134,8 @@ function Employees() {
         }
     };
 
-    const handleEdit = (index) => {
-        const employee = employees[index];
+    const handleEdit = (employeeId) => {
+        const employee = employees.find((emp) => emp.id === employeeId);
         setEmployeeDetails({
             id: employee.id,
             name: employee.name,
@@ -148,7 +148,7 @@ function Employees() {
         setOriginalRole(employee.role);
         console.log(`To update: ${employee.id}`)
         setIsEditMode(true);
-        setEditEmployeeIndex(index);
+        setEditEmployeeIndex(null);
         setIsModalOpen(true);
     };
 

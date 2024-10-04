@@ -148,8 +148,8 @@ function Customers() {
         }
     };
 
-    const handleEdit = (index) => {
-        const customer = customers[index];
+    const handleEdit = (customerId) => {
+        const customer = customers.find((cust) => cust.id === customerId);
         setCustomerDetails({
             id: customer.id,
             name: customer.name,
@@ -160,7 +160,7 @@ function Customers() {
         });
         console.log(`To update: ${customer.id}`)
         setIsEditMode(true);
-        setEditCustomerIndex(index);
+        setEditCustomerIndex(null);
         setIsModalOpen(true);
     };
 
