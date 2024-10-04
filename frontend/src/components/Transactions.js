@@ -162,8 +162,8 @@ function Transactions() {
         }
     };
 
-    const handleEdit = (index) => {
-        const transaction = transactions[index];
+    const handleEdit = (transactionId) => {
+        const transaction = transactions.find(trans => trans.id === transactionId);
         const formattedDateTime = transaction.dateTime.replace('T', ' ');
         setTransactionDetails({
             id: transaction.id,
@@ -175,7 +175,7 @@ function Transactions() {
         });
         console.log(`To update: ${transaction.id}`)
         setIsEditMode(true);
-        setEditTransactionIndex(index);
+        setEditTransactionIndex(null);
         setIsModalOpen(true);
     };
 
@@ -343,7 +343,7 @@ function Transactions() {
                                 </td>
                             </tr>
                         ) : (
-                            paginatedTransactions.map((transaction, index) => (
+                            paginatedTransactions.map((transaction) => (
                                 <tr key={transaction.id}>
                                     <td onClick={() => handleCheckboxChange(transaction.id)} style={{ cursor: 'pointer' }}>
                                         <input
@@ -362,7 +362,7 @@ function Transactions() {
                                     <td>
                                         <span
                                             className="material-symbols-outlined edit-icon"
-                                            onClick={() => handleEdit(index)}
+                                            onClick={() => handleEdit(transaction.id)}
                                             title="Edit Transaction"
                                         >
                                             edit_note
