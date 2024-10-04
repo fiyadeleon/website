@@ -175,7 +175,7 @@ function Transactions() {
         });
         console.log(`To update: ${transaction.id}`)
         setIsEditMode(true);
-        setEditTransactionIndex(null);
+        setEditTransactionIndex(transactionId);
         setIsModalOpen(true);
     };
 
@@ -206,6 +206,7 @@ function Transactions() {
             let response;
 
             if (isEditMode && editTransactionIndex !== null) {
+                console.log("test")
                 response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
                     method: 'PUT',
                     headers: {
@@ -214,6 +215,7 @@ function Transactions() {
                     body: JSON.stringify(newTransaction)
                 });
             } else {
+                console.log("test1")
                 response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
                     method: 'POST',
                     headers: {
