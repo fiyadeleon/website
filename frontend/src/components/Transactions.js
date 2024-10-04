@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Transactions.css';
 
-let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
-let API_KEY = process.env.REACT_APP_API_KEY || "KQRIkLTuHg6Rh9awpOOqi5kmHEEcM9CX8k8S3vMT";
+let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+let API_KEY = process.env.REACT_APP_API_KEY;
 
 let userRole = localStorage.getItem('role') || 'user';
 
