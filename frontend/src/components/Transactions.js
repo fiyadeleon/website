@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Transactions.css';
 
-let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
-let API_KEY = process.env.REACT_APP_API_KEY;
+let API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || "https://q2tf3g5e4l.execute-api.ap-southeast-1.amazonaws.com/v1";
+let API_KEY = process.env.REACT_APP_API_KEY || "KQRIkLTuHg6Rh9awpOOqi5kmHEEcM9CX8k8S3vMT";
 
 let userRole = localStorage.getItem('role') || 'user';
 
@@ -97,18 +97,18 @@ function Transactions() {
         setTransactions(sortedTransactions);
     };
 
-    const handleCheckboxChange = (index, id) => {
-        const isAlreadySelected = selectedCheckboxes.includes(index);
-
+    const handleCheckboxChange = (transactionId) => {
+        const isAlreadySelected = selectedCheckboxes.includes(transactionId);
+    
         if (!isAlreadySelected) {
-            console.log(`Selected transaction: ${id}`);
+            console.log(`Selected transaction: ${transactionId}`);
         }
-
+    
         setSelectedCheckboxes((prevSelected) => {
             if (isAlreadySelected) {
-                return prevSelected.filter((item) => item !== index);
+                return prevSelected.filter((id) => id !== transactionId);
             } else {
-                return [...prevSelected, index];
+                return [...prevSelected, transactionId];
             }
         });
     };
@@ -116,10 +116,7 @@ function Transactions() {
     const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
             try {
-                const selectedTransactions = selectedCheckboxes.map(index => {
-                    const transaction = transactions[index];
-                    return { id: transaction.id };
-                });
+                const selectedTransactions = selectedCheckboxes.map((id) => ({ id }));
 
                 const response = await fetch(`${API_ENDPOINT}/item?resource=transaction`, {
                     method: 'DELETE',
@@ -137,7 +134,7 @@ function Transactions() {
                 console.log('Deletion result:', result);
 
                 setTransactions((prevTransactions) =>
-                    prevTransactions.filter((_, index) => !selectedCheckboxes.includes(index))
+                    prevTransactions.filter((transaction) => !selectedCheckboxes.includes(transaction.id))
                 );
                 setSelectedCheckboxes([]);
 
@@ -346,36 +343,33 @@ function Transactions() {
                                 </td>
                             </tr>
                         ) : (
-                            paginatedTransactions.map((transaction, index) => {
-                                const absoluteIndex = (currentPage - 1) * pageSize + index;
-                                return (
-                                    <tr key={absoluteIndex}>
-                                        <td onClick={() => handleCheckboxChange(absoluteIndex, transaction.id)} style={{ cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                onChange={() => handleCheckboxChange(absoluteIndex, transaction.id)}
-                                                checked={selectedCheckboxes.includes(absoluteIndex)}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                        </td>
-                                        <td>{transaction.id}</td>
-                                        <td>{transaction.type}</td>
-                                        <td>{transaction.customerName}</td>
-                                        <td>{transaction.plateNo}</td>
-                                        {userRole !== 'user' && <td>₱{transaction.amount.toFixed(2)}</td>}
-                                        <td>{transaction.dateTime}</td>
-                                        <td>
-                                            <span
-                                                className="material-symbols-outlined edit-icon"
-                                                onClick={() => handleEdit(absoluteIndex)}
-                                                title="Edit Transaction"
-                                            >
-                                                edit_note
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })
+                            paginatedTransactions.map((transaction, index) => (
+                                <tr key={transaction.id}>
+                                    <td onClick={() => handleCheckboxChange(transaction.id)} style={{ cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            onChange={() => handleCheckboxChange(transaction.id)}
+                                            checked={selectedCheckboxes.includes(transaction.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </td>
+                                    <td>{transaction.id}</td>
+                                    <td>{transaction.type}</td>
+                                    <td>{transaction.customerName}</td>
+                                    <td>{transaction.plateNo}</td>
+                                    {userRole !== 'user' && <td>₱{transaction.amount.toFixed(2)}</td>}
+                                    <td>{transaction.dateTime}</td>
+                                    <td>
+                                        <span
+                                            className="material-symbols-outlined edit-icon"
+                                            onClick={() => handleEdit(index)}
+                                            title="Edit Transaction"
+                                        >
+                                            edit_note
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>
