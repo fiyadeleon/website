@@ -98,18 +98,18 @@ function Inventory() {
         setProducts(sortedProducts);
     };
 
-    const handleCheckboxChange = (index, product_name) => {
-        const isAlreadySelected = selectedCheckboxes.includes(index);
-
+    const handleCheckboxChange = (id, product_name) => {
+        const isAlreadySelected = selectedCheckboxes.includes(id);
+    
         if (!isAlreadySelected) {
             console.log(`Selected product: ${product_name}`);
         }
-
+    
         setSelectedCheckboxes((prevSelected) => {
             if (isAlreadySelected) {
-                return prevSelected.filter((item) => item !== index);
+                return prevSelected.filter((item) => item !== id);
             } else {
-                return [...prevSelected, index];
+                return [...prevSelected, id];
             }
         });
     };
@@ -117,9 +117,8 @@ function Inventory() {
     const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
             try {
-                const selectedProducts = selectedCheckboxes.map(index => {
-                    const product = products[index];
-                    return { id: product.id };
+                const selectedProducts = selectedCheckboxes.map(id => {
+                    return { id: id };
                 });
     
                 const response = await fetch(`${API_ENDPOINT}/item?resource=inventory`, {
@@ -137,15 +136,13 @@ function Inventory() {
                 const result = await response.json();
                 console.log('Deletion result:', result);
     
-                setProducts((prevProducts) =>
-                    prevProducts.filter((_, index) => !selectedCheckboxes.includes(index))
-                );
-                setSelectedCheckboxes([]);
-    
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                await fetchProducts();
             } catch (error) {
                 alert('Error deleting product(s)!');
                 console.error('Error deleting products:', error);
             } finally {
+                setSelectedCheckboxes([]);
                 setCurrentPage(1);
             }
         } else {
@@ -403,11 +400,11 @@ function Inventory() {
 
                                 return (
                                     <tr key={absoluteIndex}>
-                                        <td onClick={() => handleCheckboxChange(absoluteIndex, product.product_name)} style={{ cursor: 'pointer' }}>
+                                        <td onClick={() => handleCheckboxChange(product.id, product.product_name)} style={{ cursor: 'pointer' }}>
                                             <input
                                                 type="checkbox"
-                                                onChange={() => handleCheckboxChange(absoluteIndex, product.product_name)}
-                                                checked={selectedCheckboxes.includes(absoluteIndex)}
+                                                onChange={() => handleCheckboxChange(product.id, product.product_name)}
+                                                checked={selectedCheckboxes.includes(product.id)}
                                                 onClick={(e) => e.stopPropagation()}
                                             />
                                         </td>

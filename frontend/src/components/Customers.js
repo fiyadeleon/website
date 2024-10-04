@@ -85,27 +85,26 @@ function Customers() {
         setCustomers(sortedCustomers);
     };
 
-    const handleCheckboxChange = (index, name) => {
-        const isAlreadySelected = selectedCheckboxes.includes(index);
-
+    const handleCheckboxChange = (id, name) => {
+        const isAlreadySelected = selectedCheckboxes.includes(id);
+    
         if (!isAlreadySelected) {
-            console.log(`Selected customer: ${name}`);
+            console.log(`Selected customer: ${id}, ${name}`);
         }
-
+    
         setSelectedCheckboxes((prevSelected) =>
-            prevSelected.includes(index)
-                ? prevSelected.filter((item) => item !== index)
-                : [...prevSelected, index]
+            prevSelected.includes(id)
+                ? prevSelected.filter((item) => item !== id)
+                : [...prevSelected, id]
         );
-    };
+    };    
 
     const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
             try {
-                const selectedCustomers = selectedCheckboxes.map(index => {
-                    const customer = customers[index];
-                    return { id: customer.id };
-                });
+                const selectedCustomers = customers.filter((customer) => 
+                    selectedCheckboxes.includes(customer.id)
+                );
 
                 const response = await fetch(`${API_ENDPOINT}/item?resource=customer`, {
                     method: 'DELETE',
@@ -129,11 +128,6 @@ function Customers() {
                 alert('Error deleting customers!');
             } finally {
                 setSelectedCheckboxes([]);
-
-                setCustomers((prevCustomers) =>
-                    prevCustomers.filter((_, index) => !selectedCheckboxes.includes(index))
-                );
-
                 setCurrentPage(1);
             }
         } else {
@@ -361,15 +355,16 @@ function Customers() {
                                 </td>
                             </tr>
                         ) : (
-                            paginatedCustomers.map((customer, index) => {
-                                const absoluteIndex = (currentPage - 1) * pageSize + index;
+                            paginatedCustomers.map((customer) => {
+                                const isSelected = selectedCheckboxes.includes(customer.id);
+
                                 return (
-                                    <tr key={absoluteIndex}>
-                                        <td onClick={() => handleCheckboxChange(absoluteIndex, customer.name)} style={{ cursor: 'pointer' }}>
+                                    <tr key={customer.id}>
+                                        <td onClick={() => handleCheckboxChange(customer.id, customer.name)} style={{ cursor: 'pointer' }}>
                                             <input
                                                 type="checkbox"
-                                                onChange={() => handleCheckboxChange(absoluteIndex, customer.name)}
-                                                checked={selectedCheckboxes.includes(absoluteIndex)}
+                                                onChange={() => handleCheckboxChange(customer.id, customer.name)} 
+                                                checked={isSelected}
                                                 onClick={(e) => e.stopPropagation()}
                                             />
                                         </td>
@@ -381,7 +376,7 @@ function Customers() {
                                         <td>
                                             <span
                                                 className="material-symbols-outlined edit-icon"
-                                                onClick={() => handleEdit(absoluteIndex)}
+                                                onClick={() => handleEdit(customer.id)}
                                                 title="Edit Customer"
                                             >
                                                 edit_note

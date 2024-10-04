@@ -77,27 +77,26 @@ function Employees() {
         setEmployees(sortedEmployees);
     };
 
-    const handleCheckboxChange = (index, name) => {
-        const isAlreadySelected = selectedCheckboxes.includes(index);
-
+    const handleCheckboxChange = (id, name) => {
+        const isAlreadySelected = selectedCheckboxes.includes(id);
+    
         if (!isAlreadySelected) {
-            console.log(`Selected employee: ${name}`);
+            console.log(`Selected employee: ${id}, ${name}`);
         }
-
+    
         setSelectedCheckboxes((prevSelected) =>
-            prevSelected.includes(index)
-                ? prevSelected.filter((item) => item !== index)
-                : [...prevSelected, index]
+            prevSelected.includes(id)
+                ? prevSelected.filter((item) => item !== id)
+                : [...prevSelected, id]
         );
     };
 
     const handleDeleteConfirmation = async (confirm) => {
         if (confirm) {
             try {
-                const selectedEmployees = selectedCheckboxes.map(index => {
-                    const employee = employees[index];
-                    return { id: employee.id, email: employee.email };
-                });
+                const selectedEmployees = employees.filter((employee) =>
+                    selectedCheckboxes.includes(employee.id)
+                );
 
                 const responseCognito = await deleteUserInCognito(selectedEmployees);
 
@@ -117,11 +116,6 @@ function Employees() {
                 alert('Error deleting employees!');
             } finally {
                 setSelectedCheckboxes([]);
-
-                setEmployees((prevEmployees) =>
-                    prevEmployees.filter((_, index) => !selectedCheckboxes.includes(index))
-                );
-
                 setCurrentPage(1);
             }
         } else {
@@ -329,36 +323,33 @@ function Employees() {
                                 </td>
                             </tr>
                         ) : (
-                            paginatedEmployees.map((employee, index) => {
-                                const absoluteIndex = (currentPage - 1) * pageSize + index;
-                                return (
-                                    <tr key={absoluteIndex}>
-                                        <td onClick={() => handleCheckboxChange(absoluteIndex, employee.name)} style={{ cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                onChange={() => handleCheckboxChange(absoluteIndex, employee.name)}
-                                                checked={selectedCheckboxes.includes(absoluteIndex)}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                        </td>
-                                        <td>{employee.name}</td>
-                                        <td>{employee.contact}</td>
-                                        <td>{employee.jobTitle}</td>
-                                        <td>{employee.salary}</td>
-                                        <td>{employee.email}</td>
-                                        <td>{employee.role}</td>
-                                        <td>
-                                            <span
-                                                className="material-symbols-outlined edit-icon"
-                                                onClick={() => handleEdit(absoluteIndex)}
-                                                title="Edit Employee"
-                                            >
-                                                edit_note
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })
+                            paginatedEmployees.map((employee) => (
+                                <tr key={employee.id}>
+                                    <td onClick={() => handleCheckboxChange(employee.id, employee.name)} style={{ cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            onChange={() => handleCheckboxChange(employee.id, employee.name)}
+                                            checked={selectedCheckboxes.includes(employee.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </td>
+                                    <td>{employee.name}</td>
+                                    <td>{employee.contact}</td>
+                                    <td>{employee.jobTitle}</td>
+                                    <td>{employee.salary}</td>
+                                    <td>{employee.email}</td>
+                                    <td>{employee.role}</td>
+                                    <td>
+                                        <span
+                                            className="material-symbols-outlined edit-icon"
+                                            onClick={() => handleEdit(employee.id)}
+                                            title="Edit Employee"
+                                        >
+                                            edit_note
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>
