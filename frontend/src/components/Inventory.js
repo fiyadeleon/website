@@ -102,7 +102,7 @@ function Inventory() {
         const isAlreadySelected = selectedCheckboxes.includes(id);
     
         if (!isAlreadySelected) {
-            console.log(`Selected product: ${product_name}`);
+            console.log(`Selected product: ${id}, ${product_name}`);
         }
     
         setSelectedCheckboxes((prevSelected) => {
